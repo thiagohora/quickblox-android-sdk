@@ -5,6 +5,7 @@ import android.widget.Toast;
 import com.quickblox.core.result.Result;
 
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * User: Oleg Soroka
@@ -32,6 +33,15 @@ public class Snippets {
     public void handleErrors(Result result) {
         String message = String.format("[ERROR %s] Request has been completed with errors: %s",
                 result.getStatusCode(), result.getErrors());
+        Toast.makeText(context, message, Toast.LENGTH_SHORT).show();
+
+        // print
+        System.out.println(message);
+    }
+
+    public void handleErrors(List<String> errors,int statusCode) {
+        String message = String.format("[ERROR %s] Request has been completed with errors: %s",
+                statusCode, errors);
         Toast.makeText(context, message, Toast.LENGTH_SHORT).show();
 
         // print

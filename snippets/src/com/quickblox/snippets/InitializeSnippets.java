@@ -1,5 +1,6 @@
 package com.quickblox.snippets;
 
+import com.quickblox.core.QBCallback;
 import com.quickblox.core.QBSettings;
 import com.quickblox.module.auth.QBAuth;
 
@@ -21,7 +22,7 @@ public class InitializeSnippets {
 //        QBSettings.getInstance().setContentBucketName(Config.CONTENT_DOMAIN);
 //        QBSettings.getInstance().setChatServerDomain(Config.CHAT_DOMAIN);
 //        QBSettings.getInstance().setTurnServerDomain(Config.TURN_SERVER_DOMAIN);
-        QBAuth.createSession(null);
+        QBAuth.createSession((QBCallback)null);
 
 
     }
