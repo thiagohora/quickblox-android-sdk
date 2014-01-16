@@ -39,9 +39,8 @@ public class Snippets {
         System.out.println(message);
     }
 
-    public void handleErrors(List<String> errors,int statusCode) {
-        String message = String.format("[ERROR %s] Request has been completed with errors: %s",
-                statusCode, errors);
+    public void handleErrors(List<String> errors) {
+        String message = String.format("[ERROR] Request has been completed with errors: %s", errors);
         Toast.makeText(context, message, Toast.LENGTH_SHORT).show();
 
         // print

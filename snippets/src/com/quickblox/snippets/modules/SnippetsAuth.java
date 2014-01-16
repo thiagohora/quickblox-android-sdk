@@ -1,13 +1,9 @@
 package com.quickblox.snippets.modules;
 
 import android.content.Context;
-import android.os.AsyncTask;
 import android.util.Log;
-
-import android.widget.Toast;
 import com.quickblox.core.QBCallbackImpl;
-import com.quickblox.core.QBEntityCallback;
-import com.quickblox.core.model.QBEntity;
+import com.quickblox.core.QBEntityCallbackImpl;
 import com.quickblox.core.result.Result;
 import com.quickblox.internal.core.exception.QBResponseException;
 import com.quickblox.module.auth.QBAuth;
@@ -15,6 +11,7 @@ import com.quickblox.module.auth.model.QBProvider;
 import com.quickblox.module.auth.model.QBSession;
 import com.quickblox.module.auth.result.QBSessionResult;
 import com.quickblox.module.users.model.QBUser;
+import com.quickblox.snippets.AsyncSnippet;
 import com.quickblox.snippets.Snippet;
 import com.quickblox.snippets.Snippets;
 
@@ -65,17 +62,12 @@ public class SnippetsAuth extends Snippets {
     Snippet createSessionNewCallback = new Snippet("create session with new callback") {
         @Override
         public void execute() {
-            QBAuth.createSession( new QBEntityCallback<QBSession>() {
+            QBAuth.createSession( new QBEntityCallbackImpl<QBSession>() {
 
                 @Override
                 public void onSuccess(QBSession result) {
                     super.onSuccess(result);
                     Log.i(TAG, "session="+result.getToken());
-                }
-
-                @Override
-                public void onSuccess() {
-                       Log.i(TAG, "session=");
                 }
 
                 @Override
@@ -86,34 +78,17 @@ public class SnippetsAuth extends Snippets {
         }
     };
 
-    Snippet createSessionSync = new Snippet("create session syncronize") {
+    Snippet createSessionSync = new AsyncSnippet("create session syncronize", context) {
         @Override
-        public void execute() {
-
-            (new AsyncTask<Void, Void, Void>(){
-                public QBSession session;
-
-                @Override
-                protected Void doInBackground(Void... objects) {
-                    Log.i(TAG, "doInBackground");
-                    try {
-                        session = QBAuth.createSession();
-                    } catch (QBResponseException e) {
-                        e.printStackTrace();
-                        Log.i(TAG, "session fail"+e.getErrors());
-                    }
-                    return null;
-                }
-
-                @Override
-                protected void onPostExecute(Void result) {
-                    if(session!=null){
-                        Log.i(TAG, "session created"+session.getToken());
-                        Toast.makeText(context, "session created"+session.getToken(), Toast.LENGTH_SHORT).show();
-                    }
-                }
-            }).execute();
-
+        public void executeAsync() {
+            QBSession session = null;
+            try {
+                session = QBAuth.createSession();
+            } catch (QBResponseException e) {
+                e.printStackTrace();
+                setException(e);
+            }
+            Log.i(TAG, "session created"+session.getToken());
         }
     };
 
@@ -139,7 +114,7 @@ public class SnippetsAuth extends Snippets {
         @Override
         public void execute() {
 
-            QBAuth.createSession(new QBUser("AndroidGirl", "AndroidGirl"), new QBEntityCallback<QBSession>() {
+            QBAuth.createSession(new QBUser("AndroidGirl", "AndroidGirl"), new QBEntityCallbackImpl<QBSession>() {
                 @Override
                 public void onSuccess(QBSession result) {
                     super.onSuccess(result);
@@ -147,13 +122,8 @@ public class SnippetsAuth extends Snippets {
                 }
 
                 @Override
-                public void onSuccess() {
-                    Log.i(TAG, "session=");
-                }
-
-                @Override
                 public void onError(List<String> eroors) {
-                                  handleErrors(eroors, 0);
+                                  handleErrors(eroors);
                 }
             });
         }
@@ -205,7 +175,7 @@ public class SnippetsAuth extends Snippets {
 
             String facebookAccessToken = "AAAEra8jNdnkBABYf3ZBSAz9dgLfyK7tQNttIoaZA1cC40niR6HVS0nYuufZB0ZCn66VJcISM8DO2bcbhEahm2nW01ZAZC1YwpZB7rds37xW0wZDZD";
 
-            QBAuth.createSessionUsingSocialProvider(QBProvider.FACEBOOK, facebookAccessToken, null, new QBEntityCallback<QBSession>() {
+            QBAuth.createSessionUsingSocialProvider(QBProvider.FACEBOOK, facebookAccessToken, null, new QBEntityCallbackImpl<QBSession>() {
 
                 @Override
                 public void onSuccess(QBSession session) {
@@ -213,13 +183,8 @@ public class SnippetsAuth extends Snippets {
                 }
 
                 @Override
-                public void onSuccess() {
-
-                }
-
-                @Override
                 public void onError(List<String> eroors) {
-                    handleErrors(eroors, 0);
+                    handleErrors(eroors);
                 }
             });
         }
@@ -244,7 +209,7 @@ public class SnippetsAuth extends Snippets {
     Snippet destroySessionNewCallback = new Snippet("destroy session with new callback") {
         @Override
         public void execute() {
-            QBAuth.deleteSession(new QBEntityCallback() {
+            QBAuth.deleteSession(new QBEntityCallbackImpl() {
                 @Override
                 public void onSuccess() {
                     Log.i(TAG, ">>> Session Destroy OK");
@@ -252,41 +217,21 @@ public class SnippetsAuth extends Snippets {
 
                 @Override
                 public void onError(List eroors) {
-                             handleErrors(eroors, 0);
+                             handleErrors(eroors);
                 }
             });
         }
     };
 
-    Snippet  destroySessionSync = new Snippet("delete session syncronize") {
+    Snippet  destroySessionSync = new AsyncSnippet("delete session syncronize", context) {
         @Override
-        public void execute() {
-
-            (new AsyncTask<Void, Void, Void>(){
-                public QBSession session;
-                List<String> erors;
-
-                @Override
-                protected Void doInBackground(Void... objects) {
-                    Log.i(TAG, "doInBackground");
-                    try {
-                        QBAuth.deleteSession();
-                    } catch (QBResponseException e) {
-                        Log.i(TAG, "delete fail"+e.getErrors());
-                        erors = e.getErrors();
-                    }
-                    return null;
-                }
-
-                @Override
-                protected void onPostExecute(Void result) {
-                    if(erors == null){
-                        Log.i(TAG, ">>> Session Destroy OK");
-                        Toast.makeText(context, " Session Destroy OK", Toast.LENGTH_SHORT).show();
-                    }
-                }
-            }).execute();
-
+        public void executeAsync() {
+            try {
+                QBAuth.deleteSession();
+            } catch (QBResponseException e) {
+                Log.i(TAG, "delete fail");
+                setException(e);
+            }
         }
     };
 }
