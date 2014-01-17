@@ -3,7 +3,7 @@ package com.quickblox.snippets.modules;
 import android.content.Context;
 import android.util.Log;
 
-import com.quickblox.core.QBCallbackImpl;
+import com.quickblox.core.*;
 import com.quickblox.core.result.Result;
 import com.quickblox.internal.core.helper.FileHelper;
 import com.quickblox.internal.core.helper.StringifyArrayList;
@@ -11,10 +11,7 @@ import com.quickblox.internal.module.custom.request.QBCustomObjectRequestBuilder
 import com.quickblox.module.content.result.QBFileDownloadResult;
 import com.quickblox.module.custom.QBCustomObjects;
 import com.quickblox.module.custom.QBCustomObjectsFiles;
-import com.quickblox.module.custom.model.QBCustomObject;
-import com.quickblox.module.custom.model.QBCustomObjectFileField;
-import com.quickblox.module.custom.model.QBPermissions;
-import com.quickblox.module.custom.model.QBPermissionsLevel;
+import com.quickblox.module.custom.model.*;
 import com.quickblox.module.custom.result.QBCOFileUploadResult;
 import com.quickblox.module.custom.result.QBCustomObjectDeletedResult;
 import com.quickblox.module.custom.result.QBCustomObjectLimitedResult;
@@ -65,6 +62,7 @@ public class SnippetsCustomObjects extends Snippets {
         snippets.add(deleteCustomObject);
         snippets.add(deleteCustomObjects);
         snippets.add(getCustomObjects);
+        snippets.add(getCustomObjectsNewCallback);
         snippets.add(updateCustomObject);
         snippets.add(updateCustomObjects);
         snippets.add(getGetCustomObjectsByIds);
@@ -100,6 +98,35 @@ public class SnippetsCustomObjects extends Snippets {
                     } else {
                         handleErrors(result);
                     }
+                }
+            });
+        }
+    };
+
+    Snippet getCustomObjectsNewCallback = new Snippet("get objects with new callback") {
+        @Override
+        public void execute() {
+            QBCustomObjects.getObjects(CLASS_NAME, (List<Object>)null, new QBPaginatorCallback<ArrayList<QBCustomObject>>(){
+
+                @Override
+                public void onSuccess(ArrayList<QBCustomObject> co, QBIPaginator qbiPaginator) {
+                    Log.i(TAG, "limit="+qbiPaginator.getLimit()+ " skip="+qbiPaginator.getSkip());
+                    Log.i(TAG, ">>> custom object list: " + co.toString());
+                }
+
+                @Override
+                public void onSuccess(ArrayList<QBCustomObject> result) {
+
+                }
+
+                @Override
+                public void onSuccess() {
+
+                }
+
+                @Override
+                public void onError(List<String> eroors) {
+                     handleErrors(eroors);
                 }
             });
         }
