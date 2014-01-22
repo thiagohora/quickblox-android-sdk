@@ -3,8 +3,8 @@ package com.quickblox.snippets.activities;
 import android.app.Activity;
 import android.os.Bundle;
 import com.quickblox.snippets.R;
-import com.quickblox.snippets.modules.SnippetsAuth;
 import com.quickblox.snippets.SnippetsList;
+import com.quickblox.snippets.modules.SnippetsAuthNew;
 
 /**
  * User: Oleg Soroka
@@ -18,7 +18,7 @@ public class AuthActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.snippets_list);
 
-        SnippetsAuth snippets = new SnippetsAuth(this);
+        SnippetsAuthNew snippets = new SnippetsAuthNew(this);
         SnippetsList list = (SnippetsList) findViewById(R.id.list);
         list.initialize(snippets);
     }

@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.os.Bundle;
 import com.quickblox.snippets.R;
 import com.quickblox.snippets.SnippetsList;
+import com.quickblox.snippets.modules.SnippetsCONew;
 import com.quickblox.snippets.modules.SnippetsCustomObjects;
 
 /**
@@ -18,7 +19,7 @@ public class CustomObjectsActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.snippets_list);
 
-        SnippetsCustomObjects snippets = new SnippetsCustomObjects(this);
+        SnippetsCONew snippets = new SnippetsCONew(this);
         SnippetsList list = (SnippetsList) findViewById(R.id.list);
         list.initialize(snippets);
     }

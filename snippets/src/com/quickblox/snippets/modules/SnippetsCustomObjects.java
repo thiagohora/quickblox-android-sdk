@@ -2,8 +2,7 @@ package com.quickblox.snippets.modules;
 
 import android.content.Context;
 import android.util.Log;
-
-import com.quickblox.core.*;
+import com.quickblox.core.QBCallbackImpl;
 import com.quickblox.core.result.Result;
 import com.quickblox.internal.core.helper.FileHelper;
 import com.quickblox.internal.core.helper.StringifyArrayList;
@@ -11,14 +10,11 @@ import com.quickblox.internal.module.custom.request.QBCustomObjectRequestBuilder
 import com.quickblox.module.content.result.QBFileDownloadResult;
 import com.quickblox.module.custom.QBCustomObjects;
 import com.quickblox.module.custom.QBCustomObjectsFiles;
-import com.quickblox.module.custom.model.*;
-import com.quickblox.module.custom.result.QBCOFileUploadResult;
-import com.quickblox.module.custom.result.QBCustomObjectDeletedResult;
-import com.quickblox.module.custom.result.QBCustomObjectLimitedResult;
-import com.quickblox.module.custom.result.QBCustomObjectMultiUpdatedResult;
-import com.quickblox.module.custom.result.QBCustomObjectPermissionResult;
-import com.quickblox.module.custom.result.QBCustomObjectResult;
-import com.quickblox.module.custom.result.QBCustomObjectTaskResult;
+import com.quickblox.module.custom.model.QBCustomObject;
+import com.quickblox.module.custom.model.QBCustomObjectFileField;
+import com.quickblox.module.custom.model.QBPermissions;
+import com.quickblox.module.custom.model.QBPermissionsLevel;
+import com.quickblox.module.custom.result.*;
 import com.quickblox.snippets.R;
 import com.quickblox.snippets.Snippet;
 import com.quickblox.snippets.Snippets;
@@ -27,11 +23,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Random;
+import java.util.*;
 
 /**
  * User: Oleg Soroka
@@ -62,7 +54,6 @@ public class SnippetsCustomObjects extends Snippets {
         snippets.add(deleteCustomObject);
         snippets.add(deleteCustomObjects);
         snippets.add(getCustomObjects);
-        snippets.add(getCustomObjectsNewCallback);
         snippets.add(updateCustomObject);
         snippets.add(updateCustomObjects);
         snippets.add(getGetCustomObjectsByIds);
@@ -78,7 +69,7 @@ public class SnippetsCustomObjects extends Snippets {
         file2 = getFileFormRaw(R.raw.sample_file2);
     }
 
-    private File getFileFormRaw(int fileId){
+    private File getFileFormRaw(int fileId) {
         InputStream is = context.getResources().openRawResource(fileId);
         File file = FileHelper.getFileInputStream(is, "sample" + fileId + ".txt", "qb_snippets12");
         return file;
@@ -103,35 +94,6 @@ public class SnippetsCustomObjects extends Snippets {
         }
     };
 
-    Snippet getCustomObjectsNewCallback = new Snippet("get objects with new callback") {
-        @Override
-        public void execute() {
-            QBCustomObjects.getObjects(CLASS_NAME, (List<Object>)null, new QBPaginatorCallback<ArrayList<QBCustomObject>>(){
-
-                @Override
-                public void onSuccess(ArrayList<QBCustomObject> co, QBIPaginator qbiPaginator) {
-                    Log.i(TAG, "limit="+qbiPaginator.getLimit()+ " skip="+qbiPaginator.getSkip());
-                    Log.i(TAG, ">>> custom object list: " + co.toString());
-                }
-
-                @Override
-                public void onSuccess(ArrayList<QBCustomObject> result) {
-
-                }
-
-                @Override
-                public void onSuccess() {
-
-                }
-
-                @Override
-                public void onError(List<String> eroors) {
-                     handleErrors(eroors);
-                }
-            });
-        }
-    };
-
     Snippet createCustomObject = new Snippet("create object") {
         @Override
         public void execute() {
@@ -148,7 +110,7 @@ public class SnippetsCustomObjects extends Snippets {
             permissions.setReadPermission(QBPermissionsLevel.OPEN);
             //
             // DELETE
-            ArrayList<String> openPermissionsForUserIDS = new  ArrayList<String>();
+            ArrayList<String> openPermissionsForUserIDS = new ArrayList<String>();
             openPermissionsForUserIDS.add("33");
             openPermissionsForUserIDS.add("92");
             permissions.setDeletePermission(QBPermissionsLevel.OPEN_FOR_USER_IDS, openPermissionsForUserIDS);
@@ -174,9 +136,9 @@ public class SnippetsCustomObjects extends Snippets {
 
     Snippet createCustomObjects = new Snippet("create objects") {
 
-        public static  final int NUM_RECORDS = 4;
+        public static final int NUM_RECORDS = 4;
 
-        private QBCustomObject createObject(){
+        private QBCustomObject createObject() {
             Random random = new Random();
             QBCustomObject customObject = new QBCustomObject(CLASS_NAME);
             customObject.put(RATING_FIELD, random.nextInt(100));
@@ -188,7 +150,7 @@ public class SnippetsCustomObjects extends Snippets {
         @Override
         public void execute() {
             List<QBCustomObject> qbCustomObjectList = new ArrayList<QBCustomObject>(NUM_RECORDS);
-            for (int i = 0; i < NUM_RECORDS; i++){
+            for (int i = 0; i < NUM_RECORDS; i++) {
                 QBCustomObject qbCustomObject = createObject();
                 qbCustomObjectList.add(qbCustomObject);
             }
@@ -351,6 +313,7 @@ public class SnippetsCustomObjects extends Snippets {
         }
     };
 
+
     Snippet deleteCustomObjects = new Snippet("delete objects") {
         @Override
         public void execute() {
@@ -395,7 +358,7 @@ public class SnippetsCustomObjects extends Snippets {
             permissions.setReadPermission(QBPermissionsLevel.OPEN);
             //
             // DELETE
-            ArrayList<String> openPermissionsForUserIDS = new  ArrayList<String>();
+            ArrayList<String> openPermissionsForUserIDS = new ArrayList<String>();
             openPermissionsForUserIDS.add("33");
             openPermissionsForUserIDS.add("92");
             permissions.setDeletePermission(QBPermissionsLevel.OPEN_FOR_USER_IDS, openPermissionsForUserIDS);
@@ -421,9 +384,9 @@ public class SnippetsCustomObjects extends Snippets {
 
     Snippet updateCustomObjects = new Snippet("update objects") {
 
-        public static  final int NUM_RECORDS = 4;
+        public static final int NUM_RECORDS = 4;
 
-        private QBCustomObject createObject(){
+        private QBCustomObject createObject() {
             Random random = new Random();
             QBCustomObject customObject = new QBCustomObject(CLASS_NAME);
             customObject.put(RATING_FIELD, random.nextInt(100));
@@ -529,11 +492,10 @@ public class SnippetsCustomObjects extends Snippets {
                         InputStream is = downloadResult.getContentStream(); // that's downloaded file content
 
                         Log.i(TAG, ">>> file downloaded successfully" + getContentFromFile(is));
-                        if(is!=null){
-                            try{
+                        if (is != null) {
+                            try {
                                 is.close();
-                            }
-                            catch(IOException e){
+                            } catch (IOException e) {
                                 e.printStackTrace();
                             }
                         }
@@ -546,17 +508,16 @@ public class SnippetsCustomObjects extends Snippets {
     };
 
 
-    public String getContentFromFile( InputStream is){
+    public String getContentFromFile(InputStream is) {
         char[] buffer = new char[1024];
         StringBuilder stringBuilder = new StringBuilder();
-        try{
+        try {
             InputStreamReader inputStreamReader = new InputStreamReader(is, "UTF-8");
 
-            while ( inputStreamReader.read(buffer, 0, 1024) != -1){
+            while (inputStreamReader.read(buffer, 0, 1024) != -1) {
                 stringBuilder.append(buffer);
             }
-        }
-        catch(IOException e){
+        } catch (IOException e) {
             e.printStackTrace();
         }
         return stringBuilder.toString();
