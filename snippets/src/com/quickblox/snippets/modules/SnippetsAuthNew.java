@@ -20,7 +20,7 @@ import java.util.List;
  */
 public class SnippetsAuthNew extends Snippets{
 
-    private static final String TAG = SnippetsAuth.class.getSimpleName();
+    private static final String TAG = SnippetsAuthNew.class.getSimpleName();
 
     public SnippetsAuthNew(Context context) {
         super(context);

@@ -28,7 +28,7 @@ import java.util.List;
  */
 public class SnippetsCONew extends Snippets{
 
-    private static final String TAG = SnippetsCustomObjects.class.getSimpleName();
+    private static final String TAG = SnippetsCONew.class.getSimpleName();
     // Define custom object model in QB Admin Panel
     // http://quickblox.com/developers/Custom_Objects
     //
@@ -79,24 +79,6 @@ public class SnippetsCONew extends Snippets{
     };
 
     Snippet getCustomObjectsSynchronous = new AsyncSnippet("get objects synchronous", context) {
-        @Override
-        public void execute() {
-            QBCustomObjects.getObjects(CLASS_NAME, (List<Object>) null, new QBEntityCallbackImpl<ArrayList<QBCustomObject>>() {
-
-                @Override
-                public void onSuccess(ArrayList<QBCustomObject> co, Bundle objs) {
-                    int skip = objs.getInt(Consts.SKIP);
-                    int limit = objs.getInt(Consts.LIMIT);
-                    Log.i(TAG, "limit=" + limit + " skip=" + skip);
-                    Log.i(TAG, ">>> custom object list: " + co.toString());
-                }
-
-                @Override
-                public void onError(List<String> eroors) {
-                    handleErrors(eroors);
-                }
-            });
-        }
 
         @Override
         public void executeAsync() {
