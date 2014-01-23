@@ -3,7 +3,6 @@ package com.quickblox.snippets.modules;
 import android.content.Context;
 import android.os.Bundle;
 import android.util.Log;
-import com.quickblox.core.QBEntityCallback;
 import com.quickblox.core.QBEntityCallbackImpl;
 import com.quickblox.internal.core.exception.QBResponseException;
 import com.quickblox.internal.core.helper.StringifyArrayList;
@@ -11,14 +10,14 @@ import com.quickblox.internal.module.custom.Consts;
 import com.quickblox.internal.module.custom.request.QBCustomObjectRequestBuilder;
 import com.quickblox.internal.module.custom.request.QBCustomObjectUpdateBuilder;
 import com.quickblox.module.custom.QBCustomObjects;
+import com.quickblox.module.custom.QBCustomObjectsFiles;
 import com.quickblox.module.custom.model.QBCustomObject;
+import com.quickblox.module.custom.model.QBCustomObjectFileField;
 import com.quickblox.module.custom.model.QBPermissions;
-import com.quickblox.snippets.AsyncSnippet;
-import com.quickblox.snippets.R;
-import com.quickblox.snippets.Snippet;
-import com.quickblox.snippets.Snippets;
+import com.quickblox.snippets.*;
 
 import java.io.File;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -39,7 +38,7 @@ public class SnippetsCONew extends Snippets{
     File file1 = null;
     File file2 = null;
 
-    private final String NOTE1_ID = "51d816e0535c12d75f006537";
+    private final String NOTE1_ID = "51ed45c8535c120845008fcd";
 
     public SnippetsCONew(Context context) {
         super(context);
@@ -54,6 +53,14 @@ public class SnippetsCONew extends Snippets{
         snippets.add(getCountCustomsObjectNew);
         snippets.add(getGetCustomObjectsByIdsNewCallback);
         snippets.add(getCustomObjectPermissionByIdNew);
+        snippets.add(uploadFile);
+        snippets.add(updateFile);
+        snippets.add(deleteFile);
+        snippets.add(downloadFile);
+
+        // get file
+        file1 = Utils.getFileFromRawResource(R.raw.sample_file, context);
+        file2 = Utils.getFileFromRawResource(R.raw.sample_file2, context);
     }
 
 
@@ -273,7 +280,7 @@ public class SnippetsCONew extends Snippets{
             try {
                 deleted = QBCustomObjects.deleteObjects(CLASS_NAME, deleteIds, bundle);
             } catch (QBResponseException e) {
-                e.printStackTrace();
+                setException(e);
             }
             if(deleted != null){
                 Log.i(TAG, ">>> deletedObjs: " + deleted.toString());
@@ -356,4 +363,83 @@ public class SnippetsCONew extends Snippets{
             });
         }
     };
+
+    Snippet uploadFile = new Snippet("upload CO file new") {
+        @Override
+        public void execute() {
+            QBCustomObject qbCustomObject = new QBCustomObject(CLASS_NAME, NOTE1_ID);
+            QBCustomObjectsFiles.uploadFile(file1, qbCustomObject, AVATAR_FIELD, new QBEntityCallbackImpl<QBCustomObjectFileField>() {
+
+                @Override
+                public void onSuccess(QBCustomObjectFileField uploadFileResult, Bundle params) {
+                    Log.i(TAG, ">>>upload response:" + uploadFileResult.getFileName() + " " + uploadFileResult.getFileId() + " " +
+                            uploadFileResult.getContentType());
+                }
+
+                @Override
+                public void onError(List<String> eroors) {
+                       handleErrors(eroors);
+                }
+            });
+        }
+    };
+
+    Snippet updateFile = new Snippet("update CO file new") {
+        @Override
+        public void execute() {
+            QBCustomObject qbCustomObject = new QBCustomObject(CLASS_NAME, NOTE1_ID);
+            QBCustomObjectsFiles.uploadFile(file2, qbCustomObject, AVATAR_FIELD, new QBEntityCallbackImpl<QBCustomObjectFileField>() {
+
+                @Override
+                public void onSuccess(QBCustomObjectFileField updatedResult, Bundle params) {
+                    Log.i(TAG, ">>>updated successful");
+                }
+
+                @Override
+                public void onError(List eroors) {
+                    handleErrors(eroors);
+                }
+            });
+        }
+    };
+
+    Snippet deleteFile = new Snippet("delete CO file") {
+        @Override
+        public void execute() {
+            QBCustomObject qbCustomObject = new QBCustomObject(CLASS_NAME, NOTE1_ID);
+            QBCustomObjectsFiles.deleteFile(qbCustomObject, AVATAR_FIELD, new QBEntityCallbackImpl() {
+
+                @Override
+                public void onSuccess() {
+                    Log.i(TAG, "deleted succesfull");
+                }
+
+                @Override
+                public void onError(List eroors) {
+                     handleErrors(eroors);
+                }
+            });
+        }
+    };
+
+
+    AsyncSnippet downloadFile = new AsyncSnippet("download CO file synchronous", context) {
+        @Override
+        public void executeAsync() {
+            QBCustomObject qbCustomObject = new QBCustomObject(CLASS_NAME, NOTE1_ID);
+            Bundle bundle = new Bundle();
+            InputStream inputStream = null;
+            try {
+                inputStream = QBCustomObjectsFiles.downloadFile(qbCustomObject, AVATAR_FIELD, bundle);
+            } catch (QBResponseException e) {
+                setException(e);
+            }
+            if(inputStream != null){
+                byte[] content = bundle.getByteArray(Consts.CONTENT_TAG);
+                String contentFromFile = Utils.getContentFromFile(inputStream);
+                Log.i(TAG, "file downloaded: "+contentFromFile);
+            }
+        }
+    };
+
 }

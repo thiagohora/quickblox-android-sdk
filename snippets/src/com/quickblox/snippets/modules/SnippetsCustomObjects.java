@@ -54,6 +54,7 @@ public class SnippetsCustomObjects extends Snippets {
         snippets.add(deleteCustomObject);
         snippets.add(deleteCustomObjects);
         snippets.add(getCustomObjects);
+        snippets.add(getCustomObjectsCount);
         snippets.add(updateCustomObject);
         snippets.add(updateCustomObjects);
         snippets.add(getGetCustomObjectsByIds);
@@ -86,6 +87,25 @@ public class SnippetsCustomObjects extends Snippets {
 
                         ArrayList<QBCustomObject> co = coresult.getCustomObjects();
                         System.out.println(">>> custom object list: " + co.toString());
+                    } else {
+                        handleErrors(result);
+                    }
+                }
+            });
+        }
+    };
+
+    Snippet getCustomObjectsCount = new Snippet("get objects") {
+        @Override
+        public void execute() {
+            QBCustomObjects.countObjects(CLASS_NAME, new QBCallbackImpl() {
+                @Override
+                public void onComplete(Result result) {
+                    if (result.isSuccess()) {
+                        QBCustomObjectCountResult coresult = (QBCustomObjectCountResult) result;
+
+                        int count = coresult.getCount();
+                        System.out.println(">>> custom object count: " +count);
                     } else {
                         handleErrors(result);
                     }
