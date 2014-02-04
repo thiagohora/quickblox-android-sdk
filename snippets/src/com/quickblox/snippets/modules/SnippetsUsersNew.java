@@ -32,8 +32,11 @@ public class SnippetsUsersNew extends Snippets{
         snippets.add(signInUserWithLogin);
         snippets.add(signInUserWithEmail);
         snippets.add(signInUsingSocialProvider);
+        snippets.add(signInUserWithEmailSync);
         snippets.add(signOut);
+        snippets.add(signOutSync);
         snippets.add(signUpUser);
+        snippets.add(signUpUserSync);
 
         snippets.add(getAllUsers);
         snippets.add(getUsersByIds);
