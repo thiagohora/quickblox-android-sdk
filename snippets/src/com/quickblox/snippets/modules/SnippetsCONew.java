@@ -70,11 +70,11 @@ public class SnippetsCONew extends Snippets{
             QBCustomObjects.getObjects(CLASS_NAME, (List<Object>) null, new QBEntityCallbackImpl<ArrayList<QBCustomObject>>() {
 
                 @Override
-                public void onSuccess(ArrayList<QBCustomObject> co, Bundle objs) {
-                    int skip = objs.getInt(Consts.SKIP);
-                    int limit = objs.getInt(Consts.LIMIT);
+                public void onSuccess(ArrayList<QBCustomObject> customObjects, Bundle params) {
+                    int skip = params.getInt(Consts.SKIP);
+                    int limit = params.getInt(Consts.LIMIT);
                     Log.i(TAG, "limit=" + limit + " skip=" + skip);
-                    Log.i(TAG, ">>> custom object list: " + co.toString());
+                    Log.i(TAG, ">>> custom object list: " + customObjects.toString());
                 }
 
                 @Override
@@ -89,16 +89,17 @@ public class SnippetsCONew extends Snippets{
 
         @Override
         public void executeAsync() {
-            Bundle bundle = new Bundle();
+            Bundle params = new Bundle();
             ArrayList<QBCustomObject> objects = null;
             try {
-                objects = QBCustomObjects.getObjects(CLASS_NAME, (List<Object>) null, bundle);
+                objects = QBCustomObjects.getObjects(CLASS_NAME, (List<Object>) null, params);
             } catch (QBResponseException e) {
                 Log.i(TAG, "errors=" + e.getLocalizedMessage());
+                setException(e);
             }
             if (objects != null) {
-                int skip = bundle.getInt(Consts.SKIP);
-                int limit = bundle.getInt(Consts.LIMIT);
+                int skip = params.getInt(Consts.SKIP);
+                int limit = params.getInt(Consts.LIMIT);
                 Log.i(TAG, "limit=" + limit + " skip=" + skip);
                 Log.i(TAG, ">>> custom object list: " + objects.toString());
             }
@@ -133,8 +134,8 @@ public class SnippetsCONew extends Snippets{
 
             QBCustomObjects.createObject(newRecord, new QBEntityCallbackImpl<QBCustomObject>() {
                 @Override
-                public void onSuccess(QBCustomObject result, Bundle args) {
-                    Log.i(TAG, ">>> created record: " + result);
+                public void onSuccess(QBCustomObject object, Bundle params) {
+                    Log.i(TAG, ">>> created record: " + object);
                 }
 
                 @Override
@@ -157,13 +158,13 @@ public class SnippetsCONew extends Snippets{
 
             QBCustomObjects.getObjects(CLASS_NAME, new QBEntityCallbackImpl<ArrayList<QBCustomObject>>() {
                 @Override
-                public void onSuccess(ArrayList<QBCustomObject> result, Bundle params) {
-                    System.out.format(">>> custom objects: " + result.toString());
+                public void onSuccess(ArrayList<QBCustomObject> objects, Bundle params) {
+                    Log.i(TAG, ">>> custom objects: " + objects.toString());
                 }
 
                 @Override
-                public void onError(List<String> eroors) {
-                    handleErrors(eroors);
+                public void onError(List<String> errors) {
+                    handleErrors(errors);
                 }
 
             });
@@ -212,8 +213,8 @@ public class SnippetsCONew extends Snippets{
             QBCustomObjects.countObjects(CLASS_NAME, requestBuilder, new QBEntityCallbackImpl<Integer>() {
 
                 @Override
-                public void onSuccess(Integer result, Bundle params) {
-                    Log.i(TAG, "count=" + result);
+                public void onSuccess(Integer counnt, Bundle params) {
+                    Log.i(TAG, "count=" + counnt);
                 }
 
                 @Override
@@ -235,8 +236,8 @@ public class SnippetsCONew extends Snippets{
             QBCustomObjects.getObjectPermissions(CLASS_NAME, OBJ_ID, new QBEntityCallbackImpl<QBPermissions>() {
 
                 @Override
-                public void onSuccess(QBPermissions result, Bundle params) {
-                    Log.i(TAG, ">>> custom object's permissions: " + result.toString());
+                public void onSuccess(QBPermissions permissions, Bundle params) {
+                    Log.i(TAG, ">>> custom object's permissions: " + permissions.toString());
                 }
 
                 @Override
@@ -275,17 +276,17 @@ public class SnippetsCONew extends Snippets{
             deleteIds.add("529f7ef5bf7b772b775a7771");
             deleteIds.add("529f7ef5bf7b772b775a7772");
             deleteIds.add("51ed3685535c12ecb0018a47");
-            Bundle bundle = new Bundle();
+            Bundle params = new Bundle();
             ArrayList<String> deleted = null;
             try {
-                deleted = QBCustomObjects.deleteObjects(CLASS_NAME, deleteIds, bundle);
+                deleted = QBCustomObjects.deleteObjects(CLASS_NAME, deleteIds, params);
             } catch (QBResponseException e) {
                 setException(e);
             }
             if(deleted != null){
                 Log.i(TAG, ">>> deletedObjs: " + deleted.toString());
-                ArrayList<String> notFound = bundle.getStringArrayList(Consts.NOT_FOUND_IDS);
-                ArrayList<String> wrongPermissions = bundle.getStringArrayList(Consts.WRONG_PERMISSIONS_IDS);
+                ArrayList<String> notFound = params.getStringArrayList(Consts.NOT_FOUND_IDS);
+                ArrayList<String> wrongPermissions = params.getStringArrayList(Consts.WRONG_PERMISSIONS_IDS);
                 Log.i(TAG, ">>> notFoundObjs: " + notFound.toString());
                 Log.i(TAG, ">>> wrongPermissionsObjs: " + wrongPermissions.toString());
             }
@@ -304,8 +305,8 @@ public class SnippetsCONew extends Snippets{
             QBCustomObjects.deleteObjects(CLASS_NAME, deleteIds, new QBEntityCallbackImpl<ArrayList<String>>() {
 
                 @Override
-                public void onSuccess(ArrayList<String> result, Bundle params) {
-                    Log.i(TAG, ">>> deletedObjs: " + result.toString());
+                public void onSuccess(ArrayList<String> deletedObjects, Bundle params) {
+                    Log.i(TAG, ">>> deletedObjs: " + deletedObjects.toString());
                     ArrayList<String> notFound = params.getStringArrayList(Consts.NOT_FOUND_IDS);
                     ArrayList<String> wrongPermissions = params.getStringArrayList(Consts.WRONG_PERMISSIONS_IDS);
                     Log.i(TAG, ">>> notFoundObjs: " + notFound.toString());
@@ -352,8 +353,8 @@ public class SnippetsCONew extends Snippets{
 
             QBCustomObjects.updateObject(record, (QBCustomObjectUpdateBuilder) null, new QBEntityCallbackImpl<QBCustomObject>() {
                 @Override
-                public void onSuccess(QBCustomObject result, Bundle params) {
-                    Log.i(TAG, ">>> updated record: : " + result.toString());
+                public void onSuccess(QBCustomObject object, Bundle params) {
+                    Log.i(TAG, ">>> updated record: : " + object.toString());
                 }
 
                 @Override

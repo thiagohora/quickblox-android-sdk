@@ -39,9 +39,9 @@ public class SnippetsAuthNew extends Snippets{
             QBAuth.createSession(new QBEntityCallbackImpl<QBSession>() {
 
                 @Override
-                public void onSuccess(QBSession result, Bundle args) {
-                    super.onSuccess(result, args);
-                    Log.i(TAG, "session=" + result.getToken());
+                public void onSuccess(QBSession session, Bundle params) {
+                    super.onSuccess(session, params);
+                    Log.i(TAG, "session=" + session.getToken());
                 }
 
                 @Override
@@ -72,9 +72,9 @@ public class SnippetsAuthNew extends Snippets{
 
             QBAuth.createSession(new QBUser("AndroidGirl", "AndroidGirl"), new QBEntityCallbackImpl<QBSession>() {
                 @Override
-                public void onSuccess(QBSession result, Bundle args) {
-                    super.onSuccess(result, args);
-                    Log.i(TAG, "session="+result.getToken());
+                public void onSuccess(QBSession session, Bundle args) {
+                    super.onSuccess(session, args);
+                    Log.i(TAG, "session=" + session.getToken());
                 }
 
                 @Override

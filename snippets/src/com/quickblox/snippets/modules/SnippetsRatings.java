@@ -1,9 +1,12 @@
 package com.quickblox.snippets.modules;
 
 import android.content.Context;
+import android.os.Bundle;
 import android.util.Log;
 
 import com.quickblox.core.QBCallbackImpl;
+import com.quickblox.core.QBEntityCallback;
+import com.quickblox.core.QBEntityCallbackImpl;
 import com.quickblox.core.result.Result;
 import com.quickblox.internal.core.request.QBPagedRequestBuilder;
 import com.quickblox.module.ratings.QBRatings;
@@ -20,6 +23,7 @@ import com.quickblox.module.users.model.QBUser;
 import com.quickblox.snippets.Snippet;
 import com.quickblox.snippets.Snippets;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -39,6 +43,7 @@ public class SnippetsRatings extends Snippets {
         snippets.add(getGameModeWithId);
         snippets.add(updateGameMode);
         snippets.add(getGameModes);
+        snippets.add(getGameModesNew);
         snippets.add(deleteGameModeWithId);
 
         snippets.add(createScore);
@@ -50,6 +55,7 @@ public class SnippetsRatings extends Snippets {
 
         snippets.add(getAverageByGameModeId);
         snippets.add(getAverageForApp);
+        snippets.add(getAverageForAppnew);
     }
 
     //
@@ -145,6 +151,24 @@ public class SnippetsRatings extends Snippets {
                     } else {
                         handleErrors(result);
                     }
+                }
+            });
+        }
+    };
+
+    Snippet getGameModesNew = new Snippet("get game modes new") {
+        @Override
+        public void execute() {
+            QBRatings.getGameModes(new QBEntityCallbackImpl<ArrayList<QBGameMode>>(){
+
+                @Override
+                public void onSuccess(ArrayList<QBGameMode> result, Bundle params) {
+                    Log.i(TAG, "GameMode list - " + result.toString());
+                }
+
+                @Override
+                public void onError(List<String> errors) {
+                     handleErrors(errors);
                 }
             });
         }
@@ -303,6 +327,24 @@ public class SnippetsRatings extends Snippets {
                     } else {
                         handleErrors(result);
                     }
+                }
+            });
+        }
+    };
+
+    Snippet getAverageForAppnew = new Snippet("get average for application new") {
+        @Override
+        public void execute() {
+            QBRatings.getAveragesByApp(new QBEntityCallbackImpl<ArrayList<QBAverage>>() {
+
+                @Override
+                public void onSuccess(ArrayList<QBAverage> result, Bundle params) {
+                    Log.i(TAG, "AverageList- " + result.toString());
+                }
+
+                @Override
+                public void onError(List<String> errors) {
+                            handleErrors(errors);
                 }
             });
         }

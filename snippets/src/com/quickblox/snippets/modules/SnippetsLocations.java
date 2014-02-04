@@ -189,7 +189,8 @@ public class SnippetsLocations extends Snippets {
 //            locationRequestBuilder.setMinCreatedAt(1326471371);
 //            locationRequestBuilder.setMaxCreatedAt(1326471371);
 //            locationRequestBuilder.setGeoRect(borderPointLat1, borderPointLng1, borderPointLat2, borderPointLng2);
-//            locationRequestBuilder.setRadius(lat1, lng1, distanceInMeters);
+            locationRequestBuilder.setRadius(lat1, lng1, distanceInMeters);
+            //locationRequestBuilder.setRadius(lat1, lng1, 0.3f);
 //
 //            locationRequestBuilder.setSort(SortField.CREATED_AT, SortOrder.ASCENDING);
 //            locationRequestBuilder.setSort(SortField.LATITUDE, SortOrder.ASCENDING);
