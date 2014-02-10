@@ -1,6 +1,7 @@
 package com.quickblox.snippets;
 
 import android.content.Context;
+import android.util.Log;
 import android.widget.Toast;
 import com.quickblox.core.result.Result;
 
@@ -14,6 +15,7 @@ import java.util.List;
  */
 public class Snippets {
 
+    private static final String TAG = Snippet.class.getSimpleName();
     protected Context context;
     protected ArrayList<Snippet> snippets = new ArrayList<Snippet>();
 
@@ -27,7 +29,7 @@ public class Snippets {
                     result.getStatusCode(), result.getErrors());
             Toast.makeText(context, message, Toast.LENGTH_SHORT).show();
         }
-        System.out.println(message);
+        Log.i(TAG, message);
     }
 
     public void handleErrors(Result result) {
@@ -36,7 +38,7 @@ public class Snippets {
         Toast.makeText(context, message, Toast.LENGTH_SHORT).show();
 
         // print
-        System.out.println(message);
+        Log.i(TAG,message);
     }
 
     public void handleErrors(List<String> errors) {
@@ -44,7 +46,7 @@ public class Snippets {
         Toast.makeText(context, message, Toast.LENGTH_SHORT).show();
 
         // print
-        System.out.println(message);
+        Log.i(TAG, message);
     }
 
 

@@ -5,6 +5,7 @@ import android.os.Bundle;
 import com.quickblox.snippets.R;
 import com.quickblox.snippets.SnippetsList;
 import com.quickblox.snippets.modules.SnippetsMessages;
+import com.quickblox.snippets.modules.SnippetsMessagesNew;
 
 /**
  * User: Oleg Soroka
@@ -18,7 +19,7 @@ public class MessagesActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.snippets_list);
 
-        SnippetsMessages snippets = new SnippetsMessages(this);
+        SnippetsMessagesNew snippets = new SnippetsMessagesNew(this);
         SnippetsList list = (SnippetsList) findViewById(R.id.list);
         list.initialize(snippets);
     }

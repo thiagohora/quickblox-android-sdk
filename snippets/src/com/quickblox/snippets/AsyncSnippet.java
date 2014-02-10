@@ -38,15 +38,19 @@ public abstract class AsyncSnippet extends Snippet {
 
             @Override
             protected void onPostExecute(Void result) {
-                if(exception == null){
-                    Log.i(TAG, ">>> executed successful");
-                    Toast.makeText(context, " executed successful", Toast.LENGTH_SHORT).show();
-                }
-                else{
-                    Log.i(TAG, ">>> errors:"+exception.getLocalizedMessage());
-                }
+               postExecute();
             }
         }).execute();
+    }
+
+    protected void postExecute(){
+        if(exception == null){
+            Log.i(TAG, ">>> executed successful");
+            Toast.makeText(context, " executed successful", Toast.LENGTH_SHORT).show();
+        }
+        else{
+            Log.i(TAG, ">>> errors:"+exception.getLocalizedMessage());
+        }
     }
 
     public abstract void executeAsync();

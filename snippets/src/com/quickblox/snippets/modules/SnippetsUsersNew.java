@@ -37,8 +37,10 @@ public class SnippetsUsersNew extends Snippets{
         snippets.add(signOutSync);
         snippets.add(signUpUser);
         snippets.add(signUpUserSync);
+        snippets.add(signUpSignInUser);
 
         snippets.add(getAllUsers);
+        snippets.add(getUsersByLoginsSync);
         snippets.add(getUsersByIds);
         snippets.add(getUsersByLogins);
         snippets.add(getUsersByEmails);
@@ -50,11 +52,13 @@ public class SnippetsUsersNew extends Snippets{
         snippets.add(getUserWithTwitterId);
         snippets.add(getUserWithFacebookId);
         snippets.add(getUserWithEmail);
+        snippets.add(getUserWithEmailSync);
         snippets.add(getUserWithExternalId);
 
         snippets.add(updateUser);
 
         snippets.add(deleteUserById);
+        snippets.add(deleteUserByIdSync);
         snippets.add(deleteUserByExternalId);
 
         snippets.add(resetPassword);
@@ -235,6 +239,40 @@ public class SnippetsUsersNew extends Snippets{
         }
     };
 
+    Snippet signUpSignInUser = new Snippet("sign up user (register) and sign in user") {
+        @Override
+        public void execute() {
+
+            final QBUser user = new QBUser("testuser12344443", "testpassword");
+            user.setEmail("test123456789w0@test.com");
+            user.setExternalId("02345777");
+            user.setFacebookId("1233453457767");
+            user.setTwitterId("12334635457");
+            user.setFullName("fullName5");
+            user.setPhone("+18904567812");
+            StringifyArrayList<String> tags = new StringifyArrayList<String>();
+            tags.add("firstTag");
+            tags.add("secondTag");
+            tags.add("thirdTag");
+            tags.add("fourthTag");
+            user.setTags(tags);
+            user.setWebsite("website.com");
+
+            QBUsers.signUpSignInTask(user, new QBEntityCallbackImpl<QBUser>() {
+                @Override
+                public void onSuccess(QBUser user, Bundle args) {
+                    Log.i(TAG, ">>> User was successfully signed up and signed in, " + user);
+                }
+
+                @Override
+                public void onError(List<String> errors) {
+                    super.onError(errors);
+                }
+            });
+        }
+    };
+
+
     Snippet getAllUsers = new Snippet("get all users") {
         @Override
         public void execute() {
@@ -321,6 +359,34 @@ public class SnippetsUsersNew extends Snippets{
             });
         }
     };
+
+    Snippet getUsersByLoginsSync = new AsyncSnippet("get users by logins synchornous", context) {
+        @Override
+        public void executeAsync() {
+            QBPagedRequestBuilder pagedRequestBuilder = new QBPagedRequestBuilder();
+            pagedRequestBuilder.setPage(1);
+            pagedRequestBuilder.setPerPage(10);
+
+            ArrayList<String> usersLogins = new ArrayList<String>();
+            usersLogins.add("bob");
+            usersLogins.add("john");
+            Bundle params = new Bundle();
+            ArrayList<QBUser> usersByLogins = null;
+            try {
+                usersByLogins = QBUsers.getUsersByLogins(usersLogins, pagedRequestBuilder, params);
+            } catch (QBResponseException e) {
+               setException(e);
+            }
+
+            if(usersByLogins != null){
+                Log.i(TAG, ">>> Users: " + usersByLogins.toString());
+                Log.i(TAG, "currentPage: " + params.getInt(Consts.CURR_PAGE));
+                Log.i(TAG, "perPage: " + params.getInt(Consts.PER_PAGE));
+                Log.i(TAG, "totalPages: " + params.getInt(Consts.TOTAL_ENTRIES));
+            }
+        }
+    };
+
 
     Snippet getUsersByEmails = new Snippet("get users by emails") {
         @Override
@@ -491,6 +557,28 @@ public class SnippetsUsersNew extends Snippets{
         }
     };
 
+    Snippet getUserWithEmailSync = new AsyncSnippet("get user with email synchornous", context) {
+
+        QBUser userByEmail;
+        @Override
+        public void executeAsync() {
+            String email = "test123@test.com";
+            try {
+                userByEmail = QBUsers.getUserByEmail(email);
+            } catch (QBResponseException e) {
+                setException(e);
+            }
+        }
+
+        @Override
+        protected void postExecute() {
+            super.postExecute();
+            if( userByEmail != null){
+                Log.i(TAG, ">>> User: " + userByEmail.toString());
+            }
+        }
+    };
+
     Snippet getUserWithExternalId = new Snippet("get user with external id") {
         @Override
         public void execute() {
@@ -562,6 +650,20 @@ public class SnippetsUsersNew extends Snippets{
                     handleErrors(errors);
                 }
             });
+        }
+    };
+
+    Snippet deleteUserByIdSync = new AsyncSnippet("delete user by id synchronous", context) {
+        @Override
+        public void executeAsync() {
+
+            int userId = 562;
+
+            try {
+                QBUsers.deleteUser(new QBUser(userId));
+            } catch (QBResponseException e) {
+                setException(e);
+            }
         }
     };
 

@@ -28,6 +28,10 @@ import java.util.List;
  */
 public class SnippetsContentNew extends Snippets{
     private static final String TAG = SnippetsContent.class.getSimpleName();
+
+    private static final int FILE_ID = 106844;
+    private static final String FILE_UID = "ce4faf98fbe84b4985570cbbbed303ab00";
+
     File file1 = null;
     File file2 = null;
     QBFileObjectAccess fileObjectAccess;
@@ -113,7 +117,7 @@ public class SnippetsContentNew extends Snippets{
     Snippet getFileWithId = new Snippet("get file with id") {
         @Override
         public void execute() {
-            QBContent.getFile(20223, new QBEntityCallbackImpl<QBFile>(){
+            QBContent.getFile(FILE_ID, new QBEntityCallbackImpl<QBFile>(){
 
                 @Override
                 public void onSuccess(QBFile file, Bundle params) {
@@ -168,7 +172,7 @@ public class SnippetsContentNew extends Snippets{
     Snippet incrementRefCount = new Snippet("increment ref count") {
         @Override
         public void execute() {
-            QBContent.incrementRefCount(20237, new QBEntityCallbackImpl() {
+            QBContent.incrementRefCount(FILE_ID, new QBEntityCallbackImpl() {
 
                 @Override
                 public void onSuccess() {
@@ -186,7 +190,7 @@ public class SnippetsContentNew extends Snippets{
     Snippet deleteFile = new Snippet("delete file") {
         @Override
         public void execute() {
-            QBContent.deleteFile(20237, new QBEntityCallbackImpl() {
+            QBContent.deleteFile(FILE_ID, new QBEntityCallbackImpl() {
 
                 @Override
                 public void onSuccess() {
@@ -204,7 +208,7 @@ public class SnippetsContentNew extends Snippets{
     Snippet getFileObjectAccess = new Snippet("get file object access") {
         @Override
         public void execute() {
-            QBContent.getFileObjectAccess(20237, new QBEntityCallbackImpl<QBFileObjectAccess>() {
+            QBContent.getFileObjectAccess(FILE_ID, new QBEntityCallbackImpl<QBFileObjectAccess>() {
 
                 @Override
                 public void onSuccess(QBFileObjectAccess fileObjectAccess, Bundle params) {
@@ -222,7 +226,7 @@ public class SnippetsContentNew extends Snippets{
     Snippet downloadFileWithUID = new Snippet("download file with UID") {
         @Override
         public void execute() {
-            QBContent.downloadFile("29e35b2faef54b15a8706c39857dc22f00", new QBEntityCallbackImpl<InputStream>() {
+            QBContent.downloadFile(FILE_UID, new QBEntityCallbackImpl<InputStream>() {
 
                 @Override
                 public void onSuccess(InputStream inputStream, Bundle params) {
@@ -306,9 +310,10 @@ public class SnippetsContentNew extends Snippets{
     };
 
     Snippet downloadFileTask = new Snippet("download file Task") {
+        final int fileId = 106844;
         @Override
         public void execute() {
-            QBContent.downloadFileTask(20248, new QBEntityCallback<InputStream>(){
+            QBContent.downloadFileTask(fileId, new QBEntityCallback<InputStream>(){
 
                 @Override
                 public void onSuccess(InputStream inputStream, Bundle params) {
@@ -332,9 +337,10 @@ public class SnippetsContentNew extends Snippets{
     };
 
     Snippet updateFileTask = new Snippet("update file Task") {
+        final int fileId = 106844;
         @Override
         public void execute() {
-            QBContent.updateFileTask(file2, 91079, null, new QBEntityCallbackImpl<QBFile>(){
+            QBContent.updateFileTask(file2, fileId, null, new QBEntityCallbackImpl<QBFile>(){
 
                 @Override
                 public void onSuccess(QBFile qbFile, Bundle params) {

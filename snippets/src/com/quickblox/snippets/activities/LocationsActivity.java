@@ -5,6 +5,7 @@ import android.os.Bundle;
 import com.quickblox.snippets.R;
 import com.quickblox.snippets.SnippetsList;
 import com.quickblox.snippets.modules.SnippetsLocations;
+import com.quickblox.snippets.modules.SnippetsLocationsNew;
 
 /**
  * User: Oleg Soroka
@@ -18,7 +19,7 @@ public class LocationsActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.snippets_list);
 
-        SnippetsLocations snippets = new SnippetsLocations(this);
+        SnippetsLocationsNew snippets = new SnippetsLocationsNew(this);
         SnippetsList list = (SnippetsList) findViewById(R.id.list);
         list.initialize(snippets);
     }
