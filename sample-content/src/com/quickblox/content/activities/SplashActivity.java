@@ -7,15 +7,17 @@ import android.view.View;
 import android.widget.ProgressBar;
 import com.quickblox.content.R;
 import com.quickblox.content.helper.DataHolder;
-import com.quickblox.core.QBCallback;
+import com.quickblox.core.QBEntityCallbackImpl;
 import com.quickblox.core.QBSettings;
-import com.quickblox.core.result.Result;
 import com.quickblox.internal.core.request.QBPagedRequestBuilder;
 import com.quickblox.module.auth.QBAuth;
-import com.quickblox.module.auth.result.QBSessionResult;
+import com.quickblox.module.auth.model.QBSession;
 import com.quickblox.module.content.QBContent;
-import com.quickblox.module.content.result.QBFilePagedResult;
+import com.quickblox.module.content.model.QBFile;
 import com.quickblox.module.users.model.QBUser;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class SplashActivity extends Activity {
 
@@ -45,23 +47,17 @@ public class SplashActivity extends Activity {
     private void authorizeApp() {
         QBUser qbUser = new QBUser(USER_LOGIN, USER_PASSWORD);
         // authorize app with default user
-        QBAuth.createSession(qbUser, new QBCallback() {
-            @Override
-            public void onComplete(Result result) {
-                if (result.isSuccess()) {
-                    // return result from QBAuth.authorizeApp() query
-                    QBSessionResult qbSessionResult = (QBSessionResult) result;
-                    DataHolder.getDataHolder().setSignInUserId(qbSessionResult.getSession().getUserId());
+        QBAuth.createSession(qbUser, new QBEntityCallbackImpl<QBSession>(){
 
-                    // retrieve user's files
-                    getFileList();
-                } else {
-                    progressBar.setVisibility(View.INVISIBLE);
-                }
+            @Override
+            public void onSuccess(QBSession session, Bundle args) {
+                DataHolder.getDataHolder().setSignInUserId(session.getUserId());
+                getFileList();
             }
 
             @Override
-            public void onComplete(Result result, Object o) {
+            public void onError(List<String> errors) {
+                progressBar.setVisibility(View.INVISIBLE);
             }
         });
     }
@@ -74,19 +70,14 @@ public class SplashActivity extends Activity {
         QBPagedRequestBuilder builder = new  QBPagedRequestBuilder();
         builder.setPerPage(100);
         builder.setPage(1);
-        QBContent.getFiles(builder, new QBCallback() {
-            @Override
-            public void onComplete(Result result) {
-                QBFilePagedResult qbFilePagedResult = (QBFilePagedResult) result;
-                DataHolder.getDataHolder().setQbFileList(qbFilePagedResult.getFiles());
+        QBContent.getFiles(builder, new QBEntityCallbackImpl<ArrayList<QBFile>>() {
 
-                // show gallery
+            @Override
+            public void onSuccess(ArrayList<QBFile> files, Bundle bundle) {
+                DataHolder.getDataHolder().setQbFileList(files);
                 startGalleryActivity();
             }
 
-            @Override
-            public void onComplete(Result result, Object o) {
-            }
         });
     }
 

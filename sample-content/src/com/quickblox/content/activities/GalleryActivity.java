@@ -13,12 +13,12 @@ import android.widget.GridView;
 import com.quickblox.content.R;
 import com.quickblox.content.adapter.GalleryAdapter;
 import com.quickblox.content.helper.DataHolder;
-import com.quickblox.core.QBCallback;
-import com.quickblox.core.result.Result;
+import com.quickblox.core.QBEntityCallbackImpl;
 import com.quickblox.module.content.QBContent;
-import com.quickblox.module.content.result.QBFileUploadTaskResult;
+import com.quickblox.module.content.model.QBFile;
 
 import java.io.File;
+import java.util.List;
 
 /**
  * Created with IntelliJ IDEA.
@@ -90,22 +90,18 @@ public class GalleryActivity extends Activity implements AdapterView.OnItemClick
         // Upload new file
         // QBContent.uploadFileTask consist of tree query : Create a file, Upload file, Declaring file uploaded
         final File img = new File(imgPath);
-        QBContent.uploadFileTask(img, PUBLIC_ACCESS_TRUE, new QBCallback() {
-            @Override
-            public void onComplete(Result result) {
-                if (result.isSuccess()) {
-                    QBFileUploadTaskResult qbFileUploadTaskResultq = (QBFileUploadTaskResult) result;
-                    DataHolder.getDataHolder().addQbFile(qbFileUploadTaskResultq.getFile());
-                    galleryAdapter.notifyDataSetChanged();
-                } else {
+        QBContent.uploadFileTask(img, PUBLIC_ACCESS_TRUE, null,  new QBEntityCallbackImpl<QBFile>() {
 
-                }
+            @Override
+            public void onSuccess(QBFile qbFile, Bundle bundle) {
                 progressDialog.hide();
+                DataHolder.getDataHolder().addQbFile(qbFile);
+                galleryAdapter.notifyDataSetChanged();
             }
 
             @Override
-            public void onComplete(Result result, Object o) {
-
+            public void onError(List<String> strings) {
+                progressDialog.hide();
             }
         });
     }
