@@ -9,28 +9,21 @@ import android.view.View;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
-
-import com.quickblox.core.QBCallback;
-import com.quickblox.core.result.Result;
+import com.quickblox.core.QBEntityCallback;
+import com.quickblox.core.QBEntityCallbackImpl;
 import com.quickblox.customobject.R;
 import com.quickblox.customobject.definition.QBQueries;
 import com.quickblox.customobject.helper.DataHolder;
 import com.quickblox.customobject.object.Note;
 import com.quickblox.module.custom.QBCustomObjects;
 import com.quickblox.module.custom.model.QBCustomObject;
-import com.quickblox.module.custom.result.QBCustomObjectResult;
 
 import java.util.HashMap;
+import java.util.List;
 
-import static com.quickblox.customobject.definition.Consts.CLASS_NAME;
-import static com.quickblox.customobject.definition.Consts.COMMENTS;
-import static com.quickblox.customobject.definition.Consts.STATUS;
-import static com.quickblox.customobject.definition.Consts.STATUS_DONE;
-import static com.quickblox.customobject.definition.Consts.STATUS_IN_PROCESS;
-import static com.quickblox.customobject.definition.Consts.STATUS_NEW;
-import static com.quickblox.customobject.definition.Consts.TITLE;
+import static com.quickblox.customobject.definition.Consts.*;
 
-public class ShowNoteActivity extends Activity implements QBCallback {
+public class ShowNoteActivity extends Activity implements QBEntityCallback<QBCustomObject> {
 
     private final String POSITION = "position";
     private TextView title;
@@ -38,45 +31,13 @@ public class ShowNoteActivity extends Activity implements QBCallback {
     private EditText comments;
     private int position;
     private ProgressDialog progressDialog;
+    QBQueries qbQueryType =  QBQueries.UPDATE_STATUS;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.note);
         initialize();
-    }
-
-    @Override
-    public void onComplete(Result result, Object context) {
-        QBQueries qbQueryType = (QBQueries) context;
-        if (result.isSuccess()) {
-            switch (qbQueryType) {
-                case UPDATE_STATUS:
-                    // return QBCustomObjectResult for updateObject()
-                    setNewNote((QBCustomObjectResult) result);
-                    status.setText(DataHolder.getDataHolder().getNoteStatus(position));
-                    break;
-                case ADD_NEW_COMMENT:
-                    // return QBCustomObjectResult for updateObject()
-                    setNewNote((QBCustomObjectResult) result);
-                    applyComment();
-                    break;
-                case DELETE_NOTE:
-                    DataHolder.getDataHolder().removeNoteFromList(position);
-                    Toast.makeText(getBaseContext(), getBaseContext().getResources().getString(R.string.note_successfully_deleted), Toast.LENGTH_SHORT).show();
-                    finish();
-                    break;
-            }
-            progressDialog.dismiss();
-        } else {
-            // print errors that came from server
-            Toast.makeText(getBaseContext(), result.getErrors().get(0), Toast.LENGTH_SHORT).show();
-            progressDialog.dismiss();
-        }
-    }
-
-    @Override
-    public void onComplete(Result result) {
     }
 
     private void initialize() {
@@ -105,7 +66,21 @@ public class ShowNoteActivity extends Activity implements QBCallback {
                 showProgressDialog();
                 // create query for delete score
                 // set className and scoreId
-                QBCustomObjects.deleteObject(CLASS_NAME, DataHolder.getDataHolder().getNoteId(position), this, QBQueries.DELETE_NOTE);
+                QBCustomObjects.deleteObject(CLASS_NAME, DataHolder.getDataHolder().getNoteId(position), new QBEntityCallbackImpl<Void>(){
+                    @Override
+                    public void onSuccess() {
+                        DataHolder.getDataHolder().removeNoteFromList(position);
+                        Toast.makeText(getBaseContext(), getBaseContext().getResources().getString(R.string.note_successfully_deleted), Toast.LENGTH_SHORT).show();
+                        finish();
+                        progressDialog.dismiss();
+                    }
+
+                    @Override
+                    public void onError(List<String> errors) {
+                        Toast.makeText(getBaseContext(), errors.toString(), Toast.LENGTH_SHORT).show();
+                        progressDialog.dismiss();
+                    }
+                });
                 break;
         }
 
@@ -166,7 +141,8 @@ public class ShowNoteActivity extends Activity implements QBCallback {
         qbCustomObject.setCustomObjectId(DataHolder.getDataHolder().getNoteId(position));
         qbCustomObject.setClassName(CLASS_NAME);
         qbCustomObject.setFields(fields);
-        QBCustomObjects.updateObject(qbCustomObject, this, QBQueries.UPDATE_STATUS);
+        qbQueryType =  QBQueries.UPDATE_STATUS;
+        QBCustomObjects.updateObject(qbCustomObject, this);
     }
 
     private void addNewComment(String comment) {
@@ -180,7 +156,8 @@ public class ShowNoteActivity extends Activity implements QBCallback {
         qbCustomObject.setCustomObjectId(DataHolder.getDataHolder().getNoteId(position));
         qbCustomObject.setClassName(CLASS_NAME);
         qbCustomObject.setFields(fields);
-        QBCustomObjects.updateObject(qbCustomObject, this, QBQueries.ADD_NEW_COMMENT);
+        qbQueryType =  QBQueries.ADD_NEW_COMMENT;
+        QBCustomObjects.updateObject(qbCustomObject, this);
     }
 
     private void applyComment() {
@@ -191,14 +168,42 @@ public class ShowNoteActivity extends Activity implements QBCallback {
         comments.setText(commentsStr);
     }
 
-    private void setNewNote(QBCustomObjectResult qbCustomObjectResult) {
-        QBCustomObject qbCustomObject = qbCustomObjectResult.getCustomObject();
+    private void setNewNote(QBCustomObject qbCustomObject) {
         Note note = new Note(qbCustomObject);
         DataHolder.getDataHolder().setNoteToNoteList(position, note);
     }
 
     private void showProgressDialog() {
         progressDialog = ProgressDialog.show(this, null, getResources().getString(R.string.please_wait), false, false);
+    }
+
+    @Override
+    public void onSuccess(QBCustomObject qbCustomObject, Bundle bundle) {
+        switch (qbQueryType) {
+            case UPDATE_STATUS:
+                // return QBCustomObjectResult for updateObject()
+                setNewNote(qbCustomObject);
+                status.setText(DataHolder.getDataHolder().getNoteStatus(position));
+                break;
+            case ADD_NEW_COMMENT:
+                // return QBCustomObjectResult for updateObject()
+                setNewNote(qbCustomObject);
+                applyComment();
+                break;
+        }
+        progressDialog.dismiss();
+    }
+
+    @Override
+    public void onSuccess() {
+
+    }
+
+    @Override
+    public void onError(List<String> errors) {
+        // print errors that came from server
+        Toast.makeText(getBaseContext(), errors.toString(), Toast.LENGTH_SHORT).show();
+        progressDialog.dismiss();
     }
 }
 

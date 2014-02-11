@@ -6,24 +6,22 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.ProgressBar;
 import android.widget.Toast;
-
-import com.quickblox.core.QBCallback;
+import com.quickblox.core.QBEntityCallback;
+import com.quickblox.core.QBEntityCallbackImpl;
 import com.quickblox.core.QBSettings;
-import com.quickblox.core.result.Result;
 import com.quickblox.customobject.R;
 import com.quickblox.customobject.definition.Consts;
-import com.quickblox.customobject.definition.QBQueries;
 import com.quickblox.customobject.helper.DataHolder;
 import com.quickblox.module.auth.QBAuth;
-import com.quickblox.module.auth.result.QBSessionResult;
+import com.quickblox.module.auth.model.QBSession;
 import com.quickblox.module.custom.QBCustomObjects;
 import com.quickblox.module.custom.model.QBCustomObject;
-import com.quickblox.module.custom.result.QBCustomObjectLimitedResult;
 import com.quickblox.module.users.model.QBUser;
 
+import java.util.ArrayList;
 import java.util.List;
 
-public class SplashActivity extends Activity implements QBCallback {
+public class SplashActivity extends Activity implements QBEntityCallback<QBSession> {
 
     private final int APP_ID = 99;
     private final String AUTH_KEY = "63ebrp5VZt7qTOv";
@@ -46,59 +44,49 @@ public class SplashActivity extends Activity implements QBCallback {
         QBSettings.getInstance().fastConfigInit(String.valueOf(APP_ID), AUTH_KEY, AUTH_SECRET);
         QBUser qbUser = new QBUser(USER_LOGIN, USER_PASSWORD);
         // authorize app with default user
-        QBAuth.createSession(qbUser, this, QBQueries.SIGN_IN);
+        QBAuth.createSession(qbUser, this);
 
     }
 
     private void getNoteList() {
         // ================= QuickBlox ===== Step 2 =================
         // Get all notes
-        QBCustomObjects.getObjects(Consts.CLASS_NAME, this, QBQueries.GET_NOTE_LIST);
-    }
-
-    @Override
-    public void onComplete(Result result) {
-
-    }
-
-    @Override
-    public void onComplete(Result result, Object context) {
-        QBQueries qbQueryType = (QBQueries) context;
-        if (result.isSuccess()) {
-            switch (qbQueryType) {
-                case SIGN_IN:
-                    // return result from QBAuth.authorizeApp() query
-                    QBSessionResult qbSessionResult = (QBSessionResult) result;
-                    DataHolder.getDataHolder().setSignInUserId(qbSessionResult.getSession().getUserId());
-                    getNoteList();
-                    break;
-                case GET_NOTE_LIST:
-                    //return QBCustomObjectLimitedResult for getObjects query
-                    if (DataHolder.getDataHolder().size() > 0) {
-                        DataHolder.getDataHolder().clear();
+        QBCustomObjects.getObjects(Consts.CLASS_NAME, new QBEntityCallbackImpl<ArrayList<QBCustomObject>>(){
+            @Override
+            public void onSuccess(ArrayList<QBCustomObject> customObjects, Bundle args) {
+                if (DataHolder.getDataHolder().size() > 0) {
+                    DataHolder.getDataHolder().clear();
+                }
+                if (customObjects != null && customObjects.size() != 0) {
+                    for (QBCustomObject customObject : customObjects) {
+                        DataHolder.getDataHolder().addNoteToList(customObject);
                     }
-                    // get all custom objects by .getCustomObjects()
-                    List<QBCustomObject> qbCustomObjects = ((QBCustomObjectLimitedResult) result).getCustomObjects();
-                    if (qbCustomObjects != null && qbCustomObjects.size() != 0) {
-                        for (QBCustomObject customObject : qbCustomObjects) {
-                            DataHolder.getDataHolder().addNoteToList(customObject);
-                        }
-                    }
-                    //DataHolder.getDataHolder().sort();
-                    startDisplayNoteListActivity();
-                    break;
+                }
+                startDisplayNoteListActivity();
             }
-
-        } else {
-            // print errors that came from server
-            Toast.makeText(getBaseContext(), result.getErrors().get(0), Toast.LENGTH_SHORT).show();
-            progressBar.setVisibility(View.INVISIBLE);
-        }
+        });
     }
 
     private void startDisplayNoteListActivity() {
         Intent intent = new Intent(this, DisplayNoteListActivity.class);
         startActivity(intent);
         finish();
+    }
+
+    @Override
+    public void onSuccess(QBSession session, Bundle bundle) {
+        DataHolder.getDataHolder().setSignInUserId(session.getUserId());
+        getNoteList();
+    }
+
+    @Override
+    public void onSuccess() {
+
+    }
+
+    @Override
+    public void onError(List<String> errors) {
+        Toast.makeText(getBaseContext(), errors.toString(), Toast.LENGTH_SHORT).show();
+        progressBar.setVisibility(View.INVISIBLE);
     }
 }
