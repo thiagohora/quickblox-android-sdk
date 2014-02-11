@@ -3,6 +3,7 @@ package com.quickblox.snippets;
 import android.content.Context;
 import android.util.Log;
 import android.widget.Toast;
+import com.quickblox.core.QBEntityCallbackImpl;
 import com.quickblox.core.result.Result;
 
 import java.util.ArrayList;
@@ -62,4 +63,22 @@ public class Snippets {
         this.snippets = snippets;
     }
 
+    public class QBEmptyCallback extends QBEntityCallbackImpl<Void>{
+
+        private String successMsg;
+
+        public QBEmptyCallback(String successMsg){
+            this.successMsg = successMsg;
+        }
+
+        @Override
+        public void onSuccess() {
+            Log.i(TAG, successMsg);
+        }
+
+        @Override
+        public void onError(List<String> errors) {
+            handleErrors(errors);
+        }
+    }
 }

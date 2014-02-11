@@ -4,7 +4,7 @@ import android.app.Activity;
 import android.os.Bundle;
 import com.quickblox.snippets.R;
 import com.quickblox.snippets.SnippetsList;
-import com.quickblox.snippets.modules.SnippetsRatings;
+import com.quickblox.snippets.modules.SnippetsRatingNew;
 
 /**
  * User: Oleg Soroka
@@ -18,7 +18,7 @@ public class RatingsActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.snippets_list);
 
-        SnippetsRatings snippets = new SnippetsRatings(this);
+        SnippetsRatingNew snippets = new SnippetsRatingNew(this);
         SnippetsList list = (SnippetsList) findViewById(R.id.list);
         list.initialize(snippets);
     }

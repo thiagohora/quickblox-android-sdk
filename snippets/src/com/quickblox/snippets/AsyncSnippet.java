@@ -4,16 +4,13 @@ import android.content.Context;
 import android.os.AsyncTask;
 import android.util.Log;
 import android.widget.Toast;
-import com.quickblox.internal.core.exception.QBResponseException;
-
-import java.util.List;
 
 /**
  * Created by vfite on 16.01.14.
  */
 public abstract class AsyncSnippet extends Snippet {
     private static final String TAG = AsyncSnippet.class.getSimpleName();
-    QBResponseException exception;
+    Exception exception;
     private Context context;
 
     public AsyncSnippet(String title, Context context) {
@@ -21,8 +18,11 @@ public abstract class AsyncSnippet extends Snippet {
         this.context = context;
     }
 
-    public void setException(QBResponseException exception){
+    public void setException(Exception exception){
          this.exception = exception;
+    }
+    public Exception getException(){
+        return exception;
     }
 
     @Override

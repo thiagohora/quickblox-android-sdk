@@ -59,10 +59,11 @@ public class SnippetsAuthNew extends Snippets{
             try {
                 session = QBAuth.createSession();
             } catch (QBResponseException e) {
-                e.printStackTrace();
                 setException(e);
             }
-            Log.i(TAG, "session created"+session.getToken());
+            if(session != null){
+                Log.i(TAG, "session created"+session.getToken());
+            }
         }
     };
 
@@ -109,17 +110,7 @@ public class SnippetsAuthNew extends Snippets{
     Snippet destroySessionNewCallback = new Snippet("destroy session with new callback") {
         @Override
         public void execute() {
-            QBAuth.deleteSession(new QBEntityCallbackImpl() {
-                @Override
-                public void onSuccess() {
-                    Log.i(TAG, ">>> Session Destroy OK");
-                }
-
-                @Override
-                public void onError(List eroors) {
-                    handleErrors(eroors);
-                }
-            });
+            QBAuth.deleteSession(new QBEmptyCallback(">>> Session Destroy OK"));
         }
     };
 
