@@ -9,9 +9,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
-
-import com.quickblox.core.QBCallback;
-import com.quickblox.core.result.Result;
+import com.quickblox.core.QBEntityCallback;
 import com.quickblox.module.chat.QBChatService;
 import com.quickblox.module.chat.listeners.SessionListener;
 import com.quickblox.module.chat.smack.SmackAndroid;
@@ -20,7 +18,9 @@ import com.quickblox.module.users.model.QBUser;
 import com.quickblox.sample.chat.App;
 import com.quickblox.sample.chat.R;
 
-public class RegistrationActivity extends Activity implements QBCallback, View.OnClickListener {
+import java.util.List;
+
+public class RegistrationActivity extends Activity implements QBEntityCallback<QBUser>, View.OnClickListener {
 
     private static final String TAG = LoginActivity.class.getSimpleName();
 
@@ -74,45 +74,52 @@ public class RegistrationActivity extends Activity implements QBCallback, View.O
         finish();
     }
 
+    private void loginInChat(QBUser user){
+        QBChatService.getInstance().loginWithUser(user, new SessionListener() {
+            @Override
+            public void onLoginSuccess() {
+                if (progressDialog != null) {
+                    progressDialog.dismiss();
+                }
+                Log.i(TAG, "success when login");
+                Intent i = new Intent();
+                setResult(RESULT_OK, i);
+                finish();
+            }
+
+            @Override
+            public void onLoginError() {
+                Log.i(TAG, "error when login");
+            }
+
+            @Override
+            public void onDisconnect() {
+                Log.i(TAG, "disconnect when login");
+            }
+
+            @Override
+            public void onDisconnectOnError(Exception exc) {
+                Log.i(TAG, "disconnect error when login");
+            }
+        });
+    }
+
+
     @Override
-    public void onComplete(Result result) {
-        if (result.isSuccess()) {
-            ((App)getApplication()).setQbUser(user);
-            QBChatService.getInstance().loginWithUser(user, new SessionListener() {
-                @Override
-                public void onLoginSuccess() {
-                    if (progressDialog != null) {
-                        progressDialog.dismiss();
-                    }
-                    Log.i(TAG, "success when login");
-                    Intent i = new Intent();
-                    setResult(RESULT_OK, i);
-                    finish();
-                }
-
-                @Override
-                public void onLoginError() {
-                    Log.i(TAG, "error when login");
-                }
-
-                @Override
-                public void onDisconnect() {
-                    Log.i(TAG, "disconnect when login");
-                }
-
-                @Override
-                public void onDisconnectOnError(Exception exc) {
-                    Log.i(TAG, "disconnect error when login");
-                }
-            });
-        } else {
-            AlertDialog.Builder dialog = new AlertDialog.Builder(this);
-            dialog.setMessage("Error(s) occurred. Look into DDMS log for details, " +
-                    "please. Errors: " + result.getErrors()).create().show();
-        }
+    public void onSuccess(QBUser qbUser, Bundle bundle) {
+        ((App)getApplication()).setQbUser(qbUser);
+        loginInChat(qbUser);
     }
 
     @Override
-    public void onComplete(Result result, Object context) {
+    public void onSuccess() {
+
+    }
+
+    @Override
+    public void onError(List<String> errors) {
+        AlertDialog.Builder dialog = new AlertDialog.Builder(this);
+        dialog.setMessage("Error(s) occurred. Look into DDMS log for details, " +
+                "please. Errors: " + errors).create().show();
     }
 }
