@@ -8,11 +8,14 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
-import com.quickblox.core.QBCallback;
+import com.quickblox.core.QBEntityCallback;
 import com.quickblox.core.QBSettings;
-import com.quickblox.core.result.Result;
 import com.quickblox.module.auth.QBAuth;
+import com.quickblox.module.auth.model.QBSession;
+import com.quickblox.module.users.model.QBUser;
 import com.quickblox.sample.location.R;
+
+import java.util.List;
 
 /**
  * Date: 24.10.12
@@ -24,7 +27,7 @@ import com.quickblox.sample.location.R;
  *
  * @author <a href="mailto:igos@quickblox.com">Igor Khomenko</a>
  */
-public class SplashActivity extends Activity implements QBCallback {
+public class SplashActivity extends Activity implements QBEntityCallback<QBSession>{
 
     private ProgressBar progressBar;
 
@@ -54,28 +57,29 @@ public class SplashActivity extends Activity implements QBCallback {
         // Authorize application with user.
         // You can create user on admin.quickblox.com, Users module or through QBUsers.signUp method
 
-        QBAuth.createSession("testuser", "testpassword", this);
+        QBAuth.createSession(new QBUser("testuser", "testpassword"), this);
     }
 
+
     @Override
-    public void onComplete(Result result) {
+    public void onSuccess(QBSession session, Bundle bundle) {
         progressBar.setVisibility(View.GONE);
+        finish();
+        Intent intent = new Intent(this, MapActivity.class);
+        startActivity(intent);
+    }
 
-        if (result.isSuccess()) {
-            // Show Map activity
-            finish();
-            Intent intent = new Intent(this, MapActivity.class);
-            startActivity(intent);
-        } else {
-
-            // Show errors
-            AlertDialog.Builder dialog = new AlertDialog.Builder(this);
-            dialog.setMessage("Error(s) occurred. Look into DDMS log for details, " +
-                    "please. Errors: " + result.getErrors()).create().show();
-        }
+    @Override
+    public void onSuccess() {
 
     }
 
     @Override
-    public void onComplete(Result result, Object context) { }
+    public void onError(List<String> errors) {
+        progressBar.setVisibility(View.GONE);
+        // Show errors
+        AlertDialog.Builder dialog = new AlertDialog.Builder(this);
+        dialog.setMessage("Error(s) occurred. Look into DDMS log for details, " +
+                "please. Errors: " + errors).create().show();
+    }
 }

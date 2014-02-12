@@ -12,7 +12,6 @@ import android.support.v4.app.FragmentActivity;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.Toast;
-
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -22,16 +21,16 @@ import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
-import com.quickblox.core.QBCallbackImpl;
-import com.quickblox.core.result.Result;
+import com.quickblox.core.QBEntityCallbackImpl;
 import com.quickblox.module.locations.QBLocations;
 import com.quickblox.module.locations.model.QBLocation;
 import com.quickblox.module.locations.request.QBLocationRequestBuilder;
-import com.quickblox.module.locations.result.QBLocationPagedResult;
 import com.quickblox.sample.location.R;
 import com.quickblox.sample.location.model.Data;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -78,27 +77,24 @@ public class MapActivity extends FragmentActivity implements LocationListener {
         QBLocationRequestBuilder getLocationsBuilder = new QBLocationRequestBuilder();
         getLocationsBuilder.setPerPage(10);
         getLocationsBuilder.setLastOnly();
-        QBLocations.getLocations(getLocationsBuilder, new QBCallbackImpl() {
+        QBLocations.getLocations(getLocationsBuilder, new QBEntityCallbackImpl<ArrayList<QBLocation>>() {
             @Override
-            public void onComplete(Result result) {
-                if (result.isSuccess()) {
-                    QBLocationPagedResult locationsResult = (QBLocationPagedResult) result;
+            public void onSuccess(ArrayList<QBLocation> locations, Bundle args) {
+                for (QBLocation location : locations) {
+                    Marker marker = map.addMarker(new MarkerOptions()
+                            .position(new LatLng(location.getLatitude(), location.getLongitude()))
+                            .icon(BitmapDescriptorFactory.fromResource(R.drawable.map_marker_other)));
 
-                    // Process result
-                    // show all locations on map
-                    for (QBLocation location : locationsResult.getLocations()) {
-                        Marker marker = map.addMarker(new MarkerOptions()
-                                .position(new LatLng(location.getLatitude(), location.getLongitude()))
-                                .icon(BitmapDescriptorFactory.fromResource(R.drawable.map_marker_other)));
+                    Data data = new Data(location.getUser().getLogin(), location.getStatus());
+                    storage.put(marker, data);
+                };
+            }
 
-                        Data data = new Data(location.getUser().getLogin(), location.getStatus());
-                        storage.put(marker, data);
-                    }
-                } else {
-                    AlertDialog.Builder dialog = new AlertDialog.Builder(MapActivity.this);
-                    dialog.setMessage("Error(s) occurred. Look into DDMS log for details, " +
-                            "please. Errors: " + result.getErrors()).create().show();
-                }
+            @Override
+            public void onError(List<String> errors) {
+                AlertDialog.Builder dialog = new AlertDialog.Builder(MapActivity.this);
+                dialog.setMessage("Error(s) occurred. Look into DDMS log for details, " +
+                        "please. Errors: " + errors).create().show();
             }
         });
     }
@@ -125,17 +121,18 @@ public class MapActivity extends FragmentActivity implements LocationListener {
                         // ================= QuickBlox ====================
                         // Share own location
                         QBLocation location = new QBLocation(lat, lng, input.getText().toString());
-                        QBLocations.createLocation(location, new QBCallbackImpl() {
+                        QBLocations.createLocation(location, new QBEntityCallbackImpl<QBLocation>() {
                             @Override
-                            public void onComplete(Result result) {
-                                if (result.isSuccess()) {
-                                    Toast.makeText(MapActivity.this, "Check In was successful!",
-                                            Toast.LENGTH_LONG).show();
-                                } else {
-                                    AlertDialog.Builder dialog = new AlertDialog.Builder(MapActivity.this);
-                                    dialog.setMessage("Error(s) occurred. Look into DDMS log for details, " +
-                                            "please. Errors: " + result.getErrors()).create().show();
-                                }
+                            public void onSuccess(QBLocation result, Bundle args) {
+                                Toast.makeText(MapActivity.this, "Check In was successful!",
+                                        Toast.LENGTH_LONG).show();
+                            }
+
+                            @Override
+                            public void onError(List<String> errors) {
+                                AlertDialog.Builder dialog = new AlertDialog.Builder(MapActivity.this);
+                                dialog.setMessage("Error(s) occurred. Look into DDMS log for details, " +
+                                        "please. Errors: " + errors).create().show();
                             }
                         });
                     }
