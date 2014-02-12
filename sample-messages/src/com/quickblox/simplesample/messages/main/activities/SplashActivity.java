@@ -8,12 +8,14 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
-import com.quickblox.core.QBCallback;
+import com.quickblox.core.QBEntityCallback;
 import com.quickblox.core.QBSettings;
-import com.quickblox.core.result.Result;
 import com.quickblox.module.auth.QBAuth;
+import com.quickblox.module.auth.model.QBSession;
 import com.quickblox.module.users.model.QBUser;
 import com.quickblox.simplesample.messages.R;
+
+import java.util.List;
 
 /**
  * Date: 24.10.12
@@ -25,7 +27,7 @@ import com.quickblox.simplesample.messages.R;
  *
  * @author <a href="mailto:igos@quickblox.com">Igor Khomenko</a>
  */
-public class SplashActivity extends Activity implements QBCallback {
+public class SplashActivity extends Activity implements QBEntityCallback<QBSession> {
 
     private ProgressBar progressBar;
 
@@ -65,25 +67,25 @@ public class SplashActivity extends Activity implements QBCallback {
     }
 
     @Override
-    public void onComplete(Result result) {
+    public void onSuccess(QBSession session, Bundle bundle) {
         progressBar.setVisibility(View.GONE);
+        // Show Messages activity
+        Intent intent = new Intent(this, MessagesActivity.class);
+        startActivity(intent);
+        finish();
+    }
 
-        if (result.isSuccess()) {
-            // Show Messages activity
-            Intent intent = new Intent(this, MessagesActivity.class);
-            startActivity(intent);
-            finish();
-        } else {
-
-            // Show errors
-            AlertDialog.Builder dialog = new AlertDialog.Builder(this);
-            dialog.setMessage("Error(s) occurred. Look into DDMS log for details, " +
-                    "please. Errors: " + result.getErrors()).create().show();
-        }
+    @Override
+    public void onSuccess() {
 
     }
 
     @Override
-    public void onComplete(Result result, Object context) {
+    public void onError(List<String> errors) {
+        progressBar.setVisibility(View.GONE);
+        // Show errors
+        AlertDialog.Builder dialog = new AlertDialog.Builder(this);
+        dialog.setMessage("Error(s) occurred. Look into DDMS log for details, " +
+                "please. Errors: " + errors).create().show();
     }
 }

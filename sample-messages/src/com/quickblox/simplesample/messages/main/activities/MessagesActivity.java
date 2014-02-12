@@ -12,22 +12,21 @@ import android.widget.EditText;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import com.google.android.gcm.GCMRegistrar;
-import com.quickblox.core.QBCallback;
-import com.quickblox.core.QBCallbackImpl;
-import com.quickblox.core.result.Result;
+import com.quickblox.core.QBEntityCallbackImpl;
 import com.quickblox.internal.core.helper.StringifyArrayList;
 import com.quickblox.internal.core.request.QBPagedRequestBuilder;
 import com.quickblox.module.messages.QBMessages;
 import com.quickblox.module.messages.model.QBEnvironment;
 import com.quickblox.module.messages.model.QBEvent;
 import com.quickblox.module.messages.model.QBNotificationType;
+import com.quickblox.module.messages.model.QBSubscription;
 import com.quickblox.module.users.QBUsers;
 import com.quickblox.module.users.model.QBUser;
-import com.quickblox.module.users.result.QBUserPagedResult;
 import com.quickblox.simplesample.messages.R;
 import com.quickblox.simplesample.messages.main.definitions.Consts;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class MessagesActivity extends Activity {
 
@@ -117,16 +116,18 @@ public class MessagesActivity extends Activity {
         QBPagedRequestBuilder rb = new QBPagedRequestBuilder(100, 1);
 
         // Retrieve all users
-        QBUsers.getUsers(rb, new QBCallback() {
+        QBUsers.getUsers(rb, new QBEntityCallbackImpl<ArrayList<QBUser>>() {
+
             @Override
-            public void onComplete(Result result) {
-                qbUsersList = ((QBUserPagedResult) result).getUsers();
-                showAllUsersPicker();
+            public void onSuccess(ArrayList<QBUser> users, Bundle args) {
                 progressBar.setVisibility(View.INVISIBLE);
+                qbUsersList = users;
+                showAllUsersPicker();
             }
 
             @Override
-            public void onComplete(Result result, Object o) {
+            public void onError(List<String> errors) {
+                progressBar.setVisibility(View.INVISIBLE);
             }
         });
     }
@@ -174,14 +175,16 @@ public class MessagesActivity extends Activity {
         userIds.add(selectedUser.getId());
         qbEvent.setUserIds(userIds);
 
-        QBMessages.createEvent(qbEvent, new QBCallback() {
+        QBMessages.createEvent(qbEvent, new QBEntityCallbackImpl<QBEvent>(){
+
             @Override
-            public void onComplete(Result result) {
+            public void onSuccess(QBEvent result, Bundle args) {
                 progressBar.setVisibility(View.INVISIBLE);
             }
 
             @Override
-            public void onComplete(Result result, Object o) {
+            public void onError(List<String> errors) {
+                progressBar.setVisibility(View.INVISIBLE);
             }
         });
         progressBar.setVisibility(View.VISIBLE);
@@ -196,12 +199,11 @@ public class MessagesActivity extends Activity {
         Log.d(LOG_TAG, "subscribing...");
 
         String deviceId = ((TelephonyManager) getBaseContext().getSystemService(Context.TELEPHONY_SERVICE)).getDeviceId();
-        QBMessages.subscribeToPushNotificationsTask(registrationID, deviceId, QBEnvironment.DEVELOPMENT, new QBCallbackImpl() {
+        QBMessages.subscribeToPushNotificationsTask(registrationID, deviceId, QBEnvironment.DEVELOPMENT, new QBEntityCallbackImpl<ArrayList<QBSubscription>>(){
+
             @Override
-            public void onComplete(Result result) {
-                if (result.isSuccess()) {
-                    Log.d(LOG_TAG, "subscribed");
-                }
+            public void onSuccess(ArrayList<QBSubscription> qbSubscriptions, Bundle bundle) {
+                Log.d(LOG_TAG, "subscribed");
             }
         });
     }
