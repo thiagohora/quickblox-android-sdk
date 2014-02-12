@@ -1,20 +1,15 @@
 package com.quickblox.sample.test.customobject;
 
-import android.util.Log;
-import com.quickblox.core.QBCallbackImpl;
-import com.quickblox.core.result.Result;
+import android.os.Bundle;
+import com.quickblox.core.QBEntityCallbackImpl;
 import com.quickblox.internal.core.helper.StringifyArrayList;
+import com.quickblox.internal.module.custom.Consts;
 import com.quickblox.module.custom.QBCustomObjects;
 import com.quickblox.module.custom.model.QBCustomObject;
-import com.quickblox.module.custom.result.QBCustomObjectDeletedResult;
-import com.quickblox.module.custom.result.QBCustomObjectLimitedResult;
-import com.quickblox.module.custom.result.QBCustomObjectResult;
-import org.apache.http.HttpStatus;
-import org.junit.AfterClass;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.LinkedList;
+import java.util.List;
 
 /**
  * Created by vfite on 10.12.13.
@@ -39,20 +34,19 @@ public class TestDeleteObject extends CustomObjectsTestCase {
             qbCustomObjectList.add(getFakeObject());
         }
         coIds.clear();
-        QBCustomObjects.createObjects(qbCustomObjectList, new QBCallbackImpl() {
-
-
-        @Override
-        public void onComplete(Result result) {
-            checkHttpStatus(HttpStatus.SC_CREATED, result);
-            checkIfSuccess(result);
-            ArrayList<QBCustomObject> responseObjects = ((QBCustomObjectLimitedResult) result).getCustomObjects();
-            for (QBCustomObject qbCustomObject : responseObjects) {
-                coIds.add(qbCustomObject.getCustomObjectId());
+        QBCustomObjects.createObjects(qbCustomObjectList, new QBEntityCallbackImpl<ArrayList<QBCustomObject>>(){
+            @Override
+            public void onSuccess(ArrayList<QBCustomObject> customObjects, Bundle args) {
+                for (QBCustomObject qbCustomObject : customObjects) {
+                    coIds.add(qbCustomObject.getCustomObjectId());
+                }
             }
-        }
 
-    });
+            @Override
+            public void onError(List<String> errors) {
+                fail(errors.toString());
+            }
+        });
     }
 
 
@@ -61,44 +55,50 @@ public class TestDeleteObject extends CustomObjectsTestCase {
         final int COUNT_OBJ =3;
 
         createObjects(COUNT_OBJ);
-        QBCustomObjects.deleteObjects(CLASS_NAME, coIds, new QBCallbackImpl() {
+        QBCustomObjects.deleteObjects(CLASS_NAME, coIds, new QBEntityCallbackImpl<ArrayList<String>>() {
 
             @Override
-            public void onComplete(Result result) {
-                checkHttpStatus(HttpStatus.SC_OK, result);
-                checkIfSuccess(result);
-                QBCustomObjectDeletedResult qbCustomObjectDeletedResult = (QBCustomObjectDeletedResult) result;
-                assertNotNull(qbCustomObjectDeletedResult);
-                assertNotNull(qbCustomObjectDeletedResult.getDeleted());
-                assertTrue(qbCustomObjectDeletedResult.getDeleted().size() ==  COUNT_OBJ);
-                assertTrue(qbCustomObjectDeletedResult.getWrongPermissions().isEmpty());
-                assertTrue(qbCustomObjectDeletedResult.getNotFound().isEmpty());
+            public void onSuccess(ArrayList<String> deletedObjects, Bundle args) {
+                assertNotNull(deletedObjects);
+                assertTrue(deletedObjects.size() == COUNT_OBJ);
+                assertTrue(args.getStringArrayList(Consts.WRONG_PERMISSIONS_IDS).isEmpty());
+                assertTrue(args.getStringArrayList(Consts.NOT_FOUND_IDS).isEmpty());
             }
 
+            @Override
+            public void onError(List<String> errors) {
+                fail(errors.toString());
+            }
         });
 
     }
 
     public void testDeleteObject() {
 
-        QBCustomObjects.createObject(note, new QBCallbackImpl() {
+        QBCustomObjects.createObject(note, new QBEntityCallbackImpl<QBCustomObject>() {
+
             @Override
-            public void onComplete(Result result) {
-                checkHttpStatus(HttpStatus.SC_CREATED, result);
-                checkIfSuccess(result);
+            public void onSuccess(QBCustomObject qbCustomObject, Bundle args) {
+                assertNotNull(qbCustomObject);
+            }
+
+            @Override
+            public void onError(List<String> errors) {
+                fail(errors.toString());
             }
         });
 
-        QBCustomObjects.deleteObject(note, new QBCallbackImpl() {
+        QBCustomObjects.deleteObject(note,  new QBEntityCallbackImpl<Void>() {
 
             @Override
-            public void onComplete(Result result) {
-                checkHttpStatus(HttpStatus.SC_OK, result);
-                checkIfSuccess(result);
-                checkEmptyResponseBody(result);
-
+            public void onSuccess() {
+                super.onSuccess();
             }
 
+            @Override
+            public void onError(List<String> errors) {
+                fail(errors.toString());
+            }
         });
 
     }
@@ -108,15 +108,16 @@ public class TestDeleteObject extends CustomObjectsTestCase {
 
         createObjects(1);
         String id = coIds.get(0);
-        QBCustomObjects.deleteObject(CLASS_NAME, id, new QBCallbackImpl() {
-
+        QBCustomObjects.deleteObject(CLASS_NAME, id, new QBEntityCallbackImpl() {
             @Override
-            public void onComplete(Result result) {
-                checkHttpStatus(HttpStatus.SC_OK, result);
-                checkIfSuccess(result);
-                checkEmptyResponseBody(result);
+            public void onSuccess() {
+                super.onSuccess();
             }
 
+            @Override
+            public void onError(List errors) {
+                fail(errors.toString());
+            }
         });
     }
 

@@ -1,6 +1,6 @@
 package com.quickblox.sample.test.customobject;
 
-import android.util.Log;
+import com.quickblox.core.QBCallback;
 import com.quickblox.core.QBCallbackImpl;
 import com.quickblox.core.result.Result;
 import com.quickblox.internal.core.helper.StringifyArrayList;
@@ -10,7 +10,6 @@ import com.quickblox.module.custom.QBCustomObjects;
 import com.quickblox.module.custom.model.QBCustomObject;
 import com.quickblox.module.custom.result.QBCustomObjectCountResult;
 import com.quickblox.module.custom.result.QBCustomObjectLimitedResult;
-import com.quickblox.module.users.QBUsers;
 import org.apache.http.HttpStatus;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
@@ -230,7 +229,7 @@ public class TestGetObjects extends CustomObjectsTestCase {
     @AfterClass
     public static void testCleanUp() {
         if (coIds != null && !coIds.isEmpty()) {
-            QBCustomObjects.deleteObjects(BOOK_CLASS_NAME, coIds, null);
+            QBCustomObjects.deleteObjects(BOOK_CLASS_NAME, coIds, (QBCallback)null);
         }
     }
 

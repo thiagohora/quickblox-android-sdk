@@ -104,8 +104,8 @@ public class BaseTestCase extends InstrumentationTestCase {
 
     }
 
-    protected void assertError(String[] errors,Result result ){
-        String error = result.getErrors().get(0);
+    protected void assertError(String[] errors, String resultError ){
+        String error = resultError;
         if(error == null){
             fail("error empty");
         }

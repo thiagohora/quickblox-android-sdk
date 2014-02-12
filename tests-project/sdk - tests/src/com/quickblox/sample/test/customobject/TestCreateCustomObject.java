@@ -1,17 +1,15 @@
 package com.quickblox.sample.test.customobject;
 
+import android.os.Bundle;
 import android.util.Log;
-import com.quickblox.core.QBCallbackImpl;
-import com.quickblox.core.result.Result;
+import com.quickblox.core.QBEntityCallback;
+import com.quickblox.core.QBEntityCallbackImpl;
 import com.quickblox.internal.core.helper.Lo;
 import com.quickblox.internal.core.helper.StringifyArrayList;
 import com.quickblox.module.custom.QBCustomObjects;
 import com.quickblox.module.custom.model.QBCustomObject;
 import com.quickblox.module.custom.model.QBPermissions;
 import com.quickblox.module.custom.model.QBPermissionsLevel;
-import com.quickblox.module.custom.result.QBCustomObjectLimitedResult;
-import com.quickblox.module.custom.result.QBCustomObjectResult;
-import org.apache.http.HttpStatus;
 import org.junit.AfterClass;
 
 import java.util.ArrayList;
@@ -50,15 +48,11 @@ public class TestCreateCustomObject extends CustomObjectsTestCase {
 
     public void testCreateNewObjects() {
 
-        QBCustomObjects.createObjects(qbCustomObjectList, new QBCallbackImpl() {
-
+        QBCustomObjects.createObjects(qbCustomObjectList, new QBEntityCallbackImpl<ArrayList<QBCustomObject>>() {
 
             @Override
-            public void onComplete(Result result) {
-                checkHttpStatus(HttpStatus.SC_CREATED, result);
-                checkIfSuccess(result);
-                ArrayList<QBCustomObject> responseObjects = ((QBCustomObjectLimitedResult) result).getCustomObjects();
-                for (QBCustomObject qbCustomObject:responseObjects) {
+            public void onSuccess(ArrayList<QBCustomObject> customObjects, Bundle args) {
+                for (QBCustomObject qbCustomObject:customObjects) {
                     Log.d(TAG, "posted item=" + qbCustomObjectList.get(0).getFields().toString());
                     coIds.add(qbCustomObject.getCustomObjectId());
                     QBCustomObject objectFromCollection = getObjectFromCollection(qbCustomObjectList, FIELD_COMMENTS, (String) qbCustomObject.getFields().get(FIELD_COMMENTS));
@@ -66,6 +60,10 @@ public class TestCreateCustomObject extends CustomObjectsTestCase {
                 }
             }
 
+            @Override
+            public void onError(List<String> errors) {
+                fail(errors.toString());
+            }
         });
 
     }
@@ -73,13 +71,11 @@ public class TestCreateCustomObject extends CustomObjectsTestCase {
     public void testCreateObject() {
 
         note.setParentId(PARENT_ID);
-        QBCustomObjects.createObject(note, new QBCallbackImpl() {
+        QBCustomObjects.createObject(note, new QBEntityCallbackImpl<QBCustomObject>() {
 
             @Override
-            public void onComplete(Result result) {
-                checkHttpStatus(HttpStatus.SC_CREATED, result);
-                checkIfSuccess(result);
-                QBCustomObject newHero = ((QBCustomObjectResult) result).getCustomObject();
+            public void onSuccess(QBCustomObject customObject, Bundle args) {
+                QBCustomObject newHero = customObject;
                 coIds.add(newHero.getCustomObjectId());
                 assertEquals(note.getClassName(), newHero.getClassName());
                 assertEquals(note.getFields().get(FIELD_COMMENTS), newHero.getFields().get(FIELD_COMMENTS));
@@ -88,6 +84,10 @@ public class TestCreateCustomObject extends CustomObjectsTestCase {
                 assertNotNull(newHero.getParentId());
             }
 
+            @Override
+            public void onError(List<String> errors) {
+               fail(errors.toString());
+            }
         });
 
     }
@@ -100,14 +100,10 @@ public class TestCreateCustomObject extends CustomObjectsTestCase {
         qbPermissions.setDeletePermission(QBPermissionsLevel.OPEN_FOR_USER_IDS, userIds);
         qbPermissions.setUpdatePermission(QBPermissionsLevel.OWNER);
         note.setPermission(qbPermissions);
-        QBCustomObjects.createObject(note, new QBCallbackImpl() {
+        QBCustomObjects.createObject(note, new QBEntityCallbackImpl<QBCustomObject>(){
 
             @Override
-
-            public void onComplete(Result result) {
-                checkHttpStatus(HttpStatus.SC_CREATED, result);
-                checkIfSuccess(result);
-                QBCustomObject newHero = ((QBCustomObjectResult) result).getCustomObject();
+            public void onSuccess(QBCustomObject newHero, Bundle args) {
                 lo.g(newHero.toString());
                 coIds.add(newHero.getCustomObjectId());
                 QBPermissions qbPermissions =    newHero.getPermission();
@@ -120,6 +116,10 @@ public class TestCreateCustomObject extends CustomObjectsTestCase {
                 assertEquals(qbPermissions.getUpdateLevel().getAccess(), QBPermissionsLevel.OWNER);
             }
 
+            @Override
+            public void onError(List<String> errors) {
+                fail(errors.toString());
+            }
         });
 
     }
@@ -127,7 +127,7 @@ public class TestCreateCustomObject extends CustomObjectsTestCase {
     @AfterClass
     public static void testCleanUp(){
         if (coIds != null && !coIds.isEmpty()) {
-            QBCustomObjects.deleteObjects(CLASS_NAME, coIds, null);
+            QBCustomObjects.deleteObjects(CLASS_NAME, coIds, (QBEntityCallback)null);
         }
     }
 
