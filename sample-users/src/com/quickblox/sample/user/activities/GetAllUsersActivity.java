@@ -88,6 +88,7 @@ public class GetAllUsersActivity extends Activity implements QBEntityCallback<Vo
                 break;
             case R.id.logout:
                 progressDialog.show();
+                qbQueryType = QBQueries.QB_QUERY_LOG_OUT_QB_USER;
                 // call query to sign out by current user
                 QBManager.signOut(this);
                 break;
@@ -117,6 +118,17 @@ public class GetAllUsersActivity extends Activity implements QBEntityCallback<Vo
     //be careful Void is just generic stub and value is null!
     @Override
     public void onSuccess(Void aVoid, Bundle bundle) {
+    }
+
+    private void closeDlg(){
+        if(progressDialog!= null && progressDialog.isShowing()){
+            progressDialog.hide();
+        }
+
+    }
+
+    @Override
+    public void onSuccess() {
         closeDlg();
         switch (qbQueryType) {
             case QB_QUERY_LOG_OUT_QB_USER:
@@ -129,16 +141,6 @@ public class GetAllUsersActivity extends Activity implements QBEntityCallback<Vo
                 singUp.setVisibility(View.VISIBLE);
                 break;
         }
-    }
-
-    private void closeDlg(){
-        if(progressDialog!= null && progressDialog.isShowing()){
-            progressDialog.hide();
-        }
-    }
-
-    @Override
-    public void onSuccess() {
     }
 
     @Override
