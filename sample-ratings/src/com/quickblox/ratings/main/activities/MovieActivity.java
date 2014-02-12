@@ -11,13 +11,13 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
-import com.quickblox.core.QBCallback;
-import com.quickblox.core.result.Result;
+import com.quickblox.core.QBEntityCallback;
 import com.quickblox.module.ratings.QBRatings;
 import com.quickblox.module.ratings.model.QBScore;
 import com.quickblox.ratings.main.R;
 import com.quickblox.ratings.main.core.DataHolder;
-import com.quickblox.ratings.main.definitions.QBQueries;
+
+import java.util.List;
 
 /**
  * Created with IntelliJ IDEA.
@@ -25,7 +25,7 @@ import com.quickblox.ratings.main.definitions.QBQueries;
  * Date: 27.11.12
  * Time: 16:31
  */
-public class MovieActivity extends Activity implements QBCallback {
+public class MovieActivity extends Activity implements QBEntityCallback<QBScore> {
 
     private final String POSITION = "position";
     ImageView movieCover;
@@ -129,27 +129,24 @@ public class MovieActivity extends Activity implements QBCallback {
         qbScore.setGameModeId(DataHolder.getDataHolder().getMovieGameModeId(position));
         qbScore.setValue((int)movieRating);
         qbScore.setUserId(DataHolder.getDataHolder().getQbUserId());
-        QBRatings.createScore(qbScore, this, QBQueries.CREATE_SCORE);
+        QBRatings.createScore(qbScore, this);
     }
 
-
+    @Override
+    public void onSuccess(QBScore qbScore, Bundle bundle) {
+        progressDialog.hide();
+        Toast.makeText(this, "Score successfully send!", Toast.LENGTH_SHORT).show();
+        DataHolder.getDataHolder().setChosenMoviePosition(position);
+    }
 
     @Override
-    public void onComplete(Result result) {}
+    public void onSuccess() {
+
+    }
 
     @Override
-    public void onComplete(Result result, Object context) {
-        QBQueries qbQueries = (QBQueries) context;
-        if (result.isSuccess()) {
-            switch (qbQueries) {
-                case CREATE_SCORE:
-                    Toast.makeText(this, "Score successfully send!", Toast.LENGTH_SHORT).show();
-                    DataHolder.getDataHolder().setChosenMoviePosition(position);
-                    break;
-            }
-        } else {
-            Toast.makeText(this, result.getErrors().get(0), Toast.LENGTH_SHORT).show();
-        }
+    public void onError(List<String> errors) {
+        Toast.makeText(this, errors.toString(), Toast.LENGTH_SHORT).show();
         progressDialog.hide();
     }
 }

@@ -8,17 +8,17 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.Toast;
-import com.quickblox.core.QBCallback;
-import com.quickblox.core.result.Result;
+import com.quickblox.core.QBEntityCallback;
 import com.quickblox.module.ratings.QBRatings;
+import com.quickblox.module.ratings.model.QBAverage;
 import com.quickblox.module.ratings.model.QBGameMode;
-import com.quickblox.module.ratings.result.QBAverageResult;
 import com.quickblox.ratings.main.R;
 import com.quickblox.ratings.main.adapter.MoviesListAdapter;
 import com.quickblox.ratings.main.core.DataHolder;
-import com.quickblox.ratings.main.definitions.QBQueries;
 
-public class MoviesListActivity extends Activity implements AdapterView.OnItemClickListener, QBCallback {
+import java.util.List;
+
+public class MoviesListActivity extends Activity implements AdapterView.OnItemClickListener, QBEntityCallback<QBAverage> {
 
     private final int APP_ID = 99;
     ListView moviesLV;
@@ -50,47 +50,42 @@ public class MoviesListActivity extends Activity implements AdapterView.OnItemCl
         super.onResume();
         int index = DataHolder.getDataHolder().getChosenMoviePosition();
         if (index != NONE_SCORE_CHANGE) {
-            getAvarageRatingForMovie(index, QBQueries.GET_AVARAGE_FOR_GAME_MODE);
+            getAvarageRatingForMovie(index);
         }
     }
 
     // Get avarage by all score for game mode
-    private void getAvarageRatingForMovie(int index, QBQueries queryName) {
+    private void getAvarageRatingForMovie(int index) {
         QBGameMode qbGameMode = new QBGameMode();
         qbGameMode.setId(DataHolder.getDataHolder().getMovieGameModeId(index));
-        QBRatings.getAverageByGameMode(qbGameMode, this, queryName);
+        QBRatings.getAverageByGameMode(qbGameMode, this);
     }
 
     @Override
     public void onItemClick(AdapterView<?> adapterView, View view, int position, long id) {
-
         Intent intent = new Intent(this, MovieActivity.class);
         intent.putExtra(POSITION, position);
         startActivity(intent);
     }
 
     @Override
-    public void onComplete(Result result) {
+    public void onSuccess(QBAverage average, Bundle bundle) {
+        if (average.getValue() != null) {
+            DataHolder.getDataHolder().setMovieRating(DataHolder.getDataHolder().getChosenMoviePosition(), average.getValue());
+            DataHolder.getDataHolder().setChosenMoviePosition(NONE_SCORE_CHANGE);
+            progressDialog.hide();
+            moviesListAdapter.notifyDataSetChanged();
+        }
     }
 
     @Override
-    public void onComplete(Result result, Object context) {
-        QBQueries qbQueries = (QBQueries) context;
-        if (result.isSuccess()) {
-            switch (qbQueries) {
-                case GET_AVARAGE_FOR_GAME_MODE:
-                    QBAverageResult qbAverageResult1 = (QBAverageResult) result;
-                    if (qbAverageResult1.getAverage().getValue() != null) {
-                        DataHolder.getDataHolder().setMovieRating(DataHolder.getDataHolder().getChosenMoviePosition(), qbAverageResult1.getAverage().getValue());
-                        DataHolder.getDataHolder().setChosenMoviePosition(NONE_SCORE_CHANGE);
-                        progressDialog.hide();
-                        moviesListAdapter.notifyDataSetChanged();
-                    }
-                    break;
-            }
-        } else {
-            Toast.makeText(this, result.getErrors().get(0), Toast.LENGTH_SHORT).show();
-            progressDialog.hide();
-        }
+    public void onSuccess() {
+
+    }
+
+    @Override
+    public void onError(List<String> errors) {
+        Toast.makeText(this, errors.toString(), Toast.LENGTH_SHORT).show();
+        progressDialog.hide();
     }
 }
