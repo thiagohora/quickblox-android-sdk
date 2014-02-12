@@ -6,15 +6,18 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.ProgressBar;
 import android.widget.Toast;
-import com.quickblox.core.QBCallback;
+import com.quickblox.core.QBEntityCallback;
+import com.quickblox.core.QBEntityCallbackImpl;
 import com.quickblox.core.QBSettings;
-import com.quickblox.core.result.Result;
 import com.quickblox.module.auth.QBAuth;
+import com.quickblox.module.auth.model.QBSession;
 import com.quickblox.module.users.QBUsers;
-import com.quickblox.module.users.result.QBUserPagedResult;
+import com.quickblox.module.users.model.QBUser;
 import com.quickblox.sample.user.R;
-import com.quickblox.sample.user.definitions.QBQueries;
 import com.quickblox.sample.user.helper.DataHolder;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import static com.quickblox.sample.user.definitions.Consts.*;
 
@@ -25,7 +28,7 @@ import static com.quickblox.sample.user.definitions.Consts.*;
  * Time: 12:38
  * To change this template use File | Settings | File Templates.
  */
-public class SplashActivity extends Activity implements QBCallback {
+public class SplashActivity extends Activity implements QBEntityCallback<QBSession> {
 
 
     private ProgressBar progressBar;
@@ -42,48 +45,25 @@ public class SplashActivity extends Activity implements QBCallback {
         // Getting app credentials -- http://quickblox.com/developers/Getting_application_credentials
         QBSettings.getInstance().fastConfigInit(APP_ID, AUTH_KEY, AUTH_SECRET);
         // Authorize application
-        QBAuth.createSession(this, QBQueries.QB_QUERY_AUTHORIZE_APP);
+        QBAuth.createSession(this);
     }
 
 
     private void getAllUser() {
         // Get all users for the current app
-        QBUsers.getUsers(new QBCallback() {
+        QBUsers.getUsers(null, new QBEntityCallbackImpl<ArrayList<QBUser>>() {
+
             @Override
-            public void onComplete(Result result) {
-                // return QBUserPagedResult for getUsers query
-                QBUserPagedResult qbUserPagedResult = (QBUserPagedResult) result;
-                DataHolder.getDataHolder().setQbUserList(qbUserPagedResult.getUsers());
+            public void onSuccess(ArrayList<QBUser> users, Bundle args) {
+                DataHolder.getDataHolder().setQbUserList(users);
                 startGetAllUsersActivity();
             }
 
             @Override
-            public void onComplete(Result result, Object o) {
+            public void onError(List<String> errors) {
+                Toast.makeText(getBaseContext(), errors.toString(), Toast.LENGTH_SHORT).show();
             }
         });
-    }
-
-
-    @Override
-    public void onComplete(Result result) {
-
-    }
-
-    @Override
-    public void onComplete(Result result, Object context) {
-        QBQueries qbQueryType = (QBQueries) context;
-        if (result.isSuccess()) {
-            switch (qbQueryType) {
-                case QB_QUERY_AUTHORIZE_APP:
-                    getAllUser();
-                    break;
-            }
-        } else {
-            // print errors that came from server
-            Toast.makeText(getBaseContext(), result.getErrors().get(0), Toast.LENGTH_SHORT).show();
-            progressBar.setVisibility(View.INVISIBLE);
-        }
-
     }
 
     private void startGetAllUsersActivity() {
@@ -92,4 +72,19 @@ public class SplashActivity extends Activity implements QBCallback {
         finish();
     }
 
+    @Override
+    public void onSuccess(QBSession session, Bundle bundle) {
+        getAllUser();
+    }
+
+    @Override
+    public void onSuccess() {
+
+    }
+
+    @Override
+    public void onError(List<String> errors) {
+        Toast.makeText(getBaseContext(), errors.toString(), Toast.LENGTH_SHORT).show();
+        progressBar.setVisibility(View.INVISIBLE);
+    }
 }

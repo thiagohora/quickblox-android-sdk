@@ -1,10 +1,9 @@
 package com.quickblox.sample.user.managers;
 
-import com.quickblox.core.QBCallback;
+import com.quickblox.core.QBEntityCallback;
 import com.quickblox.internal.core.helper.StringifyArrayList;
 import com.quickblox.module.users.QBUsers;
 import com.quickblox.module.users.model.QBUser;
-import com.quickblox.sample.user.definitions.QBQueries;
 import com.quickblox.sample.user.helper.DataHolder;
 
 import static com.quickblox.sample.user.definitions.Consts.EMPTY_STRING;
@@ -17,12 +16,13 @@ import static com.quickblox.sample.user.definitions.Consts.EMPTY_STRING;
  */
 public class QBManager {
 
-    public static void singIn(String login, String password, QBCallback callback, QBQueries context) {
+    public static void singIn(String login, String password, QBEntityCallback<QBUser> callback) {
         QBUser qbUser = new QBUser(login, password);
-        QBUsers.signIn(qbUser, callback, context);
+        QBUsers.signIn(qbUser, callback);
     }
 
-    public static void updateUser(int userId, String login, String oldPassword, String password, String fullName, String email, String phone, String webSite, String tags, QBCallback callback, QBQueries context) {
+    public static void updateUser(int userId, String login, String oldPassword, String password, String fullName,
+                                  String email, String phone, String webSite, String tags, QBEntityCallback<QBUser> callback) {
         // create QBUser object
         QBUser qbUser = new QBUser();
         if (userId != -1) {
@@ -44,18 +44,18 @@ public class QBManager {
             tagList.add(tag);
         }
         qbUser.setTags(tagList);
-        QBUsers.updateUser(qbUser, callback, context);
+        QBUsers.updateUser(qbUser, callback);
     }
 
-    public static void signOut(QBCallback callback, QBQueries context) {
-        QBUsers.signOut(callback, context);
+    public static void signOut(QBEntityCallback<Void> callback) {
+        QBUsers.signOut(callback);
     }
 
-    public static void signUp(String login, String password, QBCallback callback, QBQueries context) {
+    public static void signUp(String login, String password, QBEntityCallback<QBUser> callback) {
         QBUser qbUser = new QBUser();
         qbUser.setLogin(login);
         qbUser.setPassword(password);
-        QBUsers.signUp(qbUser, callback, context);
+        QBUsers.signUp(qbUser, callback);
     }
 
 }

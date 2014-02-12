@@ -6,13 +6,13 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.Toast;
-import com.quickblox.core.QBCallback;
-import com.quickblox.core.result.Result;
-import com.quickblox.module.users.result.QBUserResult;
+import com.quickblox.core.QBEntityCallback;
+import com.quickblox.module.users.model.QBUser;
 import com.quickblox.sample.user.R;
-import com.quickblox.sample.user.definitions.QBQueries;
 import com.quickblox.sample.user.helper.DataHolder;
 import com.quickblox.sample.user.managers.QBManager;
+
+import java.util.List;
 
 import static com.quickblox.sample.user.definitions.Consts.EMPTY_STRING;
 
@@ -22,7 +22,7 @@ import static com.quickblox.sample.user.definitions.Consts.EMPTY_STRING;
  * Date: 29.11.12
  * Time: 17:09
  */
-public class UpdateUserActivity extends Activity implements QBCallback {
+public class UpdateUserActivity extends Activity implements QBEntityCallback<QBUser> {
 
     ProgressDialog progressDialog;
     EditText login;
@@ -72,37 +72,31 @@ public class UpdateUserActivity extends Activity implements QBCallback {
                 // call query to update user
                 QBManager.updateUser(DataHolder.getDataHolder().getSignInUserId(), login.getText().toString(),
                         DataHolder.getDataHolder().getSignInUserOldPassword(), password.getText().toString(), fullName.getText().toString(),
-                        email.getText().toString(), phone.getText().toString(), webSite.getText().toString(), tags.getText().toString(), this, QBQueries.QB_QUERY_UPDATE_QB_USER);
+                        email.getText().toString(), phone.getText().toString(), webSite.getText().toString(), tags.getText().toString(), this);
                 break;
         }
     }
 
     @Override
-    public void onComplete(Result result) {
+    public void onSuccess(QBUser qbUser, Bundle bundle) {
+        progressDialog.hide();
+        DataHolder.getDataHolder().setSignInQbUser(qbUser);
+        if (!EMPTY_STRING.equals(password)) {
+            DataHolder.getDataHolder().setSignInUserPassword(password.getText().toString());
+        }
+        Toast.makeText(getBaseContext(), getResources().getString(R.string.user_successfully_updated), Toast.LENGTH_SHORT).show();
+        finish();
+    }
+
+    @Override
+    public void onSuccess() {
 
     }
 
     @Override
-    public void onComplete(Result result, Object context) {
-        QBQueries qbQueryType = (QBQueries) context;
-        if (result.isSuccess()) {
-            switch (qbQueryType) {
-                case QB_QUERY_UPDATE_QB_USER:
-                    // return QBUserResult for updateUser query
-                    QBUserResult qbUserResult = (QBUserResult) result;
-                    DataHolder.getDataHolder().setSignInQbUser(qbUserResult.getUser());
-                    if (!password.equals(EMPTY_STRING)) {
-                        DataHolder.getDataHolder().setSignInUserPassword(password.getText().toString());
-                    }
-                    Toast.makeText(getBaseContext(), getResources().getString(R.string.user_successfully_updated), Toast.LENGTH_SHORT).show();
-                    progressDialog.hide();
-                    finish();
-                    break;
-            }
-        } else {
-            // print errors that came from server
-            Toast.makeText(getBaseContext(), result.getErrors().get(0), Toast.LENGTH_SHORT).show();
-        }
+    public void onError(List<String> errors) {
+        // print errors that came from server
         progressDialog.hide();
+        Toast.makeText(getBaseContext(), errors.toString(), Toast.LENGTH_SHORT).show();
     }
 }

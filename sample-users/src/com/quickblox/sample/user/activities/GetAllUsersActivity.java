@@ -9,8 +9,7 @@ import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.ListView;
 import android.widget.Toast;
-import com.quickblox.core.QBCallback;
-import com.quickblox.core.result.Result;
+import com.quickblox.core.QBEntityCallback;
 import com.quickblox.module.auth.QBAuth;
 import com.quickblox.sample.user.R;
 import com.quickblox.sample.user.adapter.UserListAdapter;
@@ -18,10 +17,13 @@ import com.quickblox.sample.user.definitions.QBQueries;
 import com.quickblox.sample.user.helper.DataHolder;
 import com.quickblox.sample.user.managers.QBManager;
 
+import java.util.List;
+
 import static com.quickblox.sample.user.definitions.Consts.POSITION;
 
-public class GetAllUsersActivity extends Activity implements QBCallback, AdapterView.OnItemClickListener {
+public class GetAllUsersActivity extends Activity implements QBEntityCallback<Void>, AdapterView.OnItemClickListener {
 
+    private static final String TAG = GetAllUsersActivity.class.getSimpleName();
     UserListAdapter userListAdapter;
     ListView userList;
     ProgressDialog progressDialog;
@@ -29,6 +31,7 @@ public class GetAllUsersActivity extends Activity implements QBCallback, Adapter
     Button signIn;
     Button selfEdit;
     Button singUp;
+    QBQueries qbQueryType = QBQueries.QB_QUERY_LOG_OUT_QB_USER;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -64,11 +67,13 @@ public class GetAllUsersActivity extends Activity implements QBCallback, Adapter
     }
 
     @Override
-    public void onDestroy() {
-        super.onDestroy();
+    public void onBackPressed() {
+        super.onBackPressed();
+        qbQueryType = QBQueries.QB_QUERY_DELETE_QB_USER;
         // destroy session after app close
         QBAuth.deleteSession(this);
     }
+
 
     public void onClick(View v) {
         Intent intent;
@@ -84,7 +89,7 @@ public class GetAllUsersActivity extends Activity implements QBCallback, Adapter
             case R.id.logout:
                 progressDialog.show();
                 // call query to sign out by current user
-                QBManager.signOut(this, QBQueries.QB_QUERY_LOG_OUT_QB_USER);
+                QBManager.signOut(this);
                 break;
             case R.id.self_edit:
                 intent = new Intent(this, UpdateUserActivity.class);
@@ -103,39 +108,42 @@ public class GetAllUsersActivity extends Activity implements QBCallback, Adapter
     }
 
     @Override
-    public void onComplete(Result result) {
-    }
-
-
-    @Override
-    public void onComplete(Result result, Object context) {
-        QBQueries qbQueryType = (QBQueries) context;
-        if (result.isSuccess()) {
-            switch (qbQueryType) {
-                case QB_QUERY_LOG_OUT_QB_USER:
-                    Toast.makeText(getBaseContext(), getResources().getString(R.string.user_log_out_msg), Toast.LENGTH_SHORT).show();
-                    // set SignInQbUser null after logOut
-                    DataHolder.getDataHolder().setSignInQbUser(null);
-                    signIn.setVisibility(View.VISIBLE);
-                    logOut.setVisibility(View.INVISIBLE);
-                    selfEdit.setVisibility(View.INVISIBLE);
-                    singUp.setVisibility(View.VISIBLE);
-                    progressDialog.hide();
-                    break;
-            }
-        } else {
-            // print errors that came from server
-            Toast.makeText(getBaseContext(), result.getErrors().get(0), Toast.LENGTH_SHORT).show();
-            progressDialog.hide();
-        }
-
-    }
-
-    @Override
     public void onItemClick(AdapterView<?> adapterView, View view, int position, long id) {
         Intent intent = new Intent(this, ShowUserActivity.class);
         intent.putExtra(POSITION, position);
         startActivity(intent);
     }
 
+    //be careful Void is just generic stub and value is null!
+    @Override
+    public void onSuccess(Void aVoid, Bundle bundle) {
+        closeDlg();
+        switch (qbQueryType) {
+            case QB_QUERY_LOG_OUT_QB_USER:
+                Toast.makeText(getBaseContext(), getResources().getString(R.string.user_log_out_msg), Toast.LENGTH_SHORT).show();
+                // set SignInQbUser null after logOut
+                DataHolder.getDataHolder().setSignInQbUser(null);
+                signIn.setVisibility(View.VISIBLE);
+                logOut.setVisibility(View.INVISIBLE);
+                selfEdit.setVisibility(View.INVISIBLE);
+                singUp.setVisibility(View.VISIBLE);
+                break;
+        }
+    }
+
+    private void closeDlg(){
+        if(progressDialog!= null && progressDialog.isShowing()){
+            progressDialog.hide();
+        }
+    }
+
+    @Override
+    public void onSuccess() {
+    }
+
+    @Override
+    public void onError(List<String> errors) {
+        closeDlg();
+        Toast.makeText(getBaseContext(), errors.toString(), Toast.LENGTH_SHORT).show();
+    }
 }
