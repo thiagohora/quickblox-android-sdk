@@ -21,6 +21,7 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Random;
 
 /**
  * Created by vfite on 22.01.14.
@@ -44,6 +45,7 @@ public class SnippetsCONew extends Snippets{
         super(context);
 
         snippets.add(createCustomObjectNewCallback);
+        snippets.add(createCustomObjects);
         snippets.add(deleteCustomObjectsSynchronous);
         snippets.add(deleteCustomObjectNew);
         snippets.add(deleteCustomObjectsNew);
@@ -146,6 +148,42 @@ public class SnippetsCONew extends Snippets{
         }
     };
 
+    Snippet createCustomObjects = new Snippet("create objects") {
+
+        public static final int NUM_RECORDS = 4;
+
+        private QBCustomObject createObject() {
+            Random random = new Random();
+            QBCustomObject customObject = new QBCustomObject(CLASS_NAME);
+            customObject.put(RATING_FIELD, random.nextInt(100));
+            customObject.put(DESCRIPTION_FIELD, "Hello world");
+            return customObject;
+        }
+
+
+        @Override
+        public void execute() {
+            List<QBCustomObject> qbCustomObjectList = new ArrayList<QBCustomObject>(NUM_RECORDS);
+            for (int i = 0; i < NUM_RECORDS; i++) {
+                QBCustomObject qbCustomObject = createObject();
+                qbCustomObjectList.add(qbCustomObject);
+            }
+
+            QBCustomObjects.createObjects(qbCustomObjectList, new QBEntityCallbackImpl<ArrayList<QBCustomObject>>() {
+                @Override
+                public void onSuccess(ArrayList<QBCustomObject> qbCustomObjects, Bundle args) {
+                    super.onSuccess(qbCustomObjects, args);
+                    Log.i(TAG, ">>> custom object list: " + qbCustomObjects);
+                }
+
+                @Override
+                public void onError(List<String> errors) {
+                    handleErrors(errors);
+                }
+            });
+        }
+    };
+
     Snippet getGetCustomObjectsByIdsNewCallback = new Snippet("get custom objects by ids ne callback") {
         @Override
         public void execute() {
@@ -226,7 +264,6 @@ public class SnippetsCONew extends Snippets{
             );
         }
     };
-
 
     Snippet getCustomObjectPermissionByIdNew = new Snippet("get object permissions new callback") {
         @Override
