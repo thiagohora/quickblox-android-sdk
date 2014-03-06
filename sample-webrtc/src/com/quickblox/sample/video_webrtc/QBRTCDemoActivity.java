@@ -10,7 +10,9 @@ import android.view.View;
 import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.Toast;
+import com.quickblox.module.chat.QBChatService;
 import com.quickblox.module.chat.listeners.SessionListener;
+import com.quickblox.module.chat.smack.SmackAndroid;
 import com.quickblox.module.users.model.QBUser;
 import com.quickblox.module.videochat_webrtc.ISignalingChannel;
 import com.quickblox.module.videochat_webrtc.QBVideoChat;
@@ -35,14 +37,9 @@ public class QBRTCDemoActivity extends Activity implements SessionListener, View
 
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        Thread.setDefaultUncaughtExceptionHandler(
-                new UnhandledExceptionHandler(this));
         setContentView(R.layout.videolayout);
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
-
-        abortUnless(PeerConnectionFactory.initializeAndroidGlobals(this),
-                "Failed to initializeAndroidGlobals");
         AudioManager audioManager =
                 ((AudioManager) getSystemService(AUDIO_SERVICE));
         // TODO(fischman): figure out how to do this Right(tm) and remove the
@@ -55,13 +52,13 @@ public class QBRTCDemoActivity extends Activity implements SessionListener, View
 
         initViews();
         initConstraints();
-        initSignaling();
+        QBChatService.getInstance().init(this);
+        QBChatService.getInstance().loginWithUser(DataHolder.getQbUser(), this);
     }
 
     private void initSignaling(){
-        qbVideoChatSignlaing = new SignalingChannel(this, this);
+        qbVideoChatSignlaing = new SignalingChannel(QBChatService.getInstance().getPrivateChatInstance());
         qbVideoChatSignlaing.addMessageObserver(this);
-        qbVideoChatSignlaing.login(DataHolder.getQbUser());
     }
 
     private void initConstraints(){
@@ -113,13 +110,17 @@ public class QBRTCDemoActivity extends Activity implements SessionListener, View
     @Override
     public void onPause() {
         super.onPause();
-        vsv.onPause();
+        if (qbVideoChat != null){
+            qbVideoChat.onActivityPause();
+        }
     }
 
     @Override
     public void onResume() {
         super.onResume();
-        vsv.onResume();
+        if (qbVideoChat != null){
+            qbVideoChat.onActivityResume();
+        }
     }
 
 
@@ -146,9 +147,6 @@ public class QBRTCDemoActivity extends Activity implements SessionListener, View
             if(qbVideoChat != null){
                 qbVideoChat.dispose();
             }
-            if(qbVideoChatSignlaing != null){
-                qbVideoChatSignlaing.disconnect();
-            }
         }
     }
 
@@ -160,6 +158,7 @@ public class QBRTCDemoActivity extends Activity implements SessionListener, View
                 enableView(R.id.progressLayout, false);
                 enableCallView(true);
                 Toast.makeText(QBRTCDemoActivity.this, "onLoginsucces", Toast.LENGTH_SHORT).show();
+                initSignaling();
                 qbVideoChat = new QBVideoChat(QBRTCDemoActivity.this, sdpMediaConstraints, qbVideoChatSignlaing,  vsv );
             }
         });
