@@ -15,11 +15,10 @@ import com.quickblox.module.chat.QBChatService;
 import com.quickblox.module.chat.listeners.ChatMessageListener;
 import com.quickblox.module.chat.listeners.RoomListener;
 import com.quickblox.module.chat.listeners.RoomReceivingListener;
-import com.quickblox.module.chat.listeners.SessionListener;
-import com.quickblox.module.chat.model.QBChatRoster;
-import com.quickblox.module.chat.smack.SmackAndroid;
+import com.quickblox.module.chat.QBRoster;
+import com.quickblox.module.chat.QBRosterEntry;
 import com.quickblox.module.chat.utils.QBChatUtils;
-import com.quickblox.module.chat.xmpp.QBPrivateChat;
+import com.quickblox.module.chat.QBPrivateChat;
 import com.quickblox.module.users.model.QBUser;
 import com.quickblox.module.videochat.model.objects.MessageExtension;
 import com.quickblox.snippets.AsyncSnippet;
@@ -46,11 +45,12 @@ public class SnippetsChat extends Snippets {
     private Handler handler = new Handler(Looper.getMainLooper());
 
     // test Chat user credentials
-    public static final int USER_ID = 999;
-    public static final int SUBSCRIBE_USER_ID = 13163;
-    public static final String TEST_PASSWORD = "AndroidGirl";
-    public static final String TEST_PASSWORD_2 = "Gerrit";
-    private final QBUser qbUser;
+    public static final int USER_ID = 895;
+    public static final int SUBSCRIBE_USER_ID = 958;
+    public static final String TEST_PASSWORD = "androiduser";
+    public static final String TEST_PASSWORD_2 = "ced";
+    private QBUser qbUser1;
+    private QBUser qbUser2;
 
     // 1-1 Chat properties
     private QBPrivateChat qbPrivateChat;
@@ -61,33 +61,49 @@ public class SnippetsChat extends Snippets {
     public static final String ROOM_NAME = "temp_room_for_snippet";
 
     // Common properties
+    private ConnectionListener sessionListener;
     private ChatMessageListener chatMessageListener;
     private PacketListener packetListener;
-    private QBChatRoster qbChatRoster;
+    private QBRoster qbRoster;
+    private QBEntityCallbackImpl entityCallback;
 
     public SnippetsChat(final Context context) {
         super(context);
         QBChatService.init(context);
 
         // init test user
-        qbUser = new QBUser();
-        qbUser.setId(USER_ID);
-        qbUser.setPassword(TEST_PASSWORD);
+        qbUser1 = new QBUser();
+        qbUser1.setId(USER_ID);
+        qbUser1.setPassword(TEST_PASSWORD);
+
+        // init test user 2
+        qbUser2 = new QBUser();
+        qbUser2.setId(SUBSCRIBE_USER_ID);
+        qbUser2.setPassword(TEST_PASSWORD_2);
+
+        initConnectionListener();
+        initLoginCallback();
         initRoomListener();
         initChatMessageListener();
         initNotMsgListener();
-        snippets.add(loginInChat);
+        snippets.add(loginInChat1);
+        snippets.add(loginInChat2);
         snippets.add(loginInChatSync);
         snippets.add(isLoggedIn);
         snippets.add(logoutFromChat);
         snippets.add(createChat);
         //
         snippets.add(sendPresence);
-        snippets.add(addSubscription);
         snippets.add(sendCustomPresence);
         snippets.add(sendPresenceWithStatus);
         snippets.add(startAutoSendPresence);
         snippets.add(stopAutoSendPresence);
+        //
+        snippets.add(addSubscription);
+        snippets.add(removeSubscription);
+        snippets.add(confirmSubscription);
+        snippets.add(getFriendList);
+        snippets.add(reloadRoster);
         //
         snippets.add(sendMessageWithText);
         snippets.add(sendMessageWithMessage);
@@ -106,56 +122,38 @@ public class SnippetsChat extends Snippets {
         initChatMessageListener();
     }
 
-
     //
     ///////////////////////////////////////////// Login/Logout /////////////////////////////////////////////
     //
 
 
-    Snippet loginInChat = new Snippet("login in Chat") {
+    Snippet loginInChat1 = new Snippet("login in Chat with User1") {
         @Override
         public void execute() {
             if(!QBChatService.isInitialized()){
                 QBChatService.init(context);
             }
-            QBChatService.getInstance().loginWithUser(qbUser, new QBEntityCallbackImpl(){
-                @Override
-                public void onSuccess() {
-                    Log.i(TAG, "success when login");
-
-                    // Add Chat message listener
-                    initChat();
-                    initRoster();
-
-                    handler.post(new Runnable() {
-                        @Override
-                        public void run() {
-                            Toast.makeText(context, "Success when login", Toast.LENGTH_SHORT).show();
-                        }
-                    });
-                }
-
-                @Override
-                public void onError(List errors) {
-                    Log.i(TAG, "error when login");
-
-                    handler.post(new Runnable() {
-                        @Override
-                        public void run() {
-                            Toast.makeText(context, "Error when login", Toast.LENGTH_SHORT).show();
-                        }
-                    });
-                }
-            });
+            QBChatService.getInstance().loginWithUser(qbUser1, entityCallback);
         }
 
+    };
+
+    Snippet loginInChat2 = new Snippet("login in Chat with User2") {
+        @Override
+        public void execute() {
+            if(!QBChatService.isInitialized()){
+                QBChatService.init(context);
+            }
+
+            QBChatService.getInstance().loginWithUser(qbUser2, entityCallback);
+        }
     };
 
     Snippet loginInChatSync = new AsyncSnippet("login in Chat synchronous", context) {
         @Override
         public void executeAsync() {
             try {
-                QBChatService.getInstance().loginWithUser(qbUser);
+                QBChatService.getInstance().loginWithUser(qbUser1);
             } catch (XMPPException e) {
                 setException(e);
             }
@@ -172,81 +170,91 @@ public class SnippetsChat extends Snippets {
         }
     };
 
-    ConnectionListener connectionListener = new ConnectionListener() {
-        @Override
-        public void connectionClosed() {
-            Log.i(TAG, "You have been disconnected");
+    private void initLoginCallback() {
+        entityCallback = new QBEntityCallbackImpl(){
+            @Override
+            public void onSuccess() {
+                Log.i(TAG, "success when login");
 
-            handler.post(new Runnable() {
-                @Override
-                public void run() {
-                    Toast.makeText(context, "You have been disconnected", Toast.LENGTH_SHORT).show();
-                }
-            });
-        }
+                initChat();
+                initRoster();
 
-        @Override
-        public void connectionClosedOnError(Exception e) {
-            Log.i(TAG, "You have been disconnected on Error");
+                handler.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        Toast.makeText(context, "Success when login", Toast.LENGTH_SHORT).show();
+                    }
+                });
+            }
 
-            handler.post(new Runnable() {
-                @Override
-                public void run() {
-                    Toast.makeText(context, "You have been disconnected on error", Toast.LENGTH_SHORT).show();
-                }
-            });
-        }
+            @Override
+            public void onError(List errors) {
+                Log.i(TAG, "error when login");
 
-        @Override
-        public void reconnectingIn(int seconds) {
-
-        }
-
-        @Override
-        public void reconnectionSuccessful() {
-            Log.i(TAG, "reconnectionSuccessful");
-        }
-
-        @Override
-        public void reconnectionFailed(Exception e) {
-            Log.i(TAG, "reconnectionFailed");
-        }
-    };
+                handler.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        Toast.makeText(context, "Error when login", Toast.LENGTH_SHORT).show();
+                    }
+                });
+            }
+        };
+    }
 
     private void initRoster() {
-        qbChatRoster = QBChatService.getInstance().registerRoster(new QBChatRoster.QBRosterListener() {
+        qbRoster = QBChatService.getInstance().registerRoster(new QBRoster.QBRosterListener() {
             @Override
-            public void entriesDeleted(Collection<String> users) {
-
-            }
-
-            @Override
-            public void entriesAdded(Collection<String> users) {
-                //List<Integer> usersId = qbChatRoster.getUsersId();
-                for (String s : users) {
-                    Log.i(TAG, "roster added=" + s);
+            public void entriesDeleted(Collection<Integer> userIds) {
+                for (Integer id : userIds) {
+                    Log.i(TAG, "roster deleted=" + id);
                 }
             }
 
             @Override
-            public void entriesUpdated(Collection<String> users) {
-                for (String s : users) {
-                    Log.i(TAG, "roster updated=" + s);
+            public void entriesAdded(Collection<Integer> userIds) {
+                for (Integer id : userIds) {
+                    Log.i(TAG, "roster added=" + id);
+                }
+            }
+
+            @Override
+            public void entriesUpdated(Collection<Integer> userIds) {
+                for (Integer id : userIds) {
+                    Log.i(TAG, "roster updated=" + id);
                 }
             }
 
             @Override
             public void presenceChanged(Presence presence) {
+                switch (presence.getType()) {
+                    case subscribe:
+                        int userId = QBChatUtils.parseQBUser(presence.getFrom());
+                        /*
+                        if (qbRoster.contains(userId)) {
+                            QBRosterEntry entry = qbRoster.getEntry(userId);
+                            if (entry.getType() == RosterPacket.ItemType.none) {
+                                qbRoster.confirmSubsсription(qbUser1.getId());
+                            }
+                        } else {
+                            try {
+                                qbRoster.createEntry(userId, null);
+                            } catch (XMPPException e) {
+                                e.printStackTrace();
+                            }
+                        }
+                        */
+                        break;
+                }
                 Log.i(TAG, "presence changed=" + presence.getFrom() + " " + presence.getType());
             }
         });
     }
 
     private void initChat() {
-        qbPrivateChat = QBChatService.getInstance().createChat();
+        qbPrivateChat = QBChatService.getInstance().getPrivateChatInstance();
         initChatMessageListener(qbPrivateChat);
         QBChatService.getInstance().addSystemMessageListener(packetListener);
-        QBChatService.getInstance().addSessionListener(connectionListener);
+        QBChatService.getInstance().addSessionListener(sessionListener);
     }
 
     Snippet createChat = new Snippet("create 1 to 1 chat") {
@@ -315,14 +323,56 @@ public class SnippetsChat extends Snippets {
         }
     };
 
+
+    //
+    ///////////////////////////////////////////// Roster /////////////////////////////////////////////
+    //
+
     Snippet addSubscription = new Snippet("add subscription") {
         @Override
         public void execute() {
             try {
-                qbChatRoster.createEntry(SUBSCRIBE_USER_ID, "friend", null);
+                qbRoster.createEntry(SUBSCRIBE_USER_ID, "friend", null);
             } catch (XMPPException e) {
                 e.printStackTrace();
             }
+        }
+    };
+
+    Snippet removeSubscription = new Snippet("remove subscription") {
+        @Override
+        public void execute() {
+            try {
+                QBRosterEntry entry = qbRoster.getEntry(SUBSCRIBE_USER_ID);
+                qbRoster.removeEntry(entry);
+            } catch (XMPPException e) {
+                e.printStackTrace();
+            }
+        }
+    };
+
+    Snippet confirmSubscription = new Snippet("confirm subscription") {
+        @Override
+        public void execute() {
+            qbRoster.confirmSubsсription(USER_ID);
+        }
+    };
+
+    Snippet getFriendList = new Snippet("get friend list") {
+        @Override
+        public void execute() {
+            Collection<QBRosterEntry> entries = qbRoster.getEntries();
+            for (QBRosterEntry entry : entries) {
+                Log.i(TAG, "friendId: " + entry.getUserId() + "  type: "
+                        + entry.getType() + "  status: " + entry.getStatus());
+            }
+        }
+    };
+
+    Snippet reloadRoster = new Snippet("reset roster") {
+        @Override
+        public void execute() {
+            qbRoster.reload();
         }
     };
 
@@ -541,7 +591,7 @@ public class SnippetsChat extends Snippets {
                     String room = QBChatUtils.parseRoomName(from, QBSettings.getInstance().getApplicationId());
                     messageText = String.format("Received message from room %s:'%s'", room, messageBody);
                 } else {
-                    String userId = QBChatUtils.parseQBUser(from);
+                    Integer userId = QBChatUtils.parseQBUser(from);
                     messageText = String.format("Received message from user %s:'%s'", userId, messageBody);
                 }
 
@@ -575,6 +625,49 @@ public class SnippetsChat extends Snippets {
                     Presence presence = (Presence) packet;
                     Log.i(TAG, "processPresence >>> " + presence.getType());
                 }
+            }
+        };
+    }
+
+    private void initConnectionListener() {
+        sessionListener = new ConnectionListener() {
+            @Override
+            public void connectionClosed() {
+                Log.i(TAG, "You have been disconnected");
+
+                handler.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        Toast.makeText(context, "You have been disconnected", Toast.LENGTH_SHORT).show();
+                    }
+                });
+            }
+
+            @Override
+            public void connectionClosedOnError(Exception e) {
+                Log.i(TAG, "You have been disconnected on Error");
+
+                handler.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        Toast.makeText(context, "You have been disconnected on error", Toast.LENGTH_SHORT).show();
+                    }
+                });
+            }
+
+            @Override
+            public void reconnectingIn(int seconds) {
+                QBChatService.getInstance().addSessionListener(sessionListener);
+            }
+
+            @Override
+            public void reconnectionSuccessful() {
+                Log.i(TAG, "reconnectionSuccessful");
+            }
+
+            @Override
+            public void reconnectionFailed(Exception e) {
+                Log.i(TAG, "reconnectionFailed");
             }
         };
     }
