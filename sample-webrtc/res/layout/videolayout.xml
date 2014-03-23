@@ -5,9 +5,9 @@
              android:layout_width="match_parent"
              android:layout_height="match_parent">
 
-    <com.quickblox.module.videochat_webrtc.VideoStreamsView android:id="@+id/videoView"
+    <com.quickblox.module.videochat_webrtc.VideoStreamsView android:id="@+id/videoView" android:src="@drawable/logo_qb"
                                                   android:layout_width="fill_parent"
-                                                  android:layout_height="fill_parent"/>
+                                                  android:layout_height="500dp"/>
 
     <LinearLayout android:layout_gravity="center"
             android:layout_width="wrap_content" android:layout_height="wrap_content" android:id="@+id/progressLayout">
@@ -20,7 +20,8 @@
                 android:text="Connecting. Please wait..."/>
     </LinearLayout>
 
-    <LinearLayout android:layout_width="wrap_content" android:layout_height="wrap_content">
+    <LinearLayout android:layout_width="wrap_content" android:layout_height="wrap_content"
+            android:layout_gravity="bottom">
 
         <Button android:layout_width="wrap_content" android:layout_height="wrap_content"
                 android:layout_gravity="center" android:visibility="invisible"
