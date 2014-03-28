@@ -17,6 +17,7 @@ import com.quickblox.module.chat.listeners.RoomListener;
 import com.quickblox.module.chat.listeners.RoomReceivingListener;
 import com.quickblox.module.chat.QBRoster;
 import com.quickblox.module.chat.QBRosterEntry;
+import com.quickblox.module.chat.model.QBMessage;
 import com.quickblox.module.chat.utils.QBChatUtils;
 import com.quickblox.module.chat.QBPrivateChat;
 import com.quickblox.module.users.model.QBUser;
@@ -28,7 +29,6 @@ import com.quickblox.snippets.Snippets;
 import org.jivesoftware.smack.ConnectionListener;
 import org.jivesoftware.smack.PacketListener;
 import org.jivesoftware.smack.XMPPException;
-import org.jivesoftware.smack.packet.Message;
 import org.jivesoftware.smack.packet.Packet;
 import org.jivesoftware.smack.packet.Presence;
 
@@ -45,9 +45,9 @@ public class SnippetsChat extends Snippets {
     private Handler handler = new Handler(Looper.getMainLooper());
 
     // test Chat user credentials
-    public static final int USER_ID = 895;
+    public static final int USER_ID = 45944;
     public static final int SUBSCRIBE_USER_ID = 958;
-    public static final String TEST_PASSWORD = "androiduser";
+    public static final String TEST_PASSWORD = "qweqweqwe";
     public static final String TEST_PASSWORD_2 = "ced";
     private QBUser qbUser1;
     private QBUser qbUser2;
@@ -104,6 +104,7 @@ public class SnippetsChat extends Snippets {
         snippets.add(confirmSubscription);
         snippets.add(getFriendList);
         snippets.add(reloadRoster);
+        snippets.add(cleanRoster);
         //
         snippets.add(sendMessageWithText);
         snippets.add(sendMessageWithMessage);
@@ -228,26 +229,15 @@ public class SnippetsChat extends Snippets {
             public void presenceChanged(Presence presence) {
                 switch (presence.getType()) {
                     case subscribe:
-                        int userId = QBChatUtils.parseQBUser(presence.getFrom());
-                        /*
-                        if (qbRoster.contains(userId)) {
-                            QBRosterEntry entry = qbRoster.getEntry(userId);
-                            if (entry.getType() == RosterPacket.ItemType.none) {
-                                qbRoster.confirmSubsсription(qbUser1.getId());
-                            }
-                        } else {
-                            try {
-                                qbRoster.createEntry(userId, null);
-                            } catch (XMPPException e) {
-                                e.printStackTrace();
-                            }
+                        if (!qbRoster.contains(QBChatUtils.parseQBUser(presence.getFrom()))) {
+                            qbRoster.reload();
                         }
-                        */
                         break;
                 }
                 Log.i(TAG, "presence changed=" + presence.getFrom() + " " + presence.getType());
             }
         });
+        qbRoster.setSubscriptionMode(QBRoster.SubscriptionMode.auto);
     }
 
     private void initChat() {
@@ -369,13 +359,25 @@ public class SnippetsChat extends Snippets {
         }
     };
 
-    Snippet reloadRoster = new Snippet("reset roster") {
+    Snippet reloadRoster = new Snippet("reload roster") {
         @Override
         public void execute() {
             qbRoster.reload();
         }
     };
 
+    Snippet cleanRoster = new Snippet("clean roster") {
+        @Override
+        public void execute() {
+            for (QBRosterEntry entry : qbRoster.getEntries()) {
+                try {
+                    qbRoster.removeEntry(entry);
+                } catch (XMPPException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+    };
 
     //
     ///////////////////////////////////////////// 1-1 Chat /////////////////////////////////////////////
@@ -394,7 +396,7 @@ public class SnippetsChat extends Snippets {
     Snippet sendMessageWithMessage = new Snippet("send message with Message") {
         @Override
         public void execute() {
-            Message message = new Message(QBChatUtils.getChatLoginFull(USER_ID), Message.Type.chat);
+            QBMessage message = new QBMessage(QBChatUtils.getChatLoginFull(USER_ID), QBMessage.Type.chat);
             message.setBody("Hey QuickBlox!");
             try {
                 qbPrivateChat.sendMessage(USER_ID, message);
@@ -414,7 +416,7 @@ public class SnippetsChat extends Snippets {
             addinfoParams.put(Consts.AGE, 22);
             addinfoParams.put(Consts.TYPE, "actor");
             final String BODY = "Hey QuickBlox!";
-            Message message = createMsgWithAdditionalInfo(USER_ID, BODY, addinfoParams);
+            QBMessage message = createMsgWithAdditionalInfo(USER_ID, BODY, addinfoParams);
             Log.i(TAG, "message: " + message.toXML());
             try {
                 qbPrivateChat.sendMessage(USER_ID, message);
@@ -424,8 +426,8 @@ public class SnippetsChat extends Snippets {
         }
     };
 
-    private Message createMsgWithAdditionalInfo(int userId, String body, Map<?, ?> addinfoParams) {
-        Message message = new Message(QBChatUtils.getChatLoginFull(userId), Message.Type.chat);
+    private QBMessage createMsgWithAdditionalInfo(int userId, String body, Map<?, ?> addinfoParams) {
+        QBMessage message = new QBMessage(QBChatUtils.getChatLoginFull(userId), QBMessage.Type.chat);
         String addInfo = ToStringHelper.toString(addinfoParams, "", Consts.ESCAPED_AMPERSAND);
         MessageExtension messageExtension = new MessageExtension(Consts.QB_INFO, "");
         try {
@@ -583,11 +585,11 @@ public class SnippetsChat extends Snippets {
         // You can define which msg will be accept in accept method
         chatMessageListener = new ChatMessageListener() {
             @Override
-            public void processMessage(Message message) {
+            public void processMessage(QBMessage message) {
                 String from = message.getFrom();
                 String messageBody = message.getBody();
                 String messageText;
-                if (message.getType() == Message.Type.groupchat) {
+                if (message.getType() == QBMessage.Type.groupchat) {
                     String room = QBChatUtils.parseRoomName(from, QBSettings.getInstance().getApplicationId());
                     messageText = String.format("Received message from room %s:'%s'", room, messageBody);
                 } else {
@@ -602,7 +604,7 @@ public class SnippetsChat extends Snippets {
             }
 
             @Override
-            public boolean accept(Message.Type type) {
+            public boolean accept(QBMessage.Type type) {
                 switch (type) {
                     case normal:
                     case chat:
@@ -620,7 +622,7 @@ public class SnippetsChat extends Snippets {
 
             @Override
             public void processPacket(Packet packet) {
-                Log.i(TAG, "processPacket >>> " + packet.getFrom());
+                Log.i("packet", "processPacket >>> " + packet.getFrom());
                 if (packet instanceof Presence) {
                     Presence presence = (Presence) packet;
                     Log.i(TAG, "processPresence >>> " + presence.getType());
