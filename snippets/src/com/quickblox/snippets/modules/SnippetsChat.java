@@ -45,10 +45,10 @@ public class SnippetsChat extends Snippets {
     private Handler handler = new Handler(Looper.getMainLooper());
 
     // test Chat user credentials
-    public static final int USER_ID = 45944;
-    public static final int SUBSCRIBE_USER_ID = 958;
-    public static final String TEST_PASSWORD = "qweqweqwe";
-    public static final String TEST_PASSWORD_2 = "ced";
+    public static final int USER_ID = 18551;
+    public static final int SUBSCRIBE_USER_ID = 18552;
+    public static final String TEST_PASSWORD = "videoChatUser1";
+    public static final String TEST_PASSWORD_2 = "videoChatUser2";
     private QBUser qbUser1;
     private QBUser qbUser2;
 
