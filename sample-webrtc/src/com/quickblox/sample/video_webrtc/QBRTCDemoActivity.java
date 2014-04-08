@@ -15,6 +15,9 @@ import com.quickblox.module.chat.QBChatService;
 import com.quickblox.module.users.model.QBUser;
 import com.quickblox.module.videochat.model.objects.CallType;
 import com.quickblox.module.videochat_webrtc.*;
+import com.quickblox.module.videochat_webrtc.render.VideoStreamsView;
+import com.quickblox.module.videochat_webrtc.ISignalingChannel;
+import com.quickblox.module.videochat_webrtc.SignalingChannel;
 import org.webrtc.MediaConstraints;
 import org.webrtc.SessionDescription;
 
@@ -64,6 +67,8 @@ public class QBRTCDemoActivity extends Activity implements QBEntityCallback<Void
         findViewById(R.id.accept).setOnClickListener(this);
         findViewById(R.id.reject).setOnClickListener(this);
         findViewById(R.id.stop).setOnClickListener(this);
+        findViewById(R.id.muteMicrophone).setOnClickListener(this);
+        findViewById(R.id.turnSound).setOnClickListener(this);
         QBUser qbUser = DataHolder.getQbUser();
         String userName = qbUser.getId() == Splash.BOB_USER_ID ? Splash.SAM_NAME : Splash.BOB_NAME;
         int opponentId = qbUser.getId() == Splash.BOB_USER_ID ? Splash.SAM_USER_ID : Splash.BOB_USER_ID;
@@ -101,6 +106,14 @@ public class QBRTCDemoActivity extends Activity implements QBEntityCallback<Void
             }
             case R.id.stop: {
                 qbVideoChat.stopCall();
+                break;
+            }
+            case R.id.muteMicrophone: {
+                qbVideoChat.muteMicrophone(!qbVideoChat.isMicrophoneMute());
+                break;
+            }
+            case R.id.turnSound: {
+                qbVideoChat.muteSound(!qbVideoChat.isSoundMute());
                 break;
             }
         }

@@ -4,7 +4,7 @@
         android:background="@color/screen_call_background_color"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent">
-    <com.quickblox.module.videochat_webrtc.VideoStreamsView android:id="@+id/videoView"
+    <com.quickblox.module.videochat_webrtc.render.VideoStreamsView android:id="@+id/videoView"
                                                             android:src="@drawable/logo_qb"
                                                             android:layout_above="@+id/controlPanelRelativeLayout"
                                                             android:layout_centerInParent="true"
@@ -16,8 +16,9 @@
 
     <LinearLayout android:layout_width="wrap_content" android:layout_height="wrap_content"
                   android:id="@+id/controlPanelRelativeLayout"
-                  android:background="@color/screen_call_background_color" android:layout_alignParentBottom="true"
+                  android:background="@color/screen_call_background_color"
                   android:layout_centerInParent="true"
+                  android:layout_above="@+id/settingsPanelRelativeLayout"
                   android:layout_gravity="bottom">
 
         <Button android:layout_width="wrap_content" android:layout_height="50dp"
@@ -37,5 +38,17 @@
                 android:layout_centerInParent="true"
                 android:background="@drawable/button_general_selector"
                 android:src="@drawable/ic_call_mute"/>
+    </LinearLayout>
+    <LinearLayout android:layout_width="wrap_content" android:layout_height="wrap_content"
+                  android:id="@+id/settingsPanelRelativeLayout"
+                  android:background="@color/screen_call_background_color" android:layout_alignParentBottom="true"
+                  android:layout_centerInParent="true"
+                  android:layout_gravity="bottom">
+        <Button android:layout_width="wrap_content" android:layout_height="50dp"
+                android:layout_gravity="center"
+                android:id="@+id/muteMicrophone" android:text="Mute on"/>
+        <Button android:layout_width="wrap_content" android:layout_height="50dp"
+                android:layout_gravity="center"
+                android:id="@+id/turnSound" android:text="Sound on"/>
     </LinearLayout>
 </RelativeLayout>
