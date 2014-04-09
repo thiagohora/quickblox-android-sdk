@@ -22,6 +22,7 @@ import org.webrtc.MediaConstraints;
 import org.webrtc.SessionDescription;
 
 import java.util.List;
+import java.util.Map;
 
 public class QBRTCDemoActivity extends Activity implements QBEntityCallback<Void>, View.OnClickListener, ISignalingChannel.MessageObserver {
 
@@ -31,11 +32,12 @@ public class QBRTCDemoActivity extends Activity implements QBEntityCallback<Void
     // Synchronize on quit[0] to avoid teardown-related crashes.
     private final Boolean[] quit = new Boolean[]{false};
     private MediaConstraints sdpMediaConstraints;
-    QBVideoChat qbVideoChat;
-    private SignalingChannel qbVideoChatSignlaing;
+    private QBVideoChat qbVideoChat;
+    private ExtensionSignalingChannel qbVideoChatSignlaing;
     private QBUser opponent;
     private SessionDescription sdp;
-    ProgressDialog progressDialog;
+    private ProgressDialog progressDialog;
+    private String sessionId;
 
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -49,7 +51,7 @@ public class QBRTCDemoActivity extends Activity implements QBEntityCallback<Void
     }
 
     private void initSignaling() {
-        qbVideoChatSignlaing = new SignalingChannel(QBChatService.getInstance().getPrivateChatInstance());
+        qbVideoChatSignlaing = new ExtensionSignalingChannel(QBChatService.getInstance().getPrivateChatInstance());
         qbVideoChatSignlaing.addMessageObserver(this);
     }
 
@@ -95,12 +97,12 @@ public class QBRTCDemoActivity extends Activity implements QBEntityCallback<Void
             }
             case R.id.accept: {
                 qbVideoChat.setRemoteSessionDescription(sdp);
-                qbVideoChat.accept(opponent);
+                qbVideoChat.accept(opponent, sessionId);
                 enableAcceptView(false);
                 break;
             }
             case R.id.reject: {
-                qbVideoChat.reject(opponent);
+                qbVideoChat.reject(opponent, sessionId);
                 enableAcceptView(false);
                 break;
             }
@@ -189,8 +191,9 @@ public class QBRTCDemoActivity extends Activity implements QBEntityCallback<Void
     }
 
     @Override
-    public void onCall(final QBUser otherUser, CallType callType, final SessionDescription sessionDescription, long sessionId) {
+    public void onCall(final QBUser otherUser, CallType callType, final SessionDescription sessionDescription,final String sessionId, Map<String, String> params) {
         runOnUiThread(new Runnable() {
+
             @Override
             public void run() {
                 opponent = otherUser;
@@ -198,13 +201,14 @@ public class QBRTCDemoActivity extends Activity implements QBEntityCallback<Void
                 Vibrator vibrator = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
                 vibrator.vibrate(4000);
                 enableAcceptView(true);
+                QBRTCDemoActivity.this.sessionId = sessionId;
                 sdp = sessionDescription;
             }
         });
     }
 
     @Override
-    public void onAccepted(QBUser otherUser, SessionDescription sessionDescription, long sessionId) {
+    public void onAccepted(QBUser otherUser, SessionDescription sessionDescription, String sessionId, Map<String, String> params) {
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
@@ -214,7 +218,7 @@ public class QBRTCDemoActivity extends Activity implements QBEntityCallback<Void
     }
 
     @Override
-    public void onStop(QBUser otherUser, String reason, long sesison) {
+    public void onStop(QBUser otherUser, ISignalingChannel.STOP_REASON reason, String sesison) {
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
@@ -224,7 +228,7 @@ public class QBRTCDemoActivity extends Activity implements QBEntityCallback<Void
     }
 
     @Override
-    public void onRejected(QBUser otherUser, long sesison) {
+    public void onRejected(QBUser otherUser, String sesison) {
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
