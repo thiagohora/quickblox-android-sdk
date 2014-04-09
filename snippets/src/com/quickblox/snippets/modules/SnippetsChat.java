@@ -1,6 +1,13 @@
 package com.quickblox.snippets.modules;
 
+import android.app.Activity;
+import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
+import android.net.wifi.WifiManager;
 import android.os.Handler;
 import android.os.Looper;
 import android.util.Log;
@@ -8,6 +15,7 @@ import android.widget.Toast;
 import com.quickblox.core.QBEntityCallbackImpl;
 import com.quickblox.core.QBSettings;
 import com.quickblox.internal.core.exception.BaseServiceException;
+import com.quickblox.internal.core.exception.QBResponseException;
 import com.quickblox.internal.core.helper.ToStringHelper;
 import com.quickblox.module.auth.QBAuth;
 import com.quickblox.module.chat.QBChatRoom;
@@ -65,10 +73,26 @@ public class SnippetsChat extends Snippets {
     private PacketListener packetListener;
     private QBChatRoster qbChatRoster;
 
+    private BroadcastReceiver wifiReceiver = new BroadcastReceiver() {
+
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            final String action = intent.getAction();
+
+            NetworkInfo currentNetworkInfo = (NetworkInfo) intent.getParcelableExtra(ConnectivityManager.EXTRA_NETWORK_INFO);
+
+            if (currentNetworkInfo.isConnected()) {
+                loginInChat.execute();
+            } else {
+                Toast.makeText(context, "Not Connected", Toast.LENGTH_LONG).show();
+            }
+        }
+    };
+
     public SnippetsChat(final Context context) {
         super(context);
         QBChatService.init(context);
-
+        registerReceiver((Activity) context);
         // init test user
         qbUser = new QBUser();
         qbUser.setId(USER_ID);
@@ -106,6 +130,11 @@ public class SnippetsChat extends Snippets {
         initChatMessageListener();
     }
 
+    private void registerReceiver(Activity activity) {
+        activity.registerReceiver(wifiReceiver,
+                new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION));
+    }
+
 
     //
     ///////////////////////////////////////////// Login/Logout /////////////////////////////////////////////
@@ -115,10 +144,10 @@ public class SnippetsChat extends Snippets {
     Snippet loginInChat = new Snippet("login in Chat") {
         @Override
         public void execute() {
-            if(!QBChatService.isInitialized()){
+            if (!QBChatService.isInitialized()) {
                 QBChatService.init(context);
             }
-            QBChatService.getInstance().loginWithUser(qbUser, new QBEntityCallbackImpl(){
+            QBChatService.getInstance().loginWithUser(qbUser, new QBEntityCallbackImpl() {
                 @Override
                 public void onSuccess() {
                     Log.i(TAG, "success when login");
@@ -156,7 +185,7 @@ public class SnippetsChat extends Snippets {
         public void executeAsync() {
             try {
                 QBChatService.getInstance().loginWithUser(qbUser);
-            } catch (XMPPException e) {
+            } catch (QBResponseException e) {
                 setException(e);
             }
         }
@@ -243,7 +272,7 @@ public class SnippetsChat extends Snippets {
     }
 
     private void initChat() {
-        qbPrivateChat = QBChatService.getInstance().createChat();
+        qbPrivateChat = QBChatService.getInstance().getPrivateChatInstance();
         initChatMessageListener(qbPrivateChat);
         QBChatService.getInstance().addSystemMessageListener(packetListener);
         QBChatService.getInstance().addSessionListener(connectionListener);
