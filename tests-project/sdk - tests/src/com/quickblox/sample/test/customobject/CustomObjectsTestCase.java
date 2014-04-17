@@ -14,22 +14,18 @@ import com.quickblox.sample.test.faker.StringFaker;
  */
 public class CustomObjectsTestCase extends BaseTestCase {
 
-
-    public static String BK_FIELD_TITLE= "name";
+    public static final String BOOK_CLASS_NAME = "Book";
+    public static String BK_FIELD_TITLE = "name";
     public static String BK_FIELD_AUTH = "Author";
     public static String BK_FIELD_ISBN = "ISBN";
     public static String BK_FIELD_IMG = "Image";
-
-    public static final String BOOK_CLASS_NAME = "Book";
-
-    String[] types = {"New", "In Process"};
     public static String CLASS_NAME = "note";
-    public static String FIELD_TITLE= "title";
+    public static String FIELD_TITLE = "title";
     public static String FIELD_STATUS = "status";
     public static String FIELD_LICENSE = "license";
     public static String FIELD_COMMENTS = "comments";
     public static String NOTE_ID = "50e3f85f535c123376000d31";
-
+    String[] types = {"New", "In Process"};
 
     public QBCustomObject getFakeObject() {
 
@@ -42,7 +38,6 @@ public class CustomObjectsTestCase extends BaseTestCase {
         note.put(FIELD_STATUS, type);
 
         return note;
-
     }
 
     public QBCustomObject getBookFakeObject() {
@@ -56,19 +51,20 @@ public class CustomObjectsTestCase extends BaseTestCase {
         book.put(BK_FIELD_ISBN, isbn);
 
         return book;
-
     }
 
 
-    protected void assertEqualsObject(QBCustomObject qbCustomObjectRequest, QBCustomObject qbCustomObjectResponse) {
+    protected void assertEqualsObject(QBCustomObject qbCustomObjectRequest,
+            QBCustomObject qbCustomObjectResponse) {
         assertEquals(qbCustomObjectRequest.getClassName(), qbCustomObjectResponse.getClassName());
 
-        assertEquals(qbCustomObjectRequest.getFields().get(FIELD_COMMENTS), qbCustomObjectResponse.getFields().get(FIELD_COMMENTS));
+        assertEquals(qbCustomObjectRequest.getFields().get(FIELD_COMMENTS),
+                qbCustomObjectResponse.getFields().get(FIELD_COMMENTS));
 
-        assertEquals(qbCustomObjectRequest.getFields().get(FIELD_TITLE), qbCustomObjectResponse.getFields().get(FIELD_TITLE));
+        assertEquals(qbCustomObjectRequest.getFields().get(FIELD_TITLE),
+                qbCustomObjectResponse.getFields().get(FIELD_TITLE));
 
-        assertEquals(qbCustomObjectRequest.getFields().get(FIELD_STATUS), qbCustomObjectResponse.getFields().get(FIELD_STATUS));
-
+        assertEquals(qbCustomObjectRequest.getFields().get(FIELD_STATUS),
+                qbCustomObjectResponse.getFields().get(FIELD_STATUS));
     }
-
 }

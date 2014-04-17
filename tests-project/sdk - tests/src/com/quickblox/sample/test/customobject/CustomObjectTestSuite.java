@@ -23,6 +23,4 @@ public class CustomObjectTestSuite {
     public static void tearDown() {
         System.out.println("tearing down");
     }
-
-
 }

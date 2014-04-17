@@ -10,9 +10,8 @@ import java.util.Random;
  * To change this template use File | Settings | File Templates.
  */
 public class BooleanFaker {
+
     public static boolean getNext() {
-
         return (new Random()).nextBoolean();
-
     }
 }
