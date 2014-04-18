@@ -1,54 +1,97 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-        android:background="@color/screen_call_background_color"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent">
-    <com.quickblox.module.videochat_webrtc.render.VideoStreamsView android:id="@+id/videoView"
-                                                            android:src="@drawable/logo_qb"
-                                                            android:layout_above="@+id/controlPanelRelativeLayout"
-                                                            android:layout_centerInParent="true"
-                                                            android:layout_gravity="center"
-                                                            android:layout_marginBottom="30dp"
-                                                            android:layout_width="match_parent"
-                                                            android:layout_height="match_parent"/>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:background="@color/screen_call_background_color"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <com.quickblox.module.videochat_webrtc.render.VideoStreamsView
+        android:id="@+id/videoView"
+        android:src="@drawable/logo_qb"
+        android:layout_above="@+id/controlPanelRelativeLayout"
+        android:layout_centerInParent="true"
+        android:layout_gravity="center"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
 
 
-    <LinearLayout android:layout_width="wrap_content" android:layout_height="wrap_content"
-                  android:id="@+id/controlPanelRelativeLayout"
-                  android:background="@color/screen_call_background_color"
-                  android:layout_centerInParent="true"
-                  android:layout_above="@+id/settingsPanelRelativeLayout"
-                  android:layout_gravity="bottom">
+    <LinearLayout
+        android:layout_gravity="bottom" android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
 
-        <Button android:layout_width="wrap_content" android:layout_height="50dp"
-                android:layout_gravity="center" android:visibility="invisible"
-                android:id="@+id/call" android:text="Call"/>
-        <Button android:layout_width="wrap_content" android:layout_height="50dp"
-                android:layout_gravity="bottom" android:visibility="invisible"
-                android:id="@+id/accept" android:text="Accept"/>
-        <Button android:layout_width="wrap_content" android:layout_height="50dp"
-                android:layout_gravity="bottom" android:visibility="invisible"
-                android:id="@+id/reject" android:text="Reject"/>
-        <ImageButton
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/controlPanelRelativeLayout"
+            android:background="@color/screen_call_background_color"
+            android:layout_centerInParent="true"
+            android:layout_above="@+id/settingsPanelRelativeLayout"
+            android:layout_gravity="bottom">
+
+            <Button
+                android:layout_width="wrap_content"
+                android:layout_height="50dp"
+                android:layout_gravity="center"
+                android:visibility="invisible"
+                android:id="@+id/call"
+                android:text="Call" />
+
+            <Button
+                android:layout_width="wrap_content"
+                android:layout_height="50dp"
+                android:layout_gravity="bottom"
+                android:visibility="invisible"
+                android:id="@+id/accept"
+                android:text="Accept" />
+
+            <Button
+                android:layout_width="wrap_content"
+                android:layout_height="50dp"
+                android:layout_gravity="bottom"
+                android:visibility="invisible"
+                android:id="@+id/reject"
+                android:text="Reject" />
+
+            <ImageButton
                 android:id="@+id/stop"
                 android:visibility="invisible"
                 android:layout_width="@dimen/act_call_end_button_width"
                 android:layout_height="50dp"
                 android:layout_centerInParent="true"
                 android:background="@drawable/button_general_selector"
-                android:src="@drawable/ic_call_mute"/>
-    </LinearLayout>
-    <LinearLayout android:layout_width="wrap_content" android:layout_height="wrap_content"
-                  android:id="@+id/settingsPanelRelativeLayout"
-                  android:background="@color/screen_call_background_color" android:layout_alignParentBottom="true"
-                  android:layout_centerInParent="true"
-                  android:layout_gravity="bottom">
-        <Button android:layout_width="wrap_content" android:layout_height="50dp"
+                android:src="@drawable/ic_call_mute" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/settingsPanelRelativeLayout"
+            android:background="@color/screen_call_background_color"
+            android:layout_alignParentBottom="true"
+            android:layout_centerInParent="true"
+            android:layout_gravity="bottom">
+
+            <Button
+                android:layout_width="wrap_content"
+                android:layout_height="50dp"
                 android:layout_gravity="center"
-                android:id="@+id/muteMicrophone" android:text="Mute on"/>
-        <Button android:layout_width="wrap_content" android:layout_height="50dp"
+                android:id="@+id/muteMicrophone"
+                android:text="Mute on" />
+
+            <Button
+                android:layout_width="wrap_content"
+                android:layout_height="50dp"
                 android:layout_gravity="center"
-                android:id="@+id/turnSound" android:text="Sound on"/>
+                android:id="@+id/turnSound"
+                android:text="Sound on" />
+            <Button
+                android:layout_width="wrap_content"
+                android:layout_height="50dp"
+                android:layout_gravity="center"
+                android:id="@+id/orientation"
+                android:text="change orientation" />
+        </LinearLayout>
     </LinearLayout>
-</RelativeLayout>
+    </FrameLayout>
