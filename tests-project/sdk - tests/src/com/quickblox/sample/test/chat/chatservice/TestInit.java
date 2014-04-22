@@ -19,13 +19,13 @@ public class TestInit extends BaseTestCase {
             QBChatService.getInstance();
             fail("Missing exception");
         } catch (IllegalStateException e) {
-            assertEquals(Consts.CHAT_NOT_INITIALIZED, e.getMessage());
+            assertEquals(e.getMessage(), Consts.CHAT_NOT_INITIALIZED);
         }
     }
 
     public void testInit() throws Exception {
         QBChatService.init(context);
-        assertEquals(QBChatService.isInitialized(), true);
+        assertEquals(true, QBChatService.isInitialized());
     }
 
     public void testInitTwice() throws Exception {
@@ -36,7 +36,7 @@ public class TestInit extends BaseTestCase {
     public void testDestroy() throws Exception {
         QBChatService.init(context);
         QBChatService.getInstance().destroy();
-        assertEquals(QBChatService.isInitialized(), false);
+        assertEquals(false, QBChatService.isInitialized());
     }
 
     public void testDestroyTwice() throws Exception {
@@ -46,7 +46,7 @@ public class TestInit extends BaseTestCase {
             QBChatService.getInstance().destroy();
             fail("Missing exception");
         } catch (IllegalStateException e) {
-            assertEquals(Consts.CHAT_NOT_INITIALIZED, e.getMessage());
+            assertEquals(e.getMessage(), Consts.CHAT_NOT_INITIALIZED);
         }
     }
 }

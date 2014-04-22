@@ -12,6 +12,7 @@ import java.util.concurrent.TimeUnit;
 public class TestLogout extends BaseTestCase {
 
     private static final int LOGOUT_TIMEOUT = 60;
+
     private QBChatService service;
     private QBUser user;
 
@@ -33,7 +34,7 @@ public class TestLogout extends BaseTestCase {
     public void testLogoutSync() throws Exception {
         service.login(user);
         service.logout();
-        assertEquals(service.isLoggedIn(), false);
+        assertEquals(false, service.isLoggedIn());
     }
 
     public void testLogoutAsync() throws Exception {
@@ -46,12 +47,10 @@ public class TestLogout extends BaseTestCase {
             }
         });
         signal.await(LOGOUT_TIMEOUT, TimeUnit.SECONDS);
-        assertEquals(service.isLoggedIn(), false);
+        assertEquals(false, service.isLoggedIn());
     }
 
     public void testLogoutWithoutLogin() throws Exception {
         service.logout();
     }
-
-
 }

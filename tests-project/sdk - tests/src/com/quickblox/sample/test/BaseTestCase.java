@@ -6,6 +6,7 @@ import android.util.Log;
 
 import com.quickblox.core.QBCallbackImpl;
 import com.quickblox.core.QBSettings;
+import com.quickblox.core.TransferProtocol;
 import com.quickblox.core.result.Result;
 import com.quickblox.internal.core.helper.Lo;
 import com.quickblox.internal.core.helper.StringUtils;
@@ -32,18 +33,28 @@ public class BaseTestCase extends InstrumentationTestCase {
     private final int APP_ID = 99;
     private final String AUTH_KEY = "63ebrp5VZt7qTOv";
     private final String AUTH_SECRET = "YavMAxm5T59-BRw";
-    protected Lo lo = new Lo(this.getClass().getSimpleName());
+
     protected Context context;
+    protected QBUser user;
 
     @Override
     protected void setUp() throws Exception {
         context = this.getInstrumentation().getTargetContext().getApplicationContext();
         if (token == null) {
+            /*
             QBSettings.getInstance().fastConfigInit(String.valueOf(APP_ID), AUTH_KEY, AUTH_SECRET);
             QBSettings.getInstance().setSynchronous(true);
-            QBUser qbUser = new QBUser(TestConfig.USER_LOGIN, TestConfig.USER_PASSWORD);
+            */
+
+            QBSettings.getInstance().setServerApiDomain("api.stage.quickblox.com");
+            QBSettings.getInstance().setChatServerDomain("chatstage.quickblox.com");
+            QBSettings.getInstance().setContentBucketName("blobs-test-oz");
+            QBSettings.getInstance().setTransferProtocol(TransferProtocol.HTTP);
+            QBSettings.getInstance().fastConfigInit("438", "EYvyxCwkBHfa8EB", "NEsZAtydRU8syMS");
+
+            user = new QBUser(TestConfig.USER_LOGIN, TestConfig.USER_PASSWORD);
             // authorize app with default user
-            QBAuth.createSession(qbUser, new QBCallbackImpl() {
+            QBAuth.createSession(user, new QBCallbackImpl() {
                 @Override
                 public void onComplete(Result result) {
                     checkHttpStatus(HttpStatus.SC_CREATED, result);

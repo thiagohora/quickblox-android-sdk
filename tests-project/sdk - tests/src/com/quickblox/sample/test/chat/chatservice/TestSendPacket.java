@@ -79,7 +79,7 @@ public class TestSendPacket extends BaseTestCase {
         }, new AndFilter(new FromMatchesFilter(from), new PacketTypeFilter(Message.class)));
         service.sendPacket(message);
         signal.await(PACKET_DELIVERY_TIMEOUT, TimeUnit.SECONDS);
-        assertEquals(testPassed, true);
+        assertEquals(true, testPassed);
     }
 
     public void testSendPacketWithNoConnection() throws Exception {
@@ -89,7 +89,7 @@ public class TestSendPacket extends BaseTestCase {
             service.sendPacket(packet);
             fail("Missed exception");
         } catch (IllegalStateException e) {
-            assertEquals(e.getMessage(), Consts.NOT_LOGGED_IN);
+            assertEquals(Consts.NOT_LOGGED_IN, e.getMessage());
         }
     }
 

@@ -11,6 +11,7 @@ import com.quickblox.module.users.model.QBUser;
 import com.quickblox.sample.test.BaseTestCase;
 import com.quickblox.sample.test.TestConfig;
 
+import org.jivesoftware.smack.AbstractConnectionListener;
 import org.jivesoftware.smack.ConnectionListener;
 import org.jivesoftware.smack.XMPPException;
 
@@ -31,8 +32,6 @@ public class TestReconnection extends BaseTestCase {
     @Override
     protected void setUp() throws Exception {
         super.setUp();
-
-        QBChatService.setDebugEnabled(true);
 
         wifiManager = (WifiManager) context.getSystemService(Context.WIFI_SERVICE);
         wifiManager.setWifiEnabled(true);
@@ -81,8 +80,8 @@ public class TestReconnection extends BaseTestCase {
         wifiManager.setWifiEnabled(false);
         signal.await(RECONNECTION_TIMEOUT, TimeUnit.SECONDS);
         // service.removeConnectionListener(connectionListener);
-        assertEquals(service.isLoggedIn(), true);
-        assertEquals(testPassed, true);
+        assertEquals(true, service.isLoggedIn());
+        assertEquals(true, testPassed);
     }
     */
 
@@ -107,30 +106,10 @@ public class TestReconnection extends BaseTestCase {
         wifiManager.setWifiEnabled(false);
         signal.await(RECONNECTION_TIMEOUT, TimeUnit.SECONDS);
         service.removeConnectionListener(connectionListener);
-        assertEquals(service.isLoggedIn(), true);
+        assertEquals(true, service.isLoggedIn());
     }
 
-    private class FakeConnectionListenerImpl implements ConnectionListener {
-
-        @Override
-        public void connectionClosed() {
-            // Ok, it closes it on tearDown
-        }
-
-        @Override
-        public void connectionClosedOnError(Exception e) {
-            // Ok, we expected it
-        }
-
-        @Override
-        public void reconnectingIn(int seconds) {
-            // Ok, we expected it
-        }
-
-        @Override
-        public void reconnectionSuccessful() {
-            // Ok, we expected it
-        }
+    private class FakeConnectionListenerImpl extends AbstractConnectionListener {
 
         @Override
         public void reconnectionFailed(Exception e) {

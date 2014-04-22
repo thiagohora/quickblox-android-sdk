@@ -13,46 +13,9 @@ import org.jivesoftware.smack.packet.Message;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
-public class TestSendMessage extends BaseTestCase {
+public class TestSendMessage extends SignalingTestCase {
 
     private static final long PACKET_DELIVERY_TIMEOUT = 10;
-
-    private QBChatService service;
-    private QBChatService serviceFaker;
-
-    private QBUser user;
-    private QBUser participant;
-
-    private boolean testPassed;
-
-    @Override
-    protected void setUp() throws Exception {
-        super.setUp();
-
-        QBChatService.setDebugEnabled(true);
-
-        user = new QBUser(TestConfig.USER_LOGIN, TestConfig.USER_PASSWORD);
-        user.setId(TestConfig.USER_ID);
-        participant = new QBUser(TestConfig.PARTICIPANT_NAME, TestConfig.PARTICIPANT_PASSWORD);
-        participant.setId(TestConfig.PARTICIPANT_ID);
-        QBChatService.init(context);
-
-        service = QBChatService.getInstance();
-        service.login(user);
-
-        serviceFaker = ChatServiceFaker.newInstance();
-        serviceFaker.login(participant);
-
-        testPassed = false;
-    }
-
-    @Override
-    protected void tearDown() throws Exception {
-        service.logout();
-        serviceFaker.logout();
-        service.destroy();
-        super.tearDown();
-    }
 
     public void testSendText() throws Exception {
         final CountDownLatch signal = new CountDownLatch(1);
@@ -62,8 +25,8 @@ public class TestSendMessage extends BaseTestCase {
             @Override
             public void processMessage(QBSignaling signaling, Message message) {
                 final int participantId = user.getId();
-                assertEquals(signaling.getParticipant(), participantId);
-                assertEquals(message.getBody(), messageText);
+                assertEquals(participantId, signaling.getParticipant());
+                assertEquals(messageText, message.getBody());
                 testPassed = true;
                 signal.countDown();
             }
@@ -73,7 +36,7 @@ public class TestSendMessage extends BaseTestCase {
         signaling.sendMessage(messageText);
 
         signal.await(PACKET_DELIVERY_TIMEOUT, TimeUnit.SECONDS);
-        assertEquals(testPassed, true);
+        assertEquals(true, testPassed);
     }
 
     public void testSendMessage() throws Exception {
@@ -87,10 +50,10 @@ public class TestSendMessage extends BaseTestCase {
             @Override
             public void processMessage(QBSignaling signaling, Message message) {
                 final int participantId = user.getId();
-                assertEquals(signaling.getParticipant(), participantId);
-                assertEquals(message.getBody(), messageText);
-                assertEquals(message.getType(), Message.Type.headline);
-                assertEquals(message.getProperty(propertyKey), propertyValue);
+                assertEquals(participantId, signaling.getParticipant());
+                assertEquals(messageText, message.getBody());
+                assertEquals(Message.Type.headline, message.getType());
+                assertEquals(propertyValue, message.getProperty(propertyKey));
                 testPassed = true;
                 signal.countDown();
             }
@@ -105,7 +68,7 @@ public class TestSendMessage extends BaseTestCase {
         signaling.sendMessage(message);
 
         signal.await(PACKET_DELIVERY_TIMEOUT, TimeUnit.SECONDS);
-        assertEquals(testPassed, true);
+        assertEquals(true, testPassed);
     }
 
     public void testSendNullText() throws Exception {
@@ -116,8 +79,8 @@ public class TestSendMessage extends BaseTestCase {
             @Override
             public void processMessage(QBSignaling signaling, Message message) {
                 final int participantId = user.getId();
-                assertEquals(signaling.getParticipant(), participantId);
-                assertEquals(message.getBody(), null);
+                assertEquals(participantId, signaling.getParticipant());
+                assertEquals(null, message.getBody());
                 testPassed = true;
                 signal.countDown();
             }
@@ -127,7 +90,7 @@ public class TestSendMessage extends BaseTestCase {
         signaling.sendMessage((String) null);
 
         signal.await(PACKET_DELIVERY_TIMEOUT, TimeUnit.SECONDS);
-        assertEquals(testPassed, true);
+        assertEquals(true, testPassed);
     }
 
     public void testSendNullMessage() throws Exception {

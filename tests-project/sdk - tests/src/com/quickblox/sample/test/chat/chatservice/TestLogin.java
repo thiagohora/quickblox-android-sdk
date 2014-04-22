@@ -16,7 +16,7 @@ import java.util.concurrent.TimeUnit;
 
 public class TestLogin extends BaseTestCase {
 
-    private static final long LOGIN_TIMEOUT = 90;
+    private static final long LOGIN_TIMEOUT = 15;
 
     private QBUser user;
     private QBChatService service;
@@ -39,7 +39,7 @@ public class TestLogin extends BaseTestCase {
 
     public void testLoginSync() throws Exception {
         service.login(user);
-        assertEquals(service.isLoggedIn(), true);
+        assertEquals(true, service.isLoggedIn());
     }
 
     public void testLoginAsync() throws Exception {
@@ -56,7 +56,7 @@ public class TestLogin extends BaseTestCase {
             }
         });
         signal.await(LOGIN_TIMEOUT, TimeUnit.SECONDS);
-        assertEquals(service.isLoggedIn(), true);
+        assertEquals(true, service.isLoggedIn());
     }
 
     public void testLoginTwiceSync() throws Exception {
@@ -65,7 +65,7 @@ public class TestLogin extends BaseTestCase {
             service.login(user);
             fail("Missing exception");
         } catch (XMPPException e) {
-            assertEquals(e.getMessage(), Consts.ALREADY_LOGGED_IN);
+            assertEquals(Consts.ALREADY_LOGGED_IN, e.getMessage());
         }
     }
 
@@ -93,7 +93,7 @@ public class TestLogin extends BaseTestCase {
         service.login(user, callback);
         service.login(user, callback);
         signal.await(LOGIN_TIMEOUT, TimeUnit.SECONDS);
-        assertEquals(service.isLoggedIn(), true);
+        assertEquals(true, service.isLoggedIn());
     }
 
     public void testNullUserSync() throws Exception {
@@ -111,7 +111,7 @@ public class TestLogin extends BaseTestCase {
             service.login(user);
             fail("Missing exception");
         } catch (IllegalArgumentException e) {
-            assertEquals(Consts.ILLEGAL_LOGIN_ARGUMENT, e.getMessage());
+            assertEquals(e.getMessage(), Consts.ILLEGAL_LOGIN_ARGUMENT);
         }
     }
 
@@ -122,7 +122,7 @@ public class TestLogin extends BaseTestCase {
             service.login(user);
             fail("Missing exception");
         } catch (IllegalArgumentException e) {
-            assertEquals(Consts.ILLEGAL_LOGIN_ARGUMENT, e.getMessage());
+            assertEquals(e.getMessage(), Consts.ILLEGAL_LOGIN_ARGUMENT);
         }
     }
 
@@ -132,7 +132,7 @@ public class TestLogin extends BaseTestCase {
             service.login(user);
             fail("Missing exception");
         } catch (IllegalArgumentException e) {
-            assertEquals(Consts.ILLEGAL_LOGIN_ARGUMENT, e.getMessage());
+            assertEquals(e.getMessage(), Consts.ILLEGAL_LOGIN_ARGUMENT);
         }
     }
 
@@ -155,7 +155,7 @@ public class TestLogin extends BaseTestCase {
             signal.await(LOGIN_TIMEOUT, TimeUnit.SECONDS);
             fail("Missing exception");
         } catch (IllegalArgumentException e) {
-            assertEquals(Consts.ILLEGAL_LOGIN_ARGUMENT, e.getMessage());
+            assertEquals(e.getMessage(), Consts.ILLEGAL_LOGIN_ARGUMENT);
         }
     }
 
@@ -168,7 +168,7 @@ public class TestLogin extends BaseTestCase {
             signal.await(LOGIN_TIMEOUT, TimeUnit.SECONDS);
             fail("Missing exception");
         } catch (IllegalArgumentException e) {
-            assertEquals(Consts.ILLEGAL_LOGIN_ARGUMENT, e.getMessage());
+            assertEquals(e.getMessage(), Consts.ILLEGAL_LOGIN_ARGUMENT);
         }
     }
 
@@ -180,17 +180,17 @@ public class TestLogin extends BaseTestCase {
             signal.await(LOGIN_TIMEOUT, TimeUnit.SECONDS);
             fail("Missing exception");
         } catch (IllegalArgumentException e) {
-            assertEquals(Consts.ILLEGAL_LOGIN_ARGUMENT, e.getMessage());
+            assertEquals(e.getMessage(), Consts.ILLEGAL_LOGIN_ARGUMENT);
         }
     }
 
     public void testLoginAfterLogout() throws Exception {
         service.login(user);
-        assertEquals(service.isLoggedIn(), true);
+        assertEquals(true, service.isLoggedIn());
         service.logout();
-        assertEquals(service.isLoggedIn(), false);
+        assertEquals(false, service.isLoggedIn());
         service.login(user);
-        assertEquals(service.isLoggedIn(), true);
+        assertEquals(true, service.isLoggedIn());
     }
 
     // TODO : add test for adding null listener

@@ -18,43 +18,9 @@ import org.jivesoftware.smack.packet.Message;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
-public class TestCreateSignaling extends BaseTestCase {
+public class TestCreateSignaling extends SignalingTestCase {
 
     private static final long SIGNALING_CREATION_TIMEOUT = 10;
-
-    private QBChatService service;
-    private QBChatService serviceFaker;
-
-    private QBUser user;
-    private QBUser participant;
-
-    private boolean testPassed;
-
-    @Override
-    protected void setUp() throws Exception {
-        super.setUp();
-        user = new QBUser(TestConfig.USER_LOGIN, TestConfig.USER_PASSWORD);
-        user.setId(TestConfig.USER_ID);
-        participant = new QBUser(TestConfig.PARTICIPANT_NAME, TestConfig.PARTICIPANT_PASSWORD);
-        participant.setId(TestConfig.PARTICIPANT_ID);
-        QBChatService.init(context);
-
-        service = QBChatService.getInstance();
-        service.login(user);
-
-        serviceFaker = ChatServiceFaker.newInstance();
-        serviceFaker.login(participant);
-
-        testPassed = false;
-    }
-
-    @Override
-    protected void tearDown() throws Exception {
-        service.logout();
-        serviceFaker.logout();
-        service.destroy();
-        super.tearDown();
-    }
 
     public void testCreateLocally() throws Exception {
         final CountDownLatch signal = new CountDownLatch(1);
@@ -64,9 +30,9 @@ public class TestCreateSignaling extends BaseTestCase {
 
             @Override
             public void signalingCreated(QBSignaling signaling, boolean createdLocally) {
-                assertEquals(createdLocally, true);
+                assertEquals(true, createdLocally);
                 final int participantId = participant.getId();
-                assertEquals(signaling.getParticipant(), participantId);
+                assertEquals(participantId, signaling.getParticipant());
                 signal.countDown();
             }
         });
@@ -74,7 +40,7 @@ public class TestCreateSignaling extends BaseTestCase {
         QBSignaling signaling = manager.createSignaling(participant.getId(), null);
 
         signal.await(SIGNALING_CREATION_TIMEOUT, TimeUnit.SECONDS);
-        assertEquals(signaling, manager.getSignaling(participant.getId()));
+        assertEquals(manager.getSignaling(participant.getId()), signaling);
     }
 
     public void testCreateOnIncomingMessage() throws Exception {
@@ -85,9 +51,9 @@ public class TestCreateSignaling extends BaseTestCase {
 
             @Override
             public void signalingCreated(QBSignaling signaling, boolean createdLocally) {
-                assertEquals(createdLocally, false);
+                assertEquals(false, createdLocally);
                 final int participantId = participant.getId();
-                assertEquals(signaling.getParticipant(), participantId);
+                assertEquals(participantId, signaling.getParticipant());
 
                 testPassed = true;
 
@@ -101,7 +67,7 @@ public class TestCreateSignaling extends BaseTestCase {
 
         signal.await(SIGNALING_CREATION_TIMEOUT, TimeUnit.SECONDS);
         assertNotNull(manager.getSignaling(participant.getId()));
-        assertEquals(testPassed, true);
+        assertEquals(true, testPassed);
     }
 
     public void testCreateChatTwice() throws Exception {
