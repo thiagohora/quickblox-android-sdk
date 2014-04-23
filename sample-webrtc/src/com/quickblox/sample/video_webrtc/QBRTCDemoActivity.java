@@ -11,6 +11,7 @@ import android.util.Log;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.Button;
+import android.widget.RadioGroup;
 import android.widget.Toast;
 
 import com.quickblox.core.QBEntityCallback;
@@ -22,7 +23,6 @@ import com.quickblox.module.videochat_webrtc.model.ConnectionConfig;
 import com.quickblox.module.videochat_webrtc.render.VideoStreamsView;
 import com.quickblox.module.videochat_webrtc.ISignalingChannel;
 
-import org.webrtc.MediaConstraints;
 import org.webrtc.SessionDescription;
 
 import java.util.List;
@@ -42,7 +42,7 @@ public class QBRTCDemoActivity extends Activity implements QBEntityCallback<Void
     private int[] orientations = {ActivityInfo.SCREEN_ORIENTATION_PORTRAIT, ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE, ActivityInfo.SCREEN_ORIENTATION_REVERSE_PORTRAIT, ActivityInfo.SCREEN_ORIENTATION_REVERSE_LANDSCAPE};
     private int orientationIndex = 0;
     private int orientation = orientations[orientationIndex];
-    private int callType;
+    private WebRTC.MEDIA_STREAM callType;
 
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -94,7 +94,7 @@ public class QBRTCDemoActivity extends Activity implements QBEntityCallback<Void
             case R.id.call: {
                 if (QBVideoChat.VIDEO_CHAT_STATE.INACTIVE.equals(qbVideoChat.getState())) {
                     opponent = (QBUser) findViewById(R.id.call).getTag();
-                    qbVideoChat.call(opponent, WebRTC.AUDIO_CALL);
+                    qbVideoChat.call(opponent, getCallType());
                 } else {
                     logAndToast("Stop current chat before call");
                 }
@@ -102,6 +102,7 @@ public class QBRTCDemoActivity extends Activity implements QBEntityCallback<Void
             }
             case R.id.accept: {
                 qbVideoChat.setRemoteSessionDescription(sdp);
+                logAndToast("callType="+callType);
                 qbVideoChat.accept(opponent, sessionId, callType);
                 enableAcceptView(false);
                 break;
@@ -127,6 +128,12 @@ public class QBRTCDemoActivity extends Activity implements QBEntityCallback<Void
                 changeOrientation();
             }
         }
+    }
+
+    private WebRTC.MEDIA_STREAM getCallType(){
+        int selectedId = ((RadioGroup)findViewById(R.id.callMode)).getCheckedRadioButtonId();
+        return (R.id.audio_call ==selectedId) ? WebRTC.MEDIA_STREAM.AUDIO :WebRTC.MEDIA_STREAM.VIDEO;
+
     }
 
     public void changeOrientation() {
@@ -216,7 +223,7 @@ public class QBRTCDemoActivity extends Activity implements QBEntityCallback<Void
                 enableAcceptView(true);
                 QBRTCDemoActivity.this.sessionId = connectionConfig.getConnectionSession();
                 sdp = ((CallConfig)connectionConfig).getSessionDescription();
-                callType = ((CallConfig)connectionConfig).getCallType();
+                callType = ((CallConfig)connectionConfig).getCallStreamType();
             }
         });
     }
@@ -275,7 +282,18 @@ public class QBRTCDemoActivity extends Activity implements QBEntityCallback<Void
                 cancelDlg();
                 enableCallView(true);
                 initSignaling();
-                qbVideoChat = new QBVideoChat(QBRTCDemoActivity.this, qbVideoChatSignlaing, null);
+                qbVideoChat = new QBVideoChat(QBRTCDemoActivity.this, qbVideoChatSignlaing, vsv);
+                qbVideoChat.setMediaCaptureCallback( new QBVideoChat.MediaCaptureCallback() {
+                    @Override
+                    public void onCaptureFail(WebRTC.MEDIA_STREAM mediaStream, String problem) {
+                        logAndToast(problem);
+                    }
+
+                    @Override
+                    public void onCaptureSuccess(WebRTC.MEDIA_STREAM mediaStream) {
+
+                    }
+                });
             }
         });
     }
