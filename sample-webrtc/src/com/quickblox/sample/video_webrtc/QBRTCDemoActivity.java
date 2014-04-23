@@ -17,6 +17,8 @@ import com.quickblox.core.QBEntityCallback;
 import com.quickblox.module.chat.QBChatService;
 import com.quickblox.module.users.model.QBUser;
 import com.quickblox.module.videochat_webrtc.*;
+import com.quickblox.module.videochat_webrtc.model.CallConfig;
+import com.quickblox.module.videochat_webrtc.model.ConnectionConfig;
 import com.quickblox.module.videochat_webrtc.render.VideoStreamsView;
 import com.quickblox.module.videochat_webrtc.ISignalingChannel;
 
@@ -24,15 +26,12 @@ import org.webrtc.MediaConstraints;
 import org.webrtc.SessionDescription;
 
 import java.util.List;
-import java.util.Map;
 
-public class QBRTCDemoActivity extends Activity implements QBEntityCallback<Void>, View.OnClickListener, ISignalingChannel.MessageObserver {
+public class QBRTCDemoActivity extends Activity implements QBEntityCallback<Void>, View.OnClickListener, ISignalingChannel.MessageHandler {
 
     private static final String TAG = QBRTCDemoActivity.class.getSimpleName();
-    private static final int VIDEO_TYPE = 2;
     private VideoStreamsView vsv;
     private Toast logToast;
-    private MediaConstraints sdpMediaConstraints;
     private QBVideoChat qbVideoChat;
     private ExtensionSignalingChannel qbVideoChatSignlaing;
     private QBUser opponent;
@@ -43,6 +42,7 @@ public class QBRTCDemoActivity extends Activity implements QBEntityCallback<Void
     private int[] orientations = {ActivityInfo.SCREEN_ORIENTATION_PORTRAIT, ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE, ActivityInfo.SCREEN_ORIENTATION_REVERSE_PORTRAIT, ActivityInfo.SCREEN_ORIENTATION_REVERSE_LANDSCAPE};
     private int orientationIndex = 0;
     private int orientation = orientations[orientationIndex];
+    private int callType;
 
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -50,7 +50,6 @@ public class QBRTCDemoActivity extends Activity implements QBEntityCallback<Void
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
         initViews();
-        initConstraints();
         QBChatService.init(this);
         QBChatService.getInstance().loginWithUser(DataHolder.getQbUser(), this);
     }
@@ -58,7 +57,7 @@ public class QBRTCDemoActivity extends Activity implements QBEntityCallback<Void
     private void initSignaling() {
         qbVideoChatSignlaing = new ExtensionSignalingChannel(
                 QBChatService.getInstance().getPrivateChatInstance());
-        qbVideoChatSignlaing.addMessageObserver(this);
+        qbVideoChatSignlaing.addMessageHandler(this);
     }
 
     @Override
@@ -66,14 +65,6 @@ public class QBRTCDemoActivity extends Activity implements QBEntityCallback<Void
         super.onConfigurationChanged(newConfig);
         Log.i(TAG, "onConfigurationChanged");
         qbVideoChat.onConfigurationChanged(newConfig);
-    }
-
-    private void initConstraints() {
-        sdpMediaConstraints = new MediaConstraints();
-        sdpMediaConstraints.mandatory.add(new MediaConstraints.KeyValuePair(WebRTC.RECEIVE_AUDIO,
-                WebRTC.TRUE_FLAG));
-        sdpMediaConstraints.mandatory.add(new MediaConstraints.KeyValuePair(WebRTC.RECEIVE_VIDEO,
-                WebRTC.TRUE_FLAG));
     }
 
     private void initViews() {
@@ -103,7 +94,7 @@ public class QBRTCDemoActivity extends Activity implements QBEntityCallback<Void
             case R.id.call: {
                 if (QBVideoChat.VIDEO_CHAT_STATE.INACTIVE.equals(qbVideoChat.getState())) {
                     opponent = (QBUser) findViewById(R.id.call).getTag();
-                    qbVideoChat.call(opponent, VIDEO_TYPE);
+                    qbVideoChat.call(opponent, WebRTC.AUDIO_CALL);
                 } else {
                     logAndToast("Stop current chat before call");
                 }
@@ -111,7 +102,7 @@ public class QBRTCDemoActivity extends Activity implements QBEntityCallback<Void
             }
             case R.id.accept: {
                 qbVideoChat.setRemoteSessionDescription(sdp);
-                qbVideoChat.accept(opponent, sessionId);
+                qbVideoChat.accept(opponent, sessionId, callType);
                 enableAcceptView(false);
                 break;
             }
@@ -213,28 +204,30 @@ public class QBRTCDemoActivity extends Activity implements QBEntityCallback<Void
     }
 
     @Override
-    public void onCall(final QBUser otherUser, int callType, final SessionDescription sessionDescription,
-            final String sessionId, ISignalingChannel.PLATFORM platform,
-            ISignalingChannel.PLATFORM_DEVICE_ORIENTATION deviceOrientation, Map<String, String> params) {
+    public void onCall(final ConnectionConfig connectionConfig) {
         runOnUiThread(new Runnable() {
 
             @Override
             public void run() {
-                opponent = otherUser;
+                opponent = connectionConfig.getParticipant();
                 logAndToast("call from user " + opponent.getFullName());
                 Vibrator vibrator = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
                 vibrator.vibrate(4000);
                 enableAcceptView(true);
-                QBRTCDemoActivity.this.sessionId = sessionId;
-                sdp = sessionDescription;
+                QBRTCDemoActivity.this.sessionId = connectionConfig.getConnectionSession();
+                sdp = ((CallConfig)connectionConfig).getSessionDescription();
+                callType = ((CallConfig)connectionConfig).getCallType();
             }
         });
     }
 
     @Override
-    public void onAccepted(QBUser otherUser, SessionDescription sessionDescription, String sessionId,
-            ISignalingChannel.PLATFORM platform,
-            ISignalingChannel.PLATFORM_DEVICE_ORIENTATION deviceOrientation, Map<String, String> params) {
+    public void onIceCandidate(ConnectionConfig connectionConfig) {
+
+    }
+
+    @Override
+    public void onAccepted(final ConnectionConfig connectionConfig) {
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
@@ -244,14 +237,12 @@ public class QBRTCDemoActivity extends Activity implements QBEntityCallback<Void
     }
 
     @Override
-    public void onParametersChanged(QBUser qbUser, String sessionId,
-            ISignalingChannel.PLATFORM_DEVICE_ORIENTATION deviceOrientation,
-            Map<String, String> extraParams) {
+    public void onParametersChanged(final ConnectionConfig connectionConfig) {
 
     }
 
     @Override
-    public void onStop(QBUser otherUser, ISignalingChannel.STOP_REASON reason, String sesison) {
+    public void onStop(final ConnectionConfig connectionConfig) {
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
@@ -261,7 +252,7 @@ public class QBRTCDemoActivity extends Activity implements QBEntityCallback<Void
     }
 
     @Override
-    public void onRejected(QBUser otherUser, String sesison) {
+    public void onRejected(final ConnectionConfig connectionConfig) {
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
@@ -284,8 +275,7 @@ public class QBRTCDemoActivity extends Activity implements QBEntityCallback<Void
                 cancelDlg();
                 enableCallView(true);
                 initSignaling();
-                qbVideoChat = new QBVideoChat(QBRTCDemoActivity.this, sdpMediaConstraints,
-                        qbVideoChatSignlaing, vsv);
+                qbVideoChat = new QBVideoChat(QBRTCDemoActivity.this, qbVideoChatSignlaing, null);
             }
         });
     }
@@ -294,6 +284,11 @@ public class QBRTCDemoActivity extends Activity implements QBEntityCallback<Void
         if (progressDialog != null && progressDialog.isShowing()) {
             progressDialog.dismiss();
         }
+    }
+
+    @Override
+    public void onClosed(String msg) {
+
     }
 
     @Override

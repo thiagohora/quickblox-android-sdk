@@ -25,12 +25,12 @@ public class Splash extends Activity {
     private static final String AUTH_KEY = "wJHdOcQSxXQGWx5";
     private static final String AUTH_SECRET = "BTFsj7Rtt27DAmT";
 
-    public static final String BOB_USER = "ios_android1";
+    public static final String BOB_USER = "bobbobbob";
     public static final String BOB_NAME = "bob";
-    public static final int BOB_USER_ID = 1010049;
-    public static final String SAM_USER = "ios_android2";
+    public static final int BOB_USER_ID = 298;
+    public static final String SAM_USER = "samsamsam";
     public static final String SAM_NAME = "sam";
-    public static final int SAM_USER_ID = 1010050;
+    public static final int SAM_USER_ID = 299;
     public static final int USER_ID = 999;
     ProgressDialog progressDialog;
 
