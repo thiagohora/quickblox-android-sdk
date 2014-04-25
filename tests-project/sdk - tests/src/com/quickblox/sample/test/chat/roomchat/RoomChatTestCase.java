@@ -23,8 +23,6 @@ public class RoomChatTestCase extends BaseTestCase {
     protected void setUp() throws Exception {
         super.setUp();
 
-        QBChatService.setDebugEnabled(true);
-
         user = new QBUser(TestConfig.USER_LOGIN, TestConfig.USER_PASSWORD);
         user.setId(TestConfig.USER_ID);
         QBChatService.init(context);
@@ -43,7 +41,7 @@ public class RoomChatTestCase extends BaseTestCase {
         service.destroy();
         super.tearDown();
     }
-
+/*
     protected boolean containsRoom(QBChatService service, String room) throws XMPPException {
         Collection<String> roomNames = service.getRoomChatManager().getHostedRooms();
         for (String roomName : roomNames) {
@@ -62,5 +60,6 @@ public class RoomChatTestCase extends BaseTestCase {
             room.destroy();
         }
     }
+    */
 }
 

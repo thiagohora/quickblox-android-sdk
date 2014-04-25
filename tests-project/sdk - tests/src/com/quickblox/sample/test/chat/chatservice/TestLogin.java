@@ -8,6 +8,7 @@ import com.quickblox.module.users.model.QBUser;
 import com.quickblox.sample.test.BaseTestCase;
 import com.quickblox.sample.test.TestConfig;
 
+import org.jivesoftware.smack.SmackException;
 import org.jivesoftware.smack.XMPPException;
 
 import java.util.List;
@@ -64,8 +65,8 @@ public class TestLogin extends BaseTestCase {
         try {
             service.login(user);
             fail("Missing exception");
-        } catch (XMPPException e) {
-            assertEquals(Consts.ALREADY_LOGGED_IN, e.getMessage());
+        } catch (SmackException.AlreadyLoggedInException e) {
+            // Ok
         }
     }
 

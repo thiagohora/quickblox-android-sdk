@@ -24,6 +24,8 @@ public class TestCreateRoom extends RoomChatTestCase {
         super.tearDown();
     }
 
+    /*
+
     public void testMembersOnlyPersistentRoomSync() throws Exception {
         roomChat.create(true, true);
         assertEquals(containsRoom(service, ROOM_NAME), true);
@@ -101,7 +103,7 @@ public class TestCreateRoom extends RoomChatTestCase {
             assertEquals(e.getMessage(), "Creation failed - Missing acknowledge of room creation.");
         }
     }
-
+    */
     public void testNullRoomName() throws Exception {
         try {
             service.getRoomChatManager().createRoom(null);

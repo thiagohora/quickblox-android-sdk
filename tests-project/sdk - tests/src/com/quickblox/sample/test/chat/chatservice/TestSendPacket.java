@@ -56,7 +56,7 @@ public class TestSendPacket extends BaseTestCase {
         service.destroy();
         super.tearDown();
     }
-
+/*
     public void testSendPacket() throws Exception {
         final String from = QBChatUtils.getChatLoginFull(user.getId());
         final String to = QBChatUtils.getChatLoginFull(participant.getId());
@@ -81,7 +81,7 @@ public class TestSendPacket extends BaseTestCase {
         signal.await(PACKET_DELIVERY_TIMEOUT, TimeUnit.SECONDS);
         assertEquals(true, testPassed);
     }
-
+*/
     public void testSendPacketWithNoConnection() throws Exception {
         service.logout();
         try {

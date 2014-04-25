@@ -1,31 +1,28 @@
 package com.quickblox.sample.test.chat.chatservice;
 
-import android.content.Context;
-import android.net.wifi.WifiManager;
 import android.util.Log;
 
 import com.quickblox.core.QBEntityCallbackImpl;
-import com.quickblox.internal.core.helper.Lo;
 import com.quickblox.module.chat.QBChatService;
 import com.quickblox.module.users.model.QBUser;
 import com.quickblox.sample.test.BaseTestCase;
 import com.quickblox.sample.test.TestConfig;
+import com.quickblox.sample.test.faker.ChatServiceFaker;
 
-import org.jivesoftware.smack.AbstractConnectionListener;
 import org.jivesoftware.smack.ConnectionListener;
-import org.jivesoftware.smack.XMPPException;
+import org.jivesoftware.smack.XMPPConnection;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
 public class TestReconnection extends BaseTestCase {
 
-    private static final long RECONNECTION_TIMEOUT = 25;
+    private static final long RECONNECTION_TIMEOUT = 17;
 
     private QBUser user;
     private QBChatService service;
-    private WifiManager wifiManager;
 
     private boolean testPassed;
 
@@ -33,8 +30,8 @@ public class TestReconnection extends BaseTestCase {
     protected void setUp() throws Exception {
         super.setUp();
 
-        wifiManager = (WifiManager) context.getSystemService(Context.WIFI_SERVICE);
-        wifiManager.setWifiEnabled(true);
+        QBChatService.setDebugEnabled(true);
+
         user = new QBUser(TestConfig.USER_LOGIN, TestConfig.USER_PASSWORD);
         user.setId(TestConfig.USER_ID);
         QBChatService.init(context);
@@ -47,73 +44,151 @@ public class TestReconnection extends BaseTestCase {
     protected void tearDown() throws Exception {
         service.logout();
         service.destroy();
-        wifiManager.setWifiEnabled(true);
         super.tearDown();
     }
-
-    /*
-    public void testManualReconnection() throws Exception {
-        final CountDownLatch signal = new CountDownLatch(1);
-        service.login(user);
-        ConnectionListener connectionListener = new FakeConnectionListenerImpl() {
-
-            @Override
-            public void reconnectionFailed(Exception e) {
-                try {
-                    wifiManager.setWifiEnabled(true);
-                    Thread.sleep(5000);
-                    service.login(user);
-                    testPassed = true;
-                    signal.countDown();
-                } catch (XMPPException e1) {
-                    Log.d(TestConfig.TAG, "failed to login", e1);
-                    fail(e1.getMessage());
-                } catch (IllegalStateException e1) {
-                    Log.d(TestConfig.TAG, "failed to login", e1);
-                    fail(e1.getMessage());
-                } catch (InterruptedException e1) {
-                    e1.printStackTrace();
-                }
-            }
-        };
-        service.addConnectionListener(connectionListener);
-        wifiManager.setWifiEnabled(false);
-        signal.await(RECONNECTION_TIMEOUT, TimeUnit.SECONDS);
-        // service.removeConnectionListener(connectionListener);
-        assertEquals(true, service.isLoggedIn());
-        assertEquals(true, testPassed);
-    }
-    */
 
     public void testAutoReconnection() throws Exception {
         final CountDownLatch signal = new CountDownLatch(1);
         service.login(user);
-        ConnectionListener connectionListener = new FakeConnectionListenerImpl() {
+        XMPPConnectionTestListener listener = new XMPPConnectionTestListener();
+        service.addConnectionListener(listener);
 
-            @Override
-            public void reconnectingIn(int seconds) {
-                if (!wifiManager.isWifiEnabled()) {
-                    wifiManager.setWifiEnabled(true);
-                }
-            }
-
-            @Override
-            public void reconnectionSuccessful() {
-                signal.countDown();
-            }
-        };
-        service.addConnectionListener(connectionListener);
-        wifiManager.setWifiEnabled(false);
+        // Simulates an error in the connection
+        ChatServiceFaker.notifyConnectionError(service, new Exception("Simulated Error"));
         signal.await(RECONNECTION_TIMEOUT, TimeUnit.SECONDS);
-        service.removeConnectionListener(connectionListener);
+
+        // After 10 seconds, the reconnection manager must reestablishes the connection
+        assertEquals("The ConnectionListener.connectionEstablished() notification was not fired", true,
+                listener.reconnected);
+        assertTrue("The ReconnectionManager algorithm has reconnected without waiting at least 5 seconds",
+                listener.attemptsNotifications > 0);
+
+        signal.await(RECONNECTION_TIMEOUT, TimeUnit.SECONDS);
         assertEquals(true, service.isLoggedIn());
     }
 
-    private class FakeConnectionListenerImpl extends AbstractConnectionListener {
+    public void testManualReconnection() throws Exception {
+        final CountDownLatch signal = new CountDownLatch(1);
+        service.login(user);
+        XMPPConnectionTestListener listener = new XMPPConnectionTestListener();
+        service.addConnectionListener(listener);
+
+        // Simulates an error in the connection
+        ChatServiceFaker.notifyConnectionError(service, new Exception("Simulated Error"));
+
+        // After 10 seconds, the reconnection manager must reestablishes the connection
+        assertEquals("The ConnectionListener.connectionClosedOnError() notification was not fired", true,
+                listener.connectionClosedOnError);
+
+        // Makes a manual reconnection
+        service.login(user, new QBEntityCallbackImpl() {
+            @Override
+            public void onSuccess() {
+                testPassed = true;
+                signal.countDown();
+            }
+
+            @Override
+            public void onError(List errors) {
+                fail(Arrays.toString(errors.toArray()));
+            }
+        });
+        signal.await(RECONNECTION_TIMEOUT, TimeUnit.SECONDS);
+
+        assertEquals("User didn't login", true, service.isLoggedIn());
+        assertEquals("User logged in automatically", true, testPassed);
+    }
+
+    public void testCloseAndManualReconnection() throws Exception {
+        service.login(user);
+        XMPPConnectionTestListener listener = new XMPPConnectionTestListener();
+        service.addConnectionListener(listener);
+
+        // Produces a normal disconnection
+        service.logout();
+        assertEquals("ConnectionListener.connectionClosed() was not notified", true,
+                listener.connectionClosed);
+        // Waits 10 seconds waiting for a reconnection that must not happened.
+        Thread.sleep(RECONNECTION_TIMEOUT * 1000);
+        assertEquals("The connection was stablished but it was not allowed to", false, listener.reconnected);
+
+        // Makes a manual reconnection
+        service.login(user);
+        assertEquals(true, service.isLoggedIn());
+    }
+
+    private class XMPPConnectionTestListener implements ConnectionListener {
+
+        // Variables to support listener notifications verification
+        private volatile boolean connectionClosed = false;
+        private volatile boolean connectionClosedOnError = false;
+        private volatile boolean reconnected = false;
+        private volatile boolean reconnectionFailed = false;
+        private volatile int remainingSeconds = 0;
+        private volatile int attemptsNotifications = 0;
+        private CountDownLatch countDownLatch;
+
+        private XMPPConnectionTestListener(CountDownLatch latch) {
+            countDownLatch = latch;
+        }
+
+        private XMPPConnectionTestListener() {
+        }
 
         @Override
-        public void reconnectionFailed(Exception e) {
-            fail("Reconnection Failed");
+        public void connected(XMPPConnection connection) {
+
+        }
+
+        @Override
+        public void authenticated(XMPPConnection connection) {
+
+        }
+
+        /**
+         * Methods to test the listener.
+         */
+        @Override
+        public void connectionClosed() {
+            connectionClosed = true;
+
+            if (countDownLatch != null) {
+                countDownLatch.countDown();
+            }
+            Log.d("SMACK", "connectionClosed()");
+        }
+
+        @Override
+        public void connectionClosedOnError(Exception e) {
+            connectionClosedOnError = true;
+            Log.d("SMACK", "connectionClosedOnError() " + e.getMessage());
+        }
+
+        @Override
+        public void reconnectingIn(int seconds) {
+            attemptsNotifications = attemptsNotifications + 1;
+            remainingSeconds = seconds;
+            Log.d("SMACK", "reconnectingIn(" + seconds + ")");
+        }
+
+        @Override
+        public void reconnectionSuccessful() {
+            reconnected = true;
+
+            if (countDownLatch != null) {
+                countDownLatch.countDown();
+            }
+            Log.d("SMACK", "reconnectionSuccessful()");
+        }
+
+        @Override
+        public void reconnectionFailed(Exception error) {
+            reconnectionFailed = true;
+
+            if (countDownLatch != null) {
+                countDownLatch.countDown();
+            }
+            Log.d("SMACK", "reconnectionFailed() " + error.getMessage());
         }
     }
 }
