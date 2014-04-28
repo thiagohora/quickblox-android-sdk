@@ -1,116 +1,201 @@
 package com.quickblox.sample.video_webrtc;
 
 import android.app.Activity;
+import android.app.ProgressDialog;
 import android.content.Context;
-import android.media.AudioManager;
+import android.content.pm.ActivityInfo;
+import android.content.res.Configuration;
 import android.os.Bundle;
 import android.os.Vibrator;
 import android.util.Log;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.Button;
+import android.widget.RadioGroup;
 import android.widget.Toast;
+
+import com.quickblox.core.QBEntityCallback;
 import com.quickblox.module.chat.QBChatService;
-import com.quickblox.module.chat.listeners.SessionListener;
-import com.quickblox.module.chat.smack.SmackAndroid;
 import com.quickblox.module.users.model.QBUser;
+import com.quickblox.module.videochat_webrtc.*;
+import com.quickblox.module.videochat_webrtc.model.CallConfig;
+import com.quickblox.module.videochat_webrtc.model.ConnectionConfig;
+import com.quickblox.module.videochat_webrtc.render.VideoStreamsView;
 import com.quickblox.module.videochat_webrtc.ISignalingChannel;
-import com.quickblox.module.videochat_webrtc.QBVideoChat;
-import com.quickblox.module.videochat_webrtc.SignalingChannel;
-import com.quickblox.module.videochat_webrtc.VideoStreamsView;
-import org.webrtc.MediaConstraints;
-import org.webrtc.PeerConnectionFactory;
-/**
- * Created by vadim on 26.02.14.
- */
-public class QBRTCDemoActivity extends Activity implements SessionListener, View.OnClickListener, ISignalingChannel.MessageObserver {
+
+import org.webrtc.SessionDescription;
+
+import java.util.List;
+
+public class QBRTCDemoActivity extends Activity implements QBEntityCallback<Void>, View.OnClickListener, ISignalingChannel.MessageHandler {
 
     private static final String TAG = QBRTCDemoActivity.class.getSimpleName();
     private VideoStreamsView vsv;
     private Toast logToast;
-    // Synchronize on quit[0] to avoid teardown-related crashes.
-    private final Boolean[] quit = new Boolean[] { false };
-    private MediaConstraints sdpMediaConstraints;
-    QBVideoChat qbVideoChat;
-    private SignalingChannel qbVideoChatSignlaing;
-    private int userId;
+    private QBVideoChat qbVideoChat;
+    private ExtensionSignalingChannel qbVideoChatSignlaing;
+    private QBUser opponent;
+    private SessionDescription sdp;
+    private ProgressDialog progressDialog;
+    private String sessionId;
+
+    private int[] orientations = {ActivityInfo.SCREEN_ORIENTATION_PORTRAIT, ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE, ActivityInfo.SCREEN_ORIENTATION_REVERSE_PORTRAIT, ActivityInfo.SCREEN_ORIENTATION_REVERSE_LANDSCAPE};
+    private int orientationIndex = 0;
+    private int orientation = orientations[orientationIndex];
+    private WebRTC.MEDIA_STREAM callType;
+    private CallConfig callConfig;
 
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.videolayout);
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
-        AudioManager audioManager =
-                ((AudioManager) getSystemService(AUDIO_SERVICE));
-        // TODO(fischman): figure out how to do this Right(tm) and remove the
-        // suppression.
-        @SuppressWarnings("deprecation")
-        boolean isWiredHeadsetOn = audioManager.isWiredHeadsetOn();
-        audioManager.setMode(isWiredHeadsetOn ?
-                AudioManager.MODE_IN_CALL : AudioManager.MODE_IN_COMMUNICATION);
-        audioManager.setSpeakerphoneOn(!isWiredHeadsetOn);
-
         initViews();
-        initConstraints();
-        QBChatService.getInstance().init(this);
+        QBChatService.init(this);
         QBChatService.getInstance().loginWithUser(DataHolder.getQbUser(), this);
     }
 
-    private void initSignaling(){
-        qbVideoChatSignlaing = new SignalingChannel(QBChatService.getInstance().getPrivateChatInstance());
-        qbVideoChatSignlaing.addMessageObserver(this);
+    private void initSignaling() {
+        qbVideoChatSignlaing = new ExtensionSignalingChannel(
+                QBChatService.getInstance().getPrivateChatInstance());
+        qbVideoChatSignlaing.addMessageHandler(this);
     }
 
-    private void initConstraints(){
-        sdpMediaConstraints = new MediaConstraints();
-        sdpMediaConstraints.mandatory.add(new MediaConstraints.KeyValuePair(
-                "OfferToReceiveAudio", "true"));
-        sdpMediaConstraints.mandatory.add(new MediaConstraints.KeyValuePair(
-                "OfferToReceiveVideo", "true"));
+    @Override
+    public void onConfigurationChanged(Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+        Log.i(TAG, "onConfigurationChanged");
+        if (qbVideoChat != null){
+            qbVideoChat.onConfigurationChanged(newConfig);
+        }
     }
 
-    private void initViews(){
+    private void initViews() {
+        vsv = (VideoStreamsView) findViewById(R.id.videoView);
         findViewById(R.id.call).setOnClickListener(this);
         findViewById(R.id.accept).setOnClickListener(this);
         findViewById(R.id.reject).setOnClickListener(this);
         findViewById(R.id.stop).setOnClickListener(this);
-        vsv = (VideoStreamsView) findViewById(R.id.videoView);
+        findViewById(R.id.muteMicrophone).setOnClickListener(this);
+        findViewById(R.id.turnSound).setOnClickListener(this);
+        findViewById(R.id.orientation).setOnClickListener(this);
         QBUser qbUser = DataHolder.getQbUser();
-        String userName = qbUser.getId() == Splash.BOB_USER_ID ? Splash.SAM_NAME :Splash.BOB_NAME;
-        int opponentId = qbUser.getId() == Splash.BOB_USER_ID ? Splash.SAM_USER_ID :Splash.BOB_USER_ID;
-        ((Button)findViewById(R.id.call)).setText("call to "+ userName);
-        (findViewById(R.id.call)).setTag(opponentId);
+        String userName = qbUser.getId() == Splash.BOB_USER_ID ? Splash.SAM_NAME : Splash.BOB_NAME;
+        int opponentId = qbUser.getId() == Splash.BOB_USER_ID ? Splash.SAM_USER_ID : Splash.BOB_USER_ID;
+        opponent = new QBUser(opponentId);
+        opponent.setFullName(userName);
+        ((Button) findViewById(R.id.call)).setText("call to " + userName);
+        (findViewById(R.id.call)).setTag(opponent);
+        progressDialog = new ProgressDialog(this);
+        progressDialog.setMessage("Please wait. Connecting to chat...");
+        progressDialog.show();
     }
 
     @Override
     public void onClick(View v) {
-        switch (v.getId()){
-            case R.id.call:{
-                int opponentId = (Integer)findViewById(R.id.call).getTag();
-                qbVideoChat.call(opponentId);
+        switch (v.getId()) {
+            case R.id.call: {
+                startCall();
                 break;
             }
-            case R.id.accept:{
-                qbVideoChat.accept(userId);
-                enableAcceptView(false);
+            case R.id.accept: {
+                accept();
                 break;
             }
-            case R.id.reject:{
-                qbVideoChat.reject(userId);
-                enableAcceptView(false);
+            case R.id.reject: {
+                reject();
+            }
+            case R.id.stop: {
+                if (qbVideoChat != null){
+                    qbVideoChat.stopCall();
+                }
                 break;
             }
-            case R.id.stop:{
-                qbVideoChat.stopCall();
+            case R.id.muteMicrophone: {
+                if (qbVideoChat != null){
+                qbVideoChat.muteMicrophone(!qbVideoChat.isMicrophoneMute());
+                }
                 break;
+            }
+            case R.id.turnSound: {
+                if (qbVideoChat != null){
+                qbVideoChat.muteSound(!qbVideoChat.isSoundMute());
+                }
+                break;
+            }
+            case R.id.orientation: {
+                changeOrientation();
             }
         }
+    }
+
+    private void reject() {
+        if (qbVideoChat != null){
+            qbVideoChat.reject(opponent, sessionId);
+        }
+        else if (callConfig != null){
+            ConnectionConfig connectionConfig = new ConnectionConfig(callConfig.getParticipant(),
+                    callConfig.getConnectionSession());
+            qbVideoChatSignlaing.sendReject(connectionConfig);
+        }
+        enableAcceptView(false);
+    }
+
+    private void accept() {
+        if (qbVideoChat == null){
+            initVideoChat();
+        }
+        logAndToast("callType="+callConfig.getCallStreamType());
+        qbVideoChat.accept(callConfig);
+        enableAcceptView(false);
+    }
+
+    private void startCall() {
+        if (qbVideoChat == null){
+            initVideoChat();
+        }
+        if (QBVideoChat.VIDEO_CHAT_STATE.INACTIVE.equals(qbVideoChat.getState())) {
+            opponent = (QBUser) findViewById(R.id.call).getTag();
+            qbVideoChat.call(opponent, getCallType());
+        } else {
+            logAndToast("Stop current chat before call");
+        }
+    }
+
+    private void initVideoChat(){
+        qbVideoChat = new QBVideoChat(QBRTCDemoActivity.this, qbVideoChatSignlaing, vsv);
+        qbVideoChat.setMediaCaptureCallback( new QBVideoChat.MediaCaptureCallback() {
+            @Override
+            public void onCaptureFail(WebRTC.MEDIA_STREAM mediaStream, String problem) {
+                logAndToast(problem);
+            }
+
+            @Override
+            public void onCaptureSuccess(WebRTC.MEDIA_STREAM mediaStream) {
+
+            }
+        });
+    }
+
+    private WebRTC.MEDIA_STREAM getCallType(){
+        int selectedId = ((RadioGroup)findViewById(R.id.callMode)).getCheckedRadioButtonId();
+        return (R.id.audio_call ==selectedId) ? WebRTC.MEDIA_STREAM.AUDIO :WebRTC.MEDIA_STREAM.VIDEO;
+
+    }
+
+    public void changeOrientation() {
+        orientationIndex++;
+        if (orientationIndex >= orientations.length) {
+            orientationIndex = 0;
+        }
+        orientation = orientations[orientationIndex];
+        setRequestedOrientation(orientation);
     }
 
     @Override
     public void onPause() {
         super.onPause();
-        if (qbVideoChat != null){
+        if (qbVideoChat != null) {
             qbVideoChat.onActivityPause();
         }
     }
@@ -118,11 +203,10 @@ public class QBRTCDemoActivity extends Activity implements SessionListener, View
     @Override
     public void onResume() {
         super.onResume();
-        if (qbVideoChat != null){
+        if (qbVideoChat != null) {
             qbVideoChat.onActivityResume();
         }
     }
-
 
     @Override
     protected void onDestroy() {
@@ -137,102 +221,31 @@ public class QBRTCDemoActivity extends Activity implements SessionListener, View
         }
     }
 
-    // Disconnect from remote resources, dispose of local resources, and exit.
+    // Disconnect from remote resources, disposeConnection of local resources, and exit.
     private void disconnectAndExit() {
-        synchronized (quit[0]) {
-            if (quit[0]) {
-                return;
+        if (qbVideoChat != null) {
+            if (!QBVideoChat.VIDEO_CHAT_STATE.INACTIVE.equals(qbVideoChat.getState()) ){
+                qbVideoChat.disposeConnection();
             }
-            quit[0] = true;
-            if(qbVideoChat != null){
-                qbVideoChat.dispose();
-            }
-        }
+            qbVideoChat.clean();
+        } QBChatService.getInstance().logout();
+        QBChatService.getInstance().destroy();
     }
 
-    @Override
-    public void onLoginSuccess() {
-        runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                enableView(R.id.progressLayout, false);
-                enableCallView(true);
-                Toast.makeText(QBRTCDemoActivity.this, "onLoginsucces", Toast.LENGTH_SHORT).show();
-                initSignaling();
-                qbVideoChat = new QBVideoChat(QBRTCDemoActivity.this, sdpMediaConstraints, qbVideoChatSignlaing,  vsv );
-            }
-        });
+    private void enableView(int viewId, boolean enable) {
+        findViewById(viewId).setVisibility(enable ? View.VISIBLE : View.INVISIBLE);
     }
 
-    private void enableView(int viewId, boolean enable){
-        findViewById(viewId).setVisibility(enable ? View.VISIBLE:View.INVISIBLE);
-    }
-
-    private void enableCallView(boolean enable){
+    private void enableCallView(boolean enable) {
         enableView(R.id.call, enable);
         enableView(R.id.stop, enable);
     }
 
-    private void enableAcceptView(boolean enable){
+    private void enableAcceptView(boolean enable) {
         enableView(R.id.accept, enable);
         enableView(R.id.reject, enable);
     }
 
-    @Override
-    public void onLoginError() {
-        enableView(R.id.progressLayout, false);
-        enableCallView(false);
-        //Toast.makeText(this, "onLoginsucces", Toast.LENGTH_SHORT).show();
-    }
-
-    @Override
-    public void onDisconnect() {
-
-    }
-
-    @Override
-    public void onDisconnectOnError(Exception e) {
-
-    }
-
-
-    @Override
-    public void onCall(final String fromUserid) {
-        runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                userId = Integer.parseInt(fromUserid);
-                Vibrator vibrator = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
-                vibrator.vibrate(4000);
-                enableAcceptView(true);
-            }
-        });
-    }
-
-    @Override
-    public void onAccepted(String fromUserid) {
-        runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                logAndToast("onAccept");
-            }
-        });
-    }
-
-    @Override
-    public void onStop(String fromUserid) {
-
-    }
-
-    @Override
-    public void onRejected(String fromUserid) {
-        runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                logAndToast("Reject call");
-            }
-        });
-    }
 
     // Log |msg| and Toast about it.
     private void logAndToast(String msg) {
@@ -244,4 +257,104 @@ public class QBRTCDemoActivity extends Activity implements SessionListener, View
         logToast.show();
     }
 
+    @Override
+    public void onCall(final ConnectionConfig connectionConfig) {
+        runOnUiThread(new Runnable() {
+
+            @Override
+            public void run() {
+                opponent = connectionConfig.getParticipant();
+                logAndToast("call from user " + opponent.getFullName());
+                Vibrator vibrator = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
+                vibrator.vibrate(4000);
+                enableAcceptView(true);
+                QBRTCDemoActivity.this.sessionId = connectionConfig.getConnectionSession();
+                sdp = ((CallConfig)connectionConfig).getSessionDescription();
+                callType = ((CallConfig)connectionConfig).getCallStreamType();
+                callConfig =  (CallConfig)connectionConfig;
+            }
+        });
+    }
+
+    @Override
+    public void onIceCandidate(ConnectionConfig connectionConfig) {
+
+    }
+
+    @Override
+    public void onAccepted(final ConnectionConfig connectionConfig) {
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                logAndToast("Call accepted");
+            }
+        });
+    }
+
+    @Override
+    public void onParametersChanged(final ConnectionConfig connectionConfig) {
+
+    }
+
+    @Override
+    public void onStop(final ConnectionConfig connectionConfig) {
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                logAndToast("Participant closed connection");
+            }
+        });
+    }
+
+    @Override
+    public void onRejected(final ConnectionConfig connectionConfig) {
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                logAndToast("Reject call");
+                qbVideoChat.disposeConnection();
+            }
+        });
+    }
+
+    @Override
+    public void onSuccess(Void result, Bundle params) {
+
+    }
+
+    @Override
+    public void onSuccess() {
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                cancelDlg();
+                enableCallView(true);
+                initSignaling();
+            }
+        });
+    }
+
+    private void cancelDlg() {
+        if (progressDialog != null && progressDialog.isShowing()) {
+            progressDialog.dismiss();
+        }
+    }
+
+    @Override
+    public void onClosed(String msg) {
+
+    }
+
+    @Override
+    public void onError(final List<String> errors) {
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                cancelDlg();
+                Toast.makeText(QBRTCDemoActivity.this, "errors in connection " + errors.toString(),
+                        Toast.LENGTH_SHORT).show();
+                enableCallView(false);
+            }
+        });
+    }
 }
