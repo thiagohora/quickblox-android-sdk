@@ -9,6 +9,7 @@ import android.view.View;
 import com.quickblox.core.QBEntityCallback;
 import com.quickblox.core.QBEntityCallbackImpl;
 import com.quickblox.core.QBSettings;
+import com.quickblox.core.TransferProtocol;
 import com.quickblox.module.auth.QBAuth;
 import com.quickblox.module.auth.model.QBSession;
 import com.quickblox.module.users.model.QBUser;
@@ -21,16 +22,16 @@ import java.util.List;
  */
 public class Splash extends Activity {
 
-    private static final String APP_ID = "92";
-    private static final String AUTH_KEY = "wJHdOcQSxXQGWx5";
-    private static final String AUTH_SECRET = "BTFsj7Rtt27DAmT";
+    private static final String APP_ID = "7233";
+    private static final String AUTH_KEY = "5wVUHeLOq3Thfra";
+    private static final String AUTH_SECRET = "FPZnZKEVbvv9YSv";
 
-    public static final String BOB_USER = "iostester3";
+    public static final String BOB_USER = "bobbobbob";
     public static final String BOB_NAME = "bob";
-    public static final int BOB_USER_ID = 986408;
-    public static final String SAM_USER = "iostester4";
+    public static final int BOB_USER_ID = 1022193;
+    public static final String SAM_USER = "cedcedced";
     public static final String SAM_NAME = "sam";
-    public static final int SAM_USER_ID = 986409;
+    public static final int SAM_USER_ID = 1022194;
     public static final int USER_ID = 999;
     ProgressDialog progressDialog;
 
@@ -41,6 +42,12 @@ public class Splash extends Activity {
 
 
         QBSettings.getInstance().fastConfigInit(APP_ID, AUTH_KEY, AUTH_SECRET);
+
+         /* Stage */
+        QBSettings.getInstance().setServerApiDomain("api.stage.quickblox.com");
+        QBSettings.getInstance().setChatServerDomain("chatstage.quickblox.com");
+        QBSettings.getInstance().setContentBucketName("blobs-test-oz");
+        QBSettings.getInstance().setTransferProtocol(TransferProtocol.HTTP);
 
         findViewById(R.id.loginButtonChat).setOnClickListener(new View.OnClickListener() {
             @Override

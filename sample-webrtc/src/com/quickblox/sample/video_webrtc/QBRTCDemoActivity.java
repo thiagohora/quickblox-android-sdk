@@ -21,13 +21,13 @@ import com.quickblox.module.videochat_webrtc.*;
 import com.quickblox.module.videochat_webrtc.model.CallConfig;
 import com.quickblox.module.videochat_webrtc.model.ConnectionConfig;
 import com.quickblox.module.videochat_webrtc.render.VideoStreamsView;
-import com.quickblox.module.videochat_webrtc.ISignalingChannel;
 
+import org.jivesoftware.smack.SmackException;
 import org.webrtc.SessionDescription;
 
 import java.util.List;
 
-public class QBRTCDemoActivity extends Activity implements QBEntityCallback<Void>, View.OnClickListener, ISignalingChannel.MessageHandler {
+public class QBRTCDemoActivity extends Activity implements QBEntityCallback<Void>, View.OnClickListener, QBSignalingChannel.SignalingListener {
 
     private static final String TAG = QBRTCDemoActivity.class.getSimpleName();
     private VideoStreamsView vsv;
@@ -51,14 +51,15 @@ public class QBRTCDemoActivity extends Activity implements QBEntityCallback<Void
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
         initViews();
+        QBChatService.setDebugEnabled(true);
         QBChatService.init(this);
-        QBChatService.getInstance().loginWithUser(DataHolder.getQbUser(), this);
+        QBChatService.getInstance().login(DataHolder.getQbUser(), this);
     }
 
     private void initSignaling() {
         qbVideoChatSignlaing = new ExtensionSignalingChannel(
-                QBChatService.getInstance().getPrivateChatInstance());
-        qbVideoChatSignlaing.addMessageHandler(this);
+                QBChatService.getInstance().getSignalingManager());
+        qbVideoChatSignlaing.addSignalingListener(this);
     }
 
     @Override
@@ -228,7 +229,12 @@ public class QBRTCDemoActivity extends Activity implements QBEntityCallback<Void
                 qbVideoChat.disposeConnection();
             }
             qbVideoChat.clean();
-        } QBChatService.getInstance().logout();
+        }
+        try {
+            QBChatService.getInstance().logout();
+        } catch (SmackException.NotConnectedException e) {
+            e.printStackTrace();
+        }
         QBChatService.getInstance().destroy();
     }
 
@@ -302,6 +308,7 @@ public class QBRTCDemoActivity extends Activity implements QBEntityCallback<Void
             @Override
             public void run() {
                 logAndToast("Participant closed connection");
+                qbVideoChat.disposeConnection();
             }
         });
     }
