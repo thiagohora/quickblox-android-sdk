@@ -45,20 +45,20 @@ public class SnippetsCONew extends Snippets{
         super(context);
 
         snippets.add(createCustomObjectNewCallback);
-        snippets.add(createCustomObjects);
+        snippets.add(createCustomObjectsNewCallback);
         snippets.add(deleteCustomObjectsSynchronous);
-        snippets.add(deleteCustomObjectNew);
-        snippets.add(deleteCustomObjectsNew);
+        snippets.add(deleteCustomObjectNewCallback);
+        snippets.add(deleteCustomObjectsNewCallback);
         snippets.add(getCustomObjectsNewCallback);
         snippets.add(getCustomObjectsSynchronous);
-        snippets.add(updateCustomObjectNew);
-        snippets.add(getCountCustomsObjectNew);
+        snippets.add(updateCustomObjectNewCallback);
+        snippets.add(getCountCustomsObjectNewCallback);
         snippets.add(getGetCustomObjectsByIdsNewCallback);
-        snippets.add(getCustomObjectPermissionByIdNew);
-        snippets.add(uploadFile);
-        snippets.add(updateFile);
-        snippets.add(deleteFile);
-        snippets.add(downloadFile);
+        snippets.add(getCustomObjectPermissionByIdNewCallback);
+        snippets.add(uploadFileNewCallback);
+        snippets.add(updateFileNewCallback);
+        snippets.add(deleteFileNewCallback);
+        snippets.add(downloadFileSynchronous);
 
         // get file
         file1 = Utils.getFileFromRawResource(R.raw.sample_file, context);
@@ -148,7 +148,7 @@ public class SnippetsCONew extends Snippets{
         }
     };
 
-    Snippet createCustomObjects = new Snippet("create objects") {
+    Snippet createCustomObjectsNewCallback = new Snippet("create objects") {
 
         public static final int NUM_RECORDS = 4;
 
@@ -209,7 +209,7 @@ public class SnippetsCONew extends Snippets{
         }
     };
 
-    Snippet getCountCustomsObjectNew = new Snippet("get count custom objects new") {
+    Snippet getCountCustomsObjectNewCallback = new Snippet("get count custom objects new") {
         @Override
         public void execute() {
             String fieldName = "title";
@@ -265,7 +265,7 @@ public class SnippetsCONew extends Snippets{
         }
     };
 
-    Snippet getCustomObjectPermissionByIdNew = new Snippet("get object permissions new callback") {
+    Snippet getCustomObjectPermissionByIdNewCallback = new Snippet("get object permissions new callback") {
         @Override
         public void execute() {
             String OBJ_ID = "52b88399535c12c51c001140";
@@ -285,7 +285,7 @@ public class SnippetsCONew extends Snippets{
         }
     };
 
-    Snippet deleteCustomObjectNew = new Snippet("delete object on new callback") {
+    Snippet deleteCustomObjectNewCallback = new Snippet("delete object on new callback") {
         @Override
         public void execute() {
 
@@ -330,7 +330,7 @@ public class SnippetsCONew extends Snippets{
         }
     };
 
-    Snippet deleteCustomObjectsNew = new Snippet("delete objects new callback") {
+    Snippet deleteCustomObjectsNewCallback = new Snippet("delete objects new callback") {
         @Override
         public void execute() {
 
@@ -358,7 +358,7 @@ public class SnippetsCONew extends Snippets{
         }
     };
 
-    Snippet updateCustomObjectNew = new Snippet("update object new callback") {
+    Snippet updateCustomObjectNewCallback = new Snippet("update object new callback") {
         @Override
         public void execute() {
             QBCustomObject record = new QBCustomObject();
@@ -402,7 +402,7 @@ public class SnippetsCONew extends Snippets{
         }
     };
 
-    Snippet uploadFile = new Snippet("upload CO file new") {
+    Snippet uploadFileNewCallback = new Snippet("upload CO file new") {
         @Override
         public void execute() {
             QBCustomObject qbCustomObject = new QBCustomObject(CLASS_NAME, NOTE1_ID);
@@ -422,7 +422,7 @@ public class SnippetsCONew extends Snippets{
         }
     };
 
-    Snippet updateFile = new Snippet("update CO file new") {
+    Snippet updateFileNewCallback = new Snippet("update CO file new") {
         @Override
         public void execute() {
             QBCustomObject qbCustomObject = new QBCustomObject(CLASS_NAME, NOTE1_ID);
@@ -441,7 +441,7 @@ public class SnippetsCONew extends Snippets{
         }
     };
 
-    Snippet deleteFile = new Snippet("delete CO file") {
+    Snippet deleteFileNewCallback = new Snippet("delete CO file") {
         @Override
         public void execute() {
             QBCustomObject qbCustomObject = new QBCustomObject(CLASS_NAME, NOTE1_ID);
@@ -461,7 +461,7 @@ public class SnippetsCONew extends Snippets{
     };
 
 
-    AsyncSnippet downloadFile = new AsyncSnippet("download CO file synchronous", context) {
+    AsyncSnippet downloadFileSynchronous = new AsyncSnippet("download CO file synchronous", context) {
         @Override
         public void executeAsync() {
             QBCustomObject qbCustomObject = new QBCustomObject(CLASS_NAME, NOTE1_ID);

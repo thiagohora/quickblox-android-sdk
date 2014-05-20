@@ -30,30 +30,30 @@ public class SnippetsRatingNew extends Snippets {
     public SnippetsRatingNew(Context context) {
         super(context);
 
-        snippets.add(createGameMode);
-        snippets.add(getGameModeWithId);
-        snippets.add(updateGameMode);
-        snippets.add(getGameModes);
-        snippets.add(getGameModesSync);
-        snippets.add(deleteGameModeWithId);
+        snippets.add(createGameModeNewCallback);
+        snippets.add(getGameModeWithIdNewCallback);
+        snippets.add(updateGameModeNewCallback);
+        snippets.add(getGameModesNewCallback);
+        snippets.add(getGameModesSynchronous);
+        snippets.add(deleteGameModeWithIdNewCallback);
 
-        snippets.add(createScore);
-        snippets.add(getScoreWithId);
-        snippets.add(updateScore);
-        snippets.add(deleteScoreWithId);
-        snippets.add(getTopNScores);
-        snippets.add(getScoresWithUserId);
-        snippets.add(getScoresWithUserIdSync);
+        snippets.add(createScoreNewCallback);
+        snippets.add(getScoreWithIdNewCallback);
+        snippets.add(updateScoreNewCallback);
+        snippets.add(deleteScoreWithIdNewCallback);
+        snippets.add(getTopNScoresNewCallback);
+        snippets.add(getScoresWithUserIdNewCallback);
+        snippets.add(getScoresWithUserIdSynchronous);
 
-        snippets.add(getAverageByGameModeId);
-        snippets.add(getAverageByGameModeIdSync);
-        snippets.add(getAverageForApp);
+        snippets.add(getAverageByGameModeIdNewCallback);
+        snippets.add(getAverageByGameModeIdSynchronous);
+        snippets.add(getAverageForAppNewCallback);
     }
 
     //
     ///////////////////////////////////////////// Game mode /////////////////////////////////////////////
     //
-    Snippet createGameMode = new Snippet("create game mode") {
+    Snippet createGameModeNewCallback = new Snippet("create game mode") {
         @Override
         public void execute() {
             QBGameMode gameMode = new QBGameMode("Guitar hero mode");
@@ -76,7 +76,7 @@ public class SnippetsRatingNew extends Snippets {
     };
 
 
-    Snippet getGameModeWithId = new Snippet("get game mode") {
+    Snippet getGameModeWithIdNewCallback = new Snippet("get game mode") {
         @Override
         public void execute() {
             QBGameMode gameMode = new QBGameMode(311);
@@ -84,7 +84,7 @@ public class SnippetsRatingNew extends Snippets {
         }
     };
 
-    Snippet updateGameMode = new Snippet("update game mode") {
+    Snippet updateGameModeNewCallback = new Snippet("update game mode") {
         @Override
         public void execute() {
             QBGameMode qbGameMode = new QBGameMode();
@@ -95,7 +95,7 @@ public class SnippetsRatingNew extends Snippets {
         }
     };
 
-    Snippet deleteGameModeWithId = new Snippet("delete game mode") {
+    Snippet deleteGameModeWithIdNewCallback = new Snippet("delete game mode") {
         @Override
         public void execute() {
             QBGameMode gameMode = new QBGameMode(3190);
@@ -103,7 +103,7 @@ public class SnippetsRatingNew extends Snippets {
         }
     };
 
-    Snippet getGameModes = new Snippet("get game modes") {
+    Snippet getGameModesNewCallback = new Snippet("get game modes") {
         @Override
         public void execute() {
             QBRatings.getGameModes(new QBEntityCallbackImpl<ArrayList<QBGameMode>>() {
@@ -121,7 +121,7 @@ public class SnippetsRatingNew extends Snippets {
         }
     };
 
-    Snippet getGameModesSync = new AsyncSnippet("get game modes synchronous", context) {
+    Snippet getGameModesSynchronous = new AsyncSnippet("get game modes synchronous", context) {
         @Override
         public void executeAsync() {
             ArrayList<QBGameMode> gameModes = null;
@@ -139,7 +139,7 @@ public class SnippetsRatingNew extends Snippets {
     //
     ///////////////////////////////////////////// Scores /////////////////////////////////////////////
     //
-    Snippet createScore = new Snippet("create score") {
+    Snippet createScoreNewCallback = new Snippet("create score") {
         @Override
         public void execute() {
             QBScore score = new QBScore();
@@ -163,7 +163,7 @@ public class SnippetsRatingNew extends Snippets {
         }
     };
 
-    Snippet getScoreWithId = new Snippet("get score") {
+    Snippet getScoreWithIdNewCallback = new Snippet("get score") {
         @Override
         public void execute() {
             QBScore score = new QBScore(1945);
@@ -174,7 +174,7 @@ public class SnippetsRatingNew extends Snippets {
         }
     };
 
-    Snippet deleteScoreWithId = new Snippet("delete score") {
+    Snippet deleteScoreWithIdNewCallback = new Snippet("delete score") {
         @Override
         public void execute() {
             QBScore score = new QBScore(1945);
@@ -183,7 +183,7 @@ public class SnippetsRatingNew extends Snippets {
         }
     };
 
-    Snippet updateScore = new Snippet("update score") {
+    Snippet updateScoreNewCallback = new Snippet("update score") {
         @Override
         public void execute() {
             QBScore qbScore = new QBScore();
@@ -194,7 +194,7 @@ public class SnippetsRatingNew extends Snippets {
         }
     };
 
-    Snippet getTopNScores = new Snippet("get top n scores") {
+    Snippet getTopNScoresNewCallback = new Snippet("get top n scores") {
         @Override
         public void execute() {
             QBGameMode qbGameMode = new QBGameMode();
@@ -223,7 +223,7 @@ public class SnippetsRatingNew extends Snippets {
         }
     };
 
-    Snippet getScoresWithUserId = new Snippet("get scores with user id") {
+    Snippet getScoresWithUserIdNewCallback = new Snippet("get scores with user id") {
         @Override
         public void execute() {
             QBUser qbUser = new QBUser();
@@ -237,7 +237,7 @@ public class SnippetsRatingNew extends Snippets {
         }
     };
 
-    Snippet getScoresWithUserIdSync = new AsyncSnippet("get scores with user id synchronous", context) {
+    Snippet getScoresWithUserIdSynchronous = new AsyncSnippet("get scores with user id synchronous", context) {
         @Override
         public void executeAsync()  {
             QBUser qbUser = new QBUser();
@@ -267,7 +267,7 @@ public class SnippetsRatingNew extends Snippets {
     ///////////////////////////////////////////// Average /////////////////////////////////////////////
     //
 
-    Snippet getAverageForApp = new Snippet("get average for application") {
+    Snippet getAverageForAppNewCallback = new Snippet("get average for application") {
         @Override
         public void execute() {
             QBRatings.getAveragesByApp(new QBEntityCallbackImpl<ArrayList<QBAverage>>() {
@@ -285,7 +285,7 @@ public class SnippetsRatingNew extends Snippets {
         }
     };
 
-    Snippet getAverageByGameModeId = new Snippet("get average by game mode id") {
+    Snippet getAverageByGameModeIdNewCallback = new Snippet("get average by game mode id") {
         @Override
         public void execute() {
             QBGameMode qbGameMode = new QBGameMode();
@@ -305,7 +305,7 @@ public class SnippetsRatingNew extends Snippets {
         }
     };
 
-    Snippet getAverageByGameModeIdSync = new AsyncSnippet("get average by game mode id synchronous", context) {
+    Snippet getAverageByGameModeIdSynchronous = new AsyncSnippet("get average by game mode id synchronous", context) {
         @Override
         public void executeAsync() {
             QBGameMode qbGameMode = new QBGameMode();

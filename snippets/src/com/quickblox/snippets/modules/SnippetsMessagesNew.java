@@ -27,30 +27,30 @@ public class SnippetsMessagesNew extends Snippets{
     public SnippetsMessagesNew(Context context) {
         super(context);
 
-        snippets.add(createPushToken);
-        snippets.add(createPushTokenSync);
-        snippets.add(deletePushToken);
+        snippets.add(createPushTokenNewCallback);
+        snippets.add(createPushTokenSynchronous);
+        snippets.add(deletePushTokenNewCallback);
 
-        snippets.add(createSubscription);
-        snippets.add(getSubscriptions);
-        snippets.add(deleteSubscription);
+        snippets.add(createSubscriptionNewCallback);
+        snippets.add(getSubscriptionsNewCallback);
+        snippets.add(deleteSubscriptionNewCallback);
 
-        snippets.add(createEvent);
-        snippets.add(getEventWithId);
-        snippets.add(getEventWithIdSync);
-        snippets.add(getEvents);
-        snippets.add(getEventsSync);
-        snippets.add(getPullEvent);
-        snippets.add(updateEvent);
-        snippets.add(deleteEvent);
+        snippets.add(createEventNewCallback);
+        snippets.add(getEventWithIdNewCallback);
+        snippets.add(getEventWithIdSynchronous);
+        snippets.add(getEventsNewCallback);
+        snippets.add(getEventsSynchronous);
+        snippets.add(getPullEventNewCallback);
+        snippets.add(updateEventNewCallback);
+        snippets.add(deleteEventNewCallback);
 
-        snippets.add(subscribeToPushNotificationsTask);
+        snippets.add(subscribeToPushNotificationsTaskNewCallback);
     }
 
     //
     ///////////////////////////////////////////// Push token /////////////////////////////////////////////
     //
-    Snippet createPushToken = new Snippet("create push token") {
+    Snippet createPushTokenNewCallback = new Snippet("create push token") {
         @Override
         public void execute() {
             String deviceId = ((TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE)).getDeviceId();
@@ -79,7 +79,7 @@ public class SnippetsMessagesNew extends Snippets{
         }
     };
 
-    Snippet createPushTokenSync = new AsyncSnippet("create push token synchronous", context) {
+    Snippet createPushTokenSynchronous = new AsyncSnippet("create push token synchronous", context) {
         @Override
         public void executeAsync() {
             String deviceId = ((TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE)).getDeviceId();
@@ -106,7 +106,7 @@ public class SnippetsMessagesNew extends Snippets{
 
 
 
-    Snippet deletePushToken = new Snippet("delete push token") {
+    Snippet deletePushTokenNewCallback = new Snippet("delete push token") {
         @Override
         public void execute() {
             QBMessages.deletePushToken(13998, new QBEntityCallbackImpl<Void>() {
@@ -128,7 +128,7 @@ public class SnippetsMessagesNew extends Snippets{
     //
     ///////////////////////////////////////////// Subscription /////////////////////////////////////////////
     //
-    Snippet createSubscription = new Snippet("subscription fot events", "(push listener)") {
+    Snippet createSubscriptionNewCallback = new Snippet("subscription fot events", "(push listener)") {
         @Override
         public void execute() {
             QBSubscription subscription = new QBSubscription(QBNotificationChannel.GCM);
@@ -147,7 +147,7 @@ public class SnippetsMessagesNew extends Snippets{
         }
     };
 
-    Snippet getSubscriptions = new Snippet("get subscriptions") {
+    Snippet getSubscriptionsNewCallback = new Snippet("get subscriptions") {
         @Override
         public void execute() {
             QBMessages.getSubscriptions(new QBEntityCallbackImpl<ArrayList<QBSubscription>>() {
@@ -165,7 +165,7 @@ public class SnippetsMessagesNew extends Snippets{
         }
     };
 
-    Snippet deleteSubscription = new Snippet("delete subscription") {
+    Snippet deleteSubscriptionNewCallback = new Snippet("delete subscription") {
         @Override
         public void execute() {
             QBMessages.deleteSubscription(14824, new QBEntityCallbackImpl<Void>() {
@@ -187,7 +187,7 @@ public class SnippetsMessagesNew extends Snippets{
     //
     ///////////////////////////////////////////// Event /////////////////////////////////////////////
     //
-    Snippet createEvent = new Snippet("create event (send push)") {
+    Snippet createEventNewCallback = new Snippet("create event (send push)") {
         @Override
         public void execute() {
 
@@ -226,7 +226,7 @@ public class SnippetsMessagesNew extends Snippets{
         }
     };
 
-    Snippet getEventWithId = new Snippet("get event with id") {
+    Snippet getEventWithIdNewCallback = new Snippet("get event with id") {
         @Override
         public void execute() {
             QBMessages.getEvent(25245, new QBEntityCallbackImpl<QBEvent>() {
@@ -245,7 +245,7 @@ public class SnippetsMessagesNew extends Snippets{
         }
     };
 
-    Snippet getEventWithIdSync = new AsyncSnippet("get event with id", context) {
+    Snippet getEventWithIdSynchronous = new AsyncSnippet("get event with id", context) {
         public QBEvent event;
 
         @Override
@@ -267,7 +267,7 @@ public class SnippetsMessagesNew extends Snippets{
     };
 
 
-    Snippet getEvents = new Snippet("get Events") {
+    Snippet getEventsNewCallback = new Snippet("get Events") {
         @Override
         public void execute() {
             QBPagedRequestBuilder requestBuilder = new QBPagedRequestBuilder(20, 1);
@@ -287,7 +287,7 @@ public class SnippetsMessagesNew extends Snippets{
         }
     };
 
-    Snippet getEventsSync = new AsyncSnippet("get Events synchronous", context) {
+    Snippet getEventsSynchronous = new AsyncSnippet("get Events synchronous", context) {
         @Override
         public void executeAsync() {
             QBPagedRequestBuilder requestBuilder = new QBPagedRequestBuilder(20, 1);
@@ -308,7 +308,7 @@ public class SnippetsMessagesNew extends Snippets{
 
     };
 
-    Snippet getPullEvent = new Snippet("get pull events") {
+    Snippet getPullEventNewCallback = new Snippet("get pull events") {
         @Override
         public void execute() {
 
@@ -327,7 +327,7 @@ public class SnippetsMessagesNew extends Snippets{
         }
     };
 
-    Snippet updateEvent = new Snippet("update event") {
+    Snippet updateEventNewCallback = new Snippet("update event") {
         @Override
         public void execute() {
             QBEvent event = new QBEvent();
@@ -353,7 +353,7 @@ public class SnippetsMessagesNew extends Snippets{
         }
     };
 
-    Snippet deleteEvent = new Snippet("delete event") {
+    Snippet deleteEventNewCallback = new Snippet("delete event") {
         @Override
         public void execute() {
             QBMessages.deleteEvent(25245, new QBEntityCallbackImpl<Void>() {
@@ -375,7 +375,7 @@ public class SnippetsMessagesNew extends Snippets{
     //
     ///////////////////////////////////////////// Tasks /////////////////////////////////////////////
     //
-    Snippet subscribeToPushNotificationsTask = new Snippet("TASK: Subscribe to push notifications") {
+    Snippet subscribeToPushNotificationsTaskNewCallback = new Snippet("TASK: Subscribe to push notifications") {
         @Override
         public void execute() {
             String registrationID = "2342hiyf2352959fg9af03fgfg0fahoo018273af";

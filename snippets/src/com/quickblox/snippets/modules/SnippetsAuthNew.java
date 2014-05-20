@@ -26,11 +26,11 @@ public class SnippetsAuthNew extends Snippets{
         super(context);
 
         snippets.add(createSessionNewCallback);
-        snippets.add(createSessionSync);
+        snippets.add(createSessionSynchronous);
         snippets.add(createSessionWithUserNewCallback);
         snippets.add(createSessionWithSocialProviderNewCallback);
         snippets.add(destroySessionNewCallback);
-        snippets.add(destroySessionSync);
+        snippets.add(destroySessionSynchronous);
     }
 
     Snippet createSessionNewCallback = new Snippet("create session with new callback") {
@@ -52,7 +52,7 @@ public class SnippetsAuthNew extends Snippets{
         }
     };
 
-    Snippet createSessionSync = new AsyncSnippet("create session syncronize", context) {
+    Snippet createSessionSynchronous = new AsyncSnippet("create session syncronize", context) {
         @Override
         public void executeAsync() {
             QBSession session = null;
@@ -114,7 +114,7 @@ public class SnippetsAuthNew extends Snippets{
         }
     };
 
-    Snippet  destroySessionSync = new AsyncSnippet("delete session syncronize", context) {
+    Snippet destroySessionSynchronous = new AsyncSnippet("delete session syncronize", context) {
         @Override
         public void executeAsync() {
             try {

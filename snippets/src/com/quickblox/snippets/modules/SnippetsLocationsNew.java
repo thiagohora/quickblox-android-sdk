@@ -52,32 +52,32 @@ public class SnippetsLocationsNew extends Snippets {
     public SnippetsLocationsNew(Context context) {
         super(context);
 
-        snippets.add(createLocation);
-        snippets.add(createLocationSync);
-        snippets.add(getLocationWithId);
-        snippets.add(getLocationWithIdSync);
-        snippets.add(updateLocation);
-        snippets.add(deleteLocationWithId);
+        snippets.add(createLocationNewCallback);
+        snippets.add(createLocationSynchronous);
+        snippets.add(getLocationWithIdNewCallback);
+        snippets.add(getLocationWithIdSynchronous);
+        snippets.add(updateLocationNewCallback);
+        snippets.add(deleteLocationWithIdNewCallback);
 
-        snippets.add(getLocations);
-        snippets.add(getLocationWithFilters);
-        snippets.add(getLocationWithFiltersSync);
-        snippets.add(deleteLocations);
+        snippets.add(getLocationsNewCallback);
+        snippets.add(getLocationWithFiltersNewCallback);
+        snippets.add(getLocationWithFiltersSynchronous);
+        snippets.add(deleteLocationsNewCallback);
 
-        snippets.add(createPlace);
-        snippets.add(getPlaceWithId);
-        snippets.add(updatePlace);
-        snippets.add(deletePlace);
-        snippets.add(getPlaces);
-        snippets.add(getPlacesSync);
-        snippets.add(createPlaceTask);
+        snippets.add(createPlaceNewCallback);
+        snippets.add(getPlaceWithIdNewCallback);
+        snippets.add(updatePlaceNewCallback);
+        snippets.add(deletePlaceNewCallback);
+        snippets.add(getPlacesNewCallback);
+        snippets.add(getPlacesSynchronous);
+        snippets.add(createPlaceTaskNewCallback);
     }
 
 
     //
     ///////////////////////////////////////////// Location /////////////////////////////////////////////
     //
-    Snippet createLocation = new Snippet("create location") {
+    Snippet createLocationNewCallback = new Snippet("create location") {
         @Override
         public void execute() {
             final QBLocation location = new QBLocation(35, 35, "hello");
@@ -97,7 +97,7 @@ public class SnippetsLocationsNew extends Snippets {
         }
     };
 
-    Snippet createLocationSync = new AsyncSnippet("create location synchronous", context) {
+    Snippet createLocationSynchronous = new AsyncSnippet("create location synchronous", context) {
         @Override
         public void executeAsync() {
             final QBLocation location = new QBLocation(35, 35, "hello");
@@ -113,7 +113,7 @@ public class SnippetsLocationsNew extends Snippets {
         }
     };
 
-    Snippet getLocationWithId = new Snippet("get location with id") {
+    Snippet getLocationWithIdNewCallback = new Snippet("get location with id") {
         @Override
         public void execute() {
             QBLocation location = new QBLocation(11308);
@@ -132,7 +132,7 @@ public class SnippetsLocationsNew extends Snippets {
         }
     };
 
-    Snippet getLocationWithIdSync = new AsyncSnippet("get location with id synchronous", context) {
+    Snippet getLocationWithIdSynchronous = new AsyncSnippet("get location with id synchronous", context) {
         @Override
         public void executeAsync() {
             QBLocation location = new QBLocation(11308);
@@ -148,7 +148,7 @@ public class SnippetsLocationsNew extends Snippets {
         }
     };
 
-    Snippet updateLocation = new Snippet("update location") {
+    Snippet updateLocationNewCallback = new Snippet("update location") {
         @Override
         public void execute() {
             QBLocation qbLocation = new QBLocation();
@@ -168,7 +168,7 @@ public class SnippetsLocationsNew extends Snippets {
         }
     };
 
-    Snippet deleteLocationWithId = new Snippet("delete location with id") {
+    Snippet deleteLocationWithIdNewCallback = new Snippet("delete location with id") {
         @Override
         public void execute() {
             QBLocation location = new QBLocation(11308);
@@ -188,7 +188,7 @@ public class SnippetsLocationsNew extends Snippets {
         }
     };
 
-    Snippet getLocations = new Snippet("get locations") {
+    Snippet getLocationsNewCallback = new Snippet("get locations") {
         @Override
         public void execute() {
             QBLocationRequestBuilder qbLocationRequestBuilder = new QBLocationRequestBuilder();
@@ -213,7 +213,7 @@ public class SnippetsLocationsNew extends Snippets {
         }
     };
 
-    Snippet getLocationWithFilters = new Snippet("get locations with filters") {
+    Snippet getLocationWithFiltersNewCallback = new Snippet("get locations with filters") {
         @Override
         public void execute() {
             QBLocationRequestBuilder locationRequestBuilder = new QBLocationRequestBuilder();
@@ -257,7 +257,7 @@ public class SnippetsLocationsNew extends Snippets {
         }
     };
 
-    Snippet getLocationWithFiltersSync = new AsyncSnippet("get locations with filters synchronous", context) {
+    Snippet getLocationWithFiltersSynchronous = new AsyncSnippet("get locations with filters synchronous", context) {
         @Override
         public void executeAsync() {
             QBLocationRequestBuilder locationRequestBuilder = new QBLocationRequestBuilder();
@@ -298,7 +298,7 @@ public class SnippetsLocationsNew extends Snippets {
         }
     };
 
-    Snippet deleteLocations = new Snippet("delete locations") {
+    Snippet deleteLocationsNewCallback = new Snippet("delete locations") {
         @Override
         public void execute() {
             QBLocations.deleteObsoleteLocations(2, new QBEntityCallbackImpl<Void>() {
@@ -319,7 +319,7 @@ public class SnippetsLocationsNew extends Snippets {
     //
     ///////////////////////////////////////////// Places /////////////////////////////////////////////
     //
-    Snippet createPlace = new Snippet("create place") {
+    Snippet createPlaceNewCallback = new Snippet("create place") {
         @Override
         public void execute() {
             QBPlace place = new QBPlace();
@@ -346,7 +346,7 @@ public class SnippetsLocationsNew extends Snippets {
         }
     };
 
-    Snippet getPlaceWithId = new Snippet("get place") {
+    Snippet getPlaceWithIdNewCallback = new Snippet("get place") {
         @Override
         public void execute() {
             QBPlace place = new QBPlace(1832);
@@ -355,7 +355,7 @@ public class SnippetsLocationsNew extends Snippets {
         }
     };
 
-    Snippet updatePlace = new Snippet("update place") {
+    Snippet updatePlaceNewCallback = new Snippet("update place") {
         @Override
         public void execute() {
 
@@ -367,7 +367,7 @@ public class SnippetsLocationsNew extends Snippets {
         }
     };
 
-    Snippet deletePlace = new Snippet("delete place") {
+    Snippet deletePlaceNewCallback = new Snippet("delete place") {
         @Override
         public void execute() {
             QBPlace place = new QBPlace(1832);
@@ -386,7 +386,7 @@ public class SnippetsLocationsNew extends Snippets {
         }
     };
 
-    Snippet getPlaces = new Snippet("get places") {
+    Snippet getPlacesNewCallback = new Snippet("get places") {
         @Override
         public void execute() {
             QBLocations.getPlaces(new QBEntityCallbackImpl<ArrayList<QBPlace>>() {
@@ -407,7 +407,7 @@ public class SnippetsLocationsNew extends Snippets {
         }
     };
 
-    Snippet getPlacesSync = new AsyncSnippet("get places synchronous", context) {
+    Snippet getPlacesSynchronous = new AsyncSnippet("get places synchronous", context) {
         @Override
         public void executeAsync() {
             Bundle params = new Bundle();
@@ -429,7 +429,7 @@ public class SnippetsLocationsNew extends Snippets {
     //
     ///////////////////////////////////////////// Tasks /////////////////////////////////////////////
     //
-    Snippet createPlaceTask = new Snippet("create place task") {
+    Snippet createPlaceTaskNewCallback = new Snippet("create place task") {
         @Override
         public void execute() {
             String placeTitle = "Kharkov city - all the best!";

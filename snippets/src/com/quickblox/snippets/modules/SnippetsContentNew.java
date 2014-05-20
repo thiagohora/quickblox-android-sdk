@@ -27,7 +27,7 @@ import java.util.List;
  * Created by vfite on 04.02.14.
  */
 public class SnippetsContentNew extends Snippets{
-    private static final String TAG = SnippetsContent.class.getSimpleName();
+    private static final String TAG = SnippetsContentNew.class.getSimpleName();
 
     private static final int FILE_ID = 106844;
     private static final String FILE_UID = "ce4faf98fbe84b4985570cbbbed303ab00";
@@ -39,22 +39,22 @@ public class SnippetsContentNew extends Snippets{
     public SnippetsContentNew(Context context) {
         super(context);
 
-        snippets.add(createFile);
-        snippets.add(updateFile);
-        snippets.add(getFileWithId);
-        snippets.add(uploadFile);
-        snippets.add(declareFileUpload);
-        snippets.add(incrementRefCount);
-        snippets.add(deleteFile);
-        snippets.add(getFileObjectAccess);
-        snippets.add(downloadFileWithUID);
+        snippets.add(createFileNewCallback);
+        snippets.add(updateFileNewCallback);
+        snippets.add(getFileWithIdNewCallback);
+        snippets.add(uploadFileNewCallback);
+        snippets.add(declareFileUploadNewCallback);
+        snippets.add(incrementRefCountNewCallback);
+        snippets.add(deleteFileNewCallback);
+        snippets.add(getFileObjectAccessNewCallback);
+        snippets.add(downloadFileWithUIDNewCallback);
 
-        snippets.add(getFiles);
-        snippets.add(getTaggedList);
+        snippets.add(getFilesNewCallback);
+        snippets.add(getTaggedListNewCallback);
 
-        snippets.add(uploadFileTask);
-        snippets.add(downloadFileTask);
-        snippets.add(updateFileTask);
+        snippets.add(uploadFileTaskNewCallback);
+        snippets.add(downloadFileTaskNewCallback);
+        snippets.add(updateFileTaskNewCallback);
 
         // get file1
         int fileId = R.raw.sample_file;
@@ -67,7 +67,7 @@ public class SnippetsContentNew extends Snippets{
         file2 = FileHelper.getFileInputStream(is2, "sample_file2.txt", "qb_snippets12");
     }
 
-    Snippet createFile = new Snippet("create file") {
+    Snippet createFileNewCallback = new Snippet("create file") {
         @Override
         public void execute() {
 
@@ -92,7 +92,7 @@ public class SnippetsContentNew extends Snippets{
         }
     };
 
-    Snippet updateFile = new Snippet("update file") {
+    Snippet updateFileNewCallback = new Snippet("update file") {
         @Override
         public void execute() {
             QBFile qbfile = new QBFile();
@@ -114,7 +114,7 @@ public class SnippetsContentNew extends Snippets{
         }
     };
 
-    Snippet getFileWithId = new Snippet("get file with id") {
+    Snippet getFileWithIdNewCallback = new Snippet("get file with id") {
         @Override
         public void execute() {
             QBContent.getFile(FILE_ID, new QBEntityCallbackImpl<QBFile>(){
@@ -133,7 +133,7 @@ public class SnippetsContentNew extends Snippets{
         }
     };
 
-    Snippet uploadFile = new Snippet("upload file") {
+    Snippet uploadFileNewCallback = new Snippet("upload file") {
         @Override
         public void execute() {
             String params = fileObjectAccess.getParams();   // will return from the server when creating file
@@ -151,7 +151,7 @@ public class SnippetsContentNew extends Snippets{
         }
     };
 
-    Snippet declareFileUpload = new Snippet("declare file upload") {
+    Snippet declareFileUploadNewCallback = new Snippet("declare file upload") {
         @Override
         public void execute() {
             QBContent.declareFileUploaded(20237, (int) file1.length(), new QBEntityCallbackImpl() {
@@ -169,7 +169,7 @@ public class SnippetsContentNew extends Snippets{
         }
     };
 
-    Snippet incrementRefCount = new Snippet("increment ref count") {
+    Snippet incrementRefCountNewCallback = new Snippet("increment ref count") {
         @Override
         public void execute() {
             QBContent.incrementRefCount(FILE_ID, new QBEntityCallbackImpl() {
@@ -187,7 +187,7 @@ public class SnippetsContentNew extends Snippets{
         }
     };
 
-    Snippet deleteFile = new Snippet("delete file") {
+    Snippet deleteFileNewCallback = new Snippet("delete file") {
         @Override
         public void execute() {
             QBContent.deleteFile(FILE_ID, new QBEntityCallbackImpl() {
@@ -205,7 +205,7 @@ public class SnippetsContentNew extends Snippets{
         }
     };
 
-    Snippet getFileObjectAccess = new Snippet("get file object access") {
+    Snippet getFileObjectAccessNewCallback = new Snippet("get file object access") {
         @Override
         public void execute() {
             QBContent.getFileObjectAccess(FILE_ID, new QBEntityCallbackImpl<QBFileObjectAccess>() {
@@ -223,7 +223,7 @@ public class SnippetsContentNew extends Snippets{
         }
     };
 
-    Snippet downloadFileWithUID = new Snippet("download file with UID") {
+    Snippet downloadFileWithUIDNewCallback = new Snippet("download file with UID") {
         @Override
         public void execute() {
             QBContent.downloadFile(FILE_UID, new QBEntityCallbackImpl<InputStream>() {
@@ -247,7 +247,7 @@ public class SnippetsContentNew extends Snippets{
     //
     ///////////////////////////////////////////// Get files /////////////////////////////////////////////
     //
-    Snippet getFiles = new Snippet("get files") {
+    Snippet getFilesNewCallback = new Snippet("get files") {
         @Override
         public void execute() {
             QBPagedRequestBuilder requestBuilder = new QBPagedRequestBuilder(5, 2);
@@ -267,7 +267,7 @@ public class SnippetsContentNew extends Snippets{
         }
     };
 
-    Snippet getTaggedList = new Snippet("get tagged list") {
+    Snippet getTaggedListNewCallback = new Snippet("get tagged list") {
         @Override
         public void execute() {
             QBPagedRequestBuilder requestBuilder = new QBPagedRequestBuilder(20, 1);
@@ -289,7 +289,7 @@ public class SnippetsContentNew extends Snippets{
     //
     ///////////////////////////////////////////// Tasks /////////////////////////////////////////////
     //
-    Snippet uploadFileTask = new Snippet("upload file task") {
+    Snippet uploadFileTaskNewCallback = new Snippet("upload file task") {
         @Override
         public void execute() {
 
@@ -309,7 +309,7 @@ public class SnippetsContentNew extends Snippets{
         }
     };
 
-    Snippet downloadFileTask = new Snippet("download file Task") {
+    Snippet downloadFileTaskNewCallback = new Snippet("download file Task") {
         final int fileId = 106844;
         @Override
         public void execute() {
@@ -336,7 +336,7 @@ public class SnippetsContentNew extends Snippets{
         }
     };
 
-    Snippet updateFileTask = new Snippet("update file Task") {
+    Snippet updateFileTaskNewCallback = new Snippet("update file Task") {
         final int fileId = 106844;
         @Override
         public void execute() {

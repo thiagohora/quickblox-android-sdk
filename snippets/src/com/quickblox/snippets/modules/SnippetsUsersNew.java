@@ -29,42 +29,42 @@ public class SnippetsUsersNew extends Snippets{
     public SnippetsUsersNew(Context context) {
         super(context);
 
-        snippets.add(signInUserWithLogin);
-        snippets.add(signInUserWithEmail);
-        snippets.add(signInUsingSocialProvider);
-        snippets.add(signInUserWithEmailSync);
-        snippets.add(signOut);
-        snippets.add(signOutSync);
-        snippets.add(signUpUser);
-        snippets.add(signUpUserSync);
-        snippets.add(signUpSignInUser);
+        snippets.add(signInUserWithLoginNewCallback);
+        snippets.add(signInUserWithEmailNewCallback);
+        snippets.add(signInUsingSocialProviderNewCallback);
+        snippets.add(signInUserWithEmailSynchrnous);
+        snippets.add(signOutNewCallback);
+        snippets.add(signOutSynchronous);
+        snippets.add(signUpUserNewCallback);
+        snippets.add(signUpUserSynchronous);
+        snippets.add(signUpSignInUserNewCallback);
 
-        snippets.add(getAllUsers);
-        snippets.add(getUsersByLoginsSync);
-        snippets.add(getUsersByIds);
-        snippets.add(getUsersByLogins);
-        snippets.add(getUsersByEmails);
-        snippets.add(getUsersWithFullName);
-        snippets.add(getUsersWithTags);
+        snippets.add(getAllUsersNewCallback);
+        snippets.add(getUsersByLoginsSynchronous);
+        snippets.add(getUsersByIdsNewCallback);
+        snippets.add(getUsersByLoginsNewCallback);
+        snippets.add(getUsersByEmailsNewCallback);
+        snippets.add(getUsersWithFullNameNewCallback);
+        snippets.add(getUsersWithTagsNewCallback);
 
-        snippets.add(getUserById);
-        snippets.add(getUserWithLogin);
-        snippets.add(getUserWithTwitterId);
-        snippets.add(getUserWithFacebookId);
-        snippets.add(getUserWithEmail);
-        snippets.add(getUserWithEmailSync);
-        snippets.add(getUserWithExternalId);
+        snippets.add(getUserByIdNewCallback);
+        snippets.add(getUserWithLoginNewCallback);
+        snippets.add(getUserWithTwitterIdNewCallback);
+        snippets.add(getUserWithFacebookIdNewCallback);
+        snippets.add(getUserWithEmailNewCallback);
+        snippets.add(getUserWithEmailSynchronous);
+        snippets.add(getUserWithExternalIdNewCallback);
 
-        snippets.add(updateUser);
+        snippets.add(updateUserNewCallback);
 
-        snippets.add(deleteUserById);
-        snippets.add(deleteUserByIdSync);
-        snippets.add(deleteUserByExternalId);
+        snippets.add(deleteUserByIdNewCallback);
+        snippets.add(deleteUserByIdSynchronous);
+        snippets.add(deleteUserByExternalIdNewCallback);
 
-        snippets.add(resetPassword);
+        snippets.add(resetPasswordNewCallback);
     }
 
-    Snippet signInUserWithLogin = new Snippet("sign in user (login)") {
+    Snippet signInUserWithLoginNewCallback = new Snippet("sign in user (login)") {
         @Override
         public void execute() {
 
@@ -87,7 +87,7 @@ public class SnippetsUsersNew extends Snippets{
         }
     };
 
-    Snippet signInUserWithEmail = new Snippet("sign in user (email)") {
+    Snippet signInUserWithEmailNewCallback = new Snippet("sign in user (email)") {
         @Override
         public void execute() {
 
@@ -109,7 +109,7 @@ public class SnippetsUsersNew extends Snippets{
         }
     };
 
-    Snippet signInUserWithEmailSync = new AsyncSnippet("sign in user (email) syncronize", context) {
+    Snippet signInUserWithEmailSynchrnous = new AsyncSnippet("sign in user (email) syncronize", context) {
         @Override
         public void executeAsync() {
             QBUser user = new QBUser();
@@ -127,7 +127,7 @@ public class SnippetsUsersNew extends Snippets{
         }
     };
 
-    Snippet signInUsingSocialProvider = new Snippet("sign in using social provider") {
+    Snippet signInUsingSocialProviderNewCallback = new Snippet("sign in using social provider") {
         @Override
         public void execute() {
             String facebookAccessToken = "AAAEra8jNdnkBABYf3ZBSAz9dgLfyK7tQNttIoaZA1cC40niR6HVS0nYuufZB0ZCn66VJcISM8DO2bcbhEahm2nW01ZAZC1YwpZB7rds37xW0wZDZD";
@@ -147,7 +147,7 @@ public class SnippetsUsersNew extends Snippets{
         }
     };
 
-    Snippet signOut = new Snippet("sign out") {
+    Snippet signOutNewCallback = new Snippet("sign out") {
         @Override
         public void execute() {
             QBUsers.signOut(new QBEntityCallbackImpl(){
@@ -165,7 +165,7 @@ public class SnippetsUsersNew extends Snippets{
         }
     };
 
-    Snippet signOutSync = new AsyncSnippet("sign out syncronize", context) {
+    Snippet signOutSynchronous = new AsyncSnippet("sign out syncronize", context) {
         @Override
         public void executeAsync() {
             try {
@@ -176,7 +176,7 @@ public class SnippetsUsersNew extends Snippets{
         }
     };
 
-    Snippet signUpUser = new Snippet("sign up user (register)") {
+    Snippet signUpUserNewCallback = new Snippet("sign up user (register)") {
         @Override
         public void execute() {
 
@@ -209,7 +209,7 @@ public class SnippetsUsersNew extends Snippets{
         }
     };
 
-    Snippet signUpUserSync = new AsyncSnippet("sign up user (register) sync", context) {
+    Snippet signUpUserSynchronous = new AsyncSnippet("sign up user (register) sync", context) {
         @Override
         public void executeAsync() {
 
@@ -239,7 +239,7 @@ public class SnippetsUsersNew extends Snippets{
         }
     };
 
-    Snippet signUpSignInUser = new Snippet("sign up user (register) and sign in user") {
+    Snippet signUpSignInUserNewCallback = new Snippet("sign up user (register) and sign in user") {
         @Override
         public void execute() {
 
@@ -273,7 +273,7 @@ public class SnippetsUsersNew extends Snippets{
     };
 
 
-    Snippet getAllUsers = new Snippet("get all users") {
+    Snippet getAllUsersNewCallback = new Snippet("get all users") {
         @Override
         public void execute() {
 
@@ -301,7 +301,7 @@ public class SnippetsUsersNew extends Snippets{
     };
 
 
-    Snippet getUsersByIds = new Snippet("get users by ids") {
+    Snippet getUsersByIdsNewCallback = new Snippet("get users by ids") {
         @Override
         public void execute() {
             QBPagedRequestBuilder pagedRequestBuilder = new QBPagedRequestBuilder();
@@ -331,7 +331,7 @@ public class SnippetsUsersNew extends Snippets{
         }
     };
 
-    Snippet getUsersByLogins = new Snippet("get users by logins") {
+    Snippet getUsersByLoginsNewCallback = new Snippet("get users by logins") {
         @Override
         public void execute() {
             QBPagedRequestBuilder pagedRequestBuilder = new QBPagedRequestBuilder();
@@ -360,7 +360,7 @@ public class SnippetsUsersNew extends Snippets{
         }
     };
 
-    Snippet getUsersByLoginsSync = new AsyncSnippet("get users by logins synchornous", context) {
+    Snippet getUsersByLoginsSynchronous = new AsyncSnippet("get users by logins synchornous", context) {
         @Override
         public void executeAsync() {
             QBPagedRequestBuilder pagedRequestBuilder = new QBPagedRequestBuilder();
@@ -388,7 +388,7 @@ public class SnippetsUsersNew extends Snippets{
     };
 
 
-    Snippet getUsersByEmails = new Snippet("get users by emails") {
+    Snippet getUsersByEmailsNewCallback = new Snippet("get users by emails") {
         @Override
         public void execute() {
             QBPagedRequestBuilder pagedRequestBuilder = new QBPagedRequestBuilder();
@@ -417,7 +417,7 @@ public class SnippetsUsersNew extends Snippets{
         }
     };
 
-    Snippet getUsersWithFullName = new Snippet("get user with full name") {
+    Snippet getUsersWithFullNameNewCallback = new Snippet("get user with full name") {
         @Override
         public void execute() {
             String fullName = "fullName";
@@ -438,7 +438,7 @@ public class SnippetsUsersNew extends Snippets{
         }
     };
 
-    Snippet getUsersWithTags = new Snippet("get users with tags") {
+    Snippet getUsersWithTagsNewCallback = new Snippet("get users with tags") {
         @Override
         public void execute() {
             ArrayList<String> userTags = new ArrayList<String>();
@@ -463,7 +463,7 @@ public class SnippetsUsersNew extends Snippets{
     };
 
 
-    Snippet getUserById = new Snippet("get user by id") {
+    Snippet getUserByIdNewCallback = new Snippet("get user by id") {
         @Override
         public void execute() {
             QBUsers.getUser(53779, new QBEntityCallbackImpl<QBUser>() {
@@ -481,7 +481,7 @@ public class SnippetsUsersNew extends Snippets{
         }
     };
 
-    Snippet getUserWithLogin = new Snippet("get user with login") {
+    Snippet getUserWithLoginNewCallback = new Snippet("get user with login") {
         @Override
         public void execute() {
             String login = "testuser";
@@ -502,7 +502,7 @@ public class SnippetsUsersNew extends Snippets{
         }
     };
 
-    Snippet getUserWithTwitterId = new Snippet("get user with twitter id") {
+    Snippet getUserWithTwitterIdNewCallback = new Snippet("get user with twitter id") {
         @Override
         public void execute() {
             String twitterId = "56802037340";
@@ -521,7 +521,7 @@ public class SnippetsUsersNew extends Snippets{
         }
     };
 
-    Snippet getUserWithFacebookId = new Snippet("get user with facebook id") {
+    Snippet getUserWithFacebookIdNewCallback = new Snippet("get user with facebook id") {
         @Override
         public void execute() {
             String facebookId = "100003123141430";
@@ -539,7 +539,7 @@ public class SnippetsUsersNew extends Snippets{
         }
     };
 
-    Snippet getUserWithEmail = new Snippet("get user with email") {
+    Snippet getUserWithEmailNewCallback = new Snippet("get user with email") {
         @Override
         public void execute() {
             String email = "test123@test.com";
@@ -557,7 +557,7 @@ public class SnippetsUsersNew extends Snippets{
         }
     };
 
-    Snippet getUserWithEmailSync = new AsyncSnippet("get user with email synchornous", context) {
+    Snippet getUserWithEmailSynchronous = new AsyncSnippet("get user with email synchornous", context) {
 
         QBUser userByEmail;
         @Override
@@ -579,7 +579,7 @@ public class SnippetsUsersNew extends Snippets{
         }
     };
 
-    Snippet getUserWithExternalId = new Snippet("get user with external id") {
+    Snippet getUserWithExternalIdNewCallback = new Snippet("get user with external id") {
         @Override
         public void execute() {
             String externalId = "123145235";
@@ -597,7 +597,7 @@ public class SnippetsUsersNew extends Snippets{
         }
     };
 
-    Snippet updateUser = new Snippet("update user") {
+    Snippet updateUserNewCallback = new Snippet("update user") {
         @Override
         public void execute() {
             final QBUser user = new QBUser();
@@ -633,7 +633,7 @@ public class SnippetsUsersNew extends Snippets{
         }
     };
 
-    Snippet deleteUserById = new Snippet("delete user by id") {
+    Snippet deleteUserByIdNewCallback = new Snippet("delete user by id") {
         @Override
         public void execute() {
 
@@ -653,7 +653,7 @@ public class SnippetsUsersNew extends Snippets{
         }
     };
 
-    Snippet deleteUserByIdSync = new AsyncSnippet("delete user by id synchronous", context) {
+    Snippet deleteUserByIdSynchronous = new AsyncSnippet("delete user by id synchronous", context) {
         @Override
         public void executeAsync() {
 
@@ -668,7 +668,7 @@ public class SnippetsUsersNew extends Snippets{
     };
 
 
-    Snippet deleteUserByExternalId = new Snippet("delete user by external id") {
+    Snippet deleteUserByExternalIdNewCallback = new Snippet("delete user by external id") {
         @Override
         public void execute() {
             QBUsers.deleteByExternalId("568965444", new QBEntityCallbackImpl() {
@@ -686,7 +686,7 @@ public class SnippetsUsersNew extends Snippets{
         }
     };
 
-    Snippet resetPassword = new Snippet("reset password") {
+    Snippet resetPasswordNewCallback = new Snippet("reset password") {
         @Override
         public void execute() {
             QBUsers.resetPassword("test987@test.com", new QBEntityCallbackImpl() {
