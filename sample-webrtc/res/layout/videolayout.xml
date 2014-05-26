@@ -84,8 +84,8 @@
                 android:layout_width="wrap_content"
                 android:layout_height="50dp"
                 android:layout_gravity="center"
-                android:id="@+id/turnSound"
-                android:text="Sound on" />
+                android:id="@+id/turnCamera"
+                android:text="@string/camera_off" />
             <Button
                 android:layout_width="wrap_content"
                 android:layout_height="50dp"

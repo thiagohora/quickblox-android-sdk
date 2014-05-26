@@ -6,12 +6,15 @@ import android.app.ProgressDialog;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
+import android.widget.EditText;
+
 import com.quickblox.core.QBEntityCallback;
 import com.quickblox.core.QBEntityCallbackImpl;
 import com.quickblox.core.QBSettings;
 import com.quickblox.core.TransferProtocol;
 import com.quickblox.module.auth.QBAuth;
 import com.quickblox.module.auth.model.QBSession;
+import com.quickblox.module.users.QBUsers;
 import com.quickblox.module.users.model.QBUser;
 import com.quickblox.sample.video_webrtc.R;
 
@@ -22,17 +25,10 @@ import java.util.List;
  */
 public class Splash extends Activity {
 
-    private static final String APP_ID = "7233";
-    private static final String AUTH_KEY = "5wVUHeLOq3Thfra";
-    private static final String AUTH_SECRET = "FPZnZKEVbvv9YSv";
+    private static final String APP_ID = "22";
+    private static final String AUTH_KEY = "xGRzM9GDkuC5RB2";
+    private static final String AUTH_SECRET = "bM3WqUc5Kyu3mWE";
 
-    public static final String BOB_USER = "bobbobbob";
-    public static final String BOB_NAME = "bob";
-    public static final int BOB_USER_ID = 1022193;
-    public static final String SAM_USER = "cedcedced";
-    public static final String SAM_NAME = "sam";
-    public static final int SAM_USER_ID = 1022194;
-    public static final int USER_ID = 999;
     ProgressDialog progressDialog;
 
     public void onCreate(Bundle savedInstanceState) {
@@ -52,38 +48,31 @@ public class Splash extends Activity {
         findViewById(R.id.loginButtonChat).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                qbUser = new QBUser();
-                //int userid = Integer.parseInt( ((EditText) findViewById(R.id.userId)).getText().toString());
-                qbUser.setLogin(BOB_USER);
-                qbUser.setPassword(BOB_USER);
-                qbUser.setId(BOB_USER_ID);
-                signinwithUser(qbUser);
+                String login = ((EditText)findViewById(R.id.login)).getText().toString();
+                String pswd = ((EditText)findViewById(R.id.pswd)).getText().toString();
+                signinwithUser(login, pswd);
             }
         });
-        findViewById(R.id.loginButtonChat1).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                qbUser = new QBUser();
-                qbUser.setLogin(SAM_USER);
-                qbUser.setPassword(SAM_USER);
-                qbUser.setId(SAM_USER_ID);
-                signinwithUser(qbUser);
-            }
-        });
+        QBAuth.createSession(sessionCallback);
     }
 
-    private void signinwithUser(QBUser qbUser) {
+    private void signinwithUser(String login, String pswd) {
+        qbUser = new QBUser();
+        qbUser.setLogin(login);
+        qbUser.setPassword(pswd);
         progressDialog = new ProgressDialog(this);
         progressDialog.show();
-        QBAuth.createSession(qbUser, sessionCallback);
+        //QBAuth.createSession(qbUser, sessionCallback);
+        QBUsers.signIn(qbUser, userCallback);
     }
 
-    private QBUser qbUser;
-    private QBEntityCallback<QBSession> sessionCallback = new QBEntityCallbackImpl<QBSession>() {
+
+    private QBEntityCallback<QBUser> userCallback = new QBEntityCallbackImpl<QBUser>() {
         @Override
-        public void onSuccess(QBSession result, Bundle args) {
+        public void onSuccess(QBUser user, Bundle args) {
             progressDialog.cancel();
-            DataHolder.setUser(qbUser);
+            user.setPassword(qbUser.getPassword());
+            DataHolder.setUser(user);
             Intent intent = new Intent(Splash.this, QBRTCDemoActivity.class);
             startActivity(intent);
             finish();
@@ -92,6 +81,22 @@ public class Splash extends Activity {
         @Override
         public void onError(List<String> errors) {
             progressDialog.cancel();
+            AlertDialog.Builder dialog = new AlertDialog.Builder(Splash.this);
+            dialog.setMessage("Error(s) occurred. Look into DDMS log for details, " +
+                    "please. Errors: " + errors).create().show();
+        }
+    };
+
+    private QBUser qbUser;
+    private QBEntityCallback<QBSession> sessionCallback = new QBEntityCallbackImpl<QBSession>() {
+        @Override
+        public void onSuccess(QBSession result, Bundle args) {
+           findViewById(R.id.loginButtonChat).setEnabled(true);
+        }
+
+        @Override
+        public void onError(List<String> errors) {
+            //progressDialog.cancel();
             AlertDialog.Builder dialog = new AlertDialog.Builder(Splash.this);
             dialog.setMessage("Error(s) occurred. Look into DDMS log for details, " +
                     "please. Errors: " + errors).create().show();

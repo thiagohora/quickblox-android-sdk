@@ -19,13 +19,28 @@
     <LinearLayout android:id="@+id/buttons" android:layout_below="@+id/splash_app_title"
                   android:layout_width="match_parent" android:layout_height="wrap_content"
                   android:orientation="vertical">
+
+        <EditText
+            android:layout_width="match_parent"
+            android:id="@+id/login"
+            android:hint="@string/login"
+            android:layout_height="wrap_content" />
+
+
+        <EditText
+            android:layout_width="match_parent"
+            android:id="@+id/pswd"
+            android:hint="@string/password"
+            android:layout_height="wrap_content" />
+
         <Button
                 android:id="@+id/loginButtonChat"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Log in QB as bob"/>
+                android:enabled="false"
+                android:text="Log in "/>
 
-        <Button
+        <Button android:visibility="gone"
                 android:id="@+id/loginButtonChat1"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"

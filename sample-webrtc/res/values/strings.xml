@@ -1,4 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">QB Video Chat</string>
+    <string name="camera_off">Camera off</string>
+    <string name="camera_on">Camera on</string>
+    <string name="login"> Login </string>
+    <string name="password"> Password </string>
 </resources>

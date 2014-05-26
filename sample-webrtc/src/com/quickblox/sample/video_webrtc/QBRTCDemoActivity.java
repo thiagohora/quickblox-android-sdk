@@ -1,8 +1,10 @@
 package com.quickblox.sample.video_webrtc;
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
 import android.os.Bundle;
@@ -11,6 +13,7 @@ import android.util.Log;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.RadioGroup;
 import android.widget.Toast;
 
@@ -44,6 +47,7 @@ public class QBRTCDemoActivity extends Activity implements QBEntityCallback<Void
     private int orientation = orientations[orientationIndex];
     private WebRTC.MEDIA_STREAM callType;
     private CallConfig callConfig;
+    private boolean cameraEnabled = true;
 
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -58,7 +62,7 @@ public class QBRTCDemoActivity extends Activity implements QBEntityCallback<Void
 
     private void initSignaling() {
         qbVideoChatSignlaing = new ExtensionSignalingChannel(
-                QBChatService.getInstance().getSignalingManager());
+                QBChatService.getInstance().getSignalingManager(), DataHolder.getQbUser());
         qbVideoChatSignlaing.addSignalingListener(this);
     }
 
@@ -78,15 +82,8 @@ public class QBRTCDemoActivity extends Activity implements QBEntityCallback<Void
         findViewById(R.id.reject).setOnClickListener(this);
         findViewById(R.id.stop).setOnClickListener(this);
         findViewById(R.id.muteMicrophone).setOnClickListener(this);
-        findViewById(R.id.turnSound).setOnClickListener(this);
+        findViewById(R.id.turnCamera).setOnClickListener(this);
         findViewById(R.id.orientation).setOnClickListener(this);
-        QBUser qbUser = DataHolder.getQbUser();
-        String userName = qbUser.getId() == Splash.BOB_USER_ID ? Splash.SAM_NAME : Splash.BOB_NAME;
-        int opponentId = qbUser.getId() == Splash.BOB_USER_ID ? Splash.SAM_USER_ID : Splash.BOB_USER_ID;
-        opponent = new QBUser(opponentId);
-        opponent.setFullName(userName);
-        ((Button) findViewById(R.id.call)).setText("call to " + userName);
-        (findViewById(R.id.call)).setTag(opponent);
         progressDialog = new ProgressDialog(this);
         progressDialog.setMessage("Please wait. Connecting to chat...");
         progressDialog.show();
@@ -96,7 +93,7 @@ public class QBRTCDemoActivity extends Activity implements QBEntityCallback<Void
     public void onClick(View v) {
         switch (v.getId()) {
             case R.id.call: {
-                startCall();
+                showCallDialog();
                 break;
             }
             case R.id.accept: {
@@ -113,20 +110,24 @@ public class QBRTCDemoActivity extends Activity implements QBEntityCallback<Void
                 break;
             }
             case R.id.muteMicrophone: {
-                if (qbVideoChat != null){
-                qbVideoChat.muteMicrophone(!qbVideoChat.isMicrophoneMute());
-                }
+                muteMicrophone();
                 break;
             }
-            case R.id.turnSound: {
-                if (qbVideoChat != null){
-                qbVideoChat.muteSound(!qbVideoChat.isSoundMute());
-                }
+            case R.id.turnCamera: {
+                enableCamera();
                 break;
             }
             case R.id.orientation: {
                 changeOrientation();
             }
+        }
+    }
+
+    private void muteMicrophone() {
+        if (qbVideoChat != null){
+            qbVideoChat.muteMicrophone(!qbVideoChat.isMicrophoneMute());
+            String status = qbVideoChat.isMicrophoneMute() ? "off" : "on";
+            ((Button)findViewById(R.id.muteMicrophone)).setText("Mute " + status);
         }
     }
 
@@ -140,6 +141,21 @@ public class QBRTCDemoActivity extends Activity implements QBEntityCallback<Void
             qbVideoChatSignlaing.sendReject(connectionConfig);
         }
         enableAcceptView(false);
+    }
+
+    private void enableCamera(){
+        if (qbVideoChat != null){
+            if (cameraEnabled) {
+                qbVideoChat.disableCamera();
+                cameraEnabled = false;
+            }
+            else{
+                qbVideoChat.enableCamera();
+                cameraEnabled = true;
+            }
+            int resource = cameraEnabled ? R.string.camera_off : R.string.camera_on;
+            ((Button)findViewById(R.id.turnCamera)).setText( getString(resource) );
+        }
     }
 
     private void accept() {
@@ -156,11 +172,39 @@ public class QBRTCDemoActivity extends Activity implements QBEntityCallback<Void
             initVideoChat();
         }
         if (QBVideoChat.VIDEO_CHAT_STATE.INACTIVE.equals(qbVideoChat.getState())) {
-            opponent = (QBUser) findViewById(R.id.call).getTag();
             qbVideoChat.call(opponent, getCallType());
         } else {
             logAndToast("Stop current chat before call");
         }
+    }
+
+    private void showCallDialog() {
+        final EditText userIdEditText = new EditText(this);
+        userIdEditText.setHint("insert user id");
+        userIdEditText.setSelection(userIdEditText.getText().length());
+        DialogInterface.OnClickListener listener =
+                new DialogInterface.OnClickListener() {
+                    @Override public void onClick(DialogInterface dialog, int which) {
+                        abortUnless(which == DialogInterface.BUTTON_POSITIVE, "lolwat?");
+                        dialog.dismiss();
+                        opponent = new QBUser();
+                        int id =0;
+                        try {
+                            id = Integer.parseInt(userIdEditText.getText().toString());
+                        }
+                        catch (NumberFormatException exc){
+                            exc.printStackTrace();
+                        }
+                        if (id !=0) {
+                            opponent.setId(id);
+                            startCall();
+                        }
+                    }
+                };
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder
+                .setMessage("Enter user id").setView(userIdEditText)
+                .setPositiveButton("Call!", listener).show();
     }
 
     private void initVideoChat(){
@@ -229,6 +273,7 @@ public class QBRTCDemoActivity extends Activity implements QBEntityCallback<Void
                 qbVideoChat.disposeConnection();
             }
             qbVideoChat.clean();
+            qbVideoChatSignlaing.close();
         }
         try {
             QBChatService.getInstance().logout();
