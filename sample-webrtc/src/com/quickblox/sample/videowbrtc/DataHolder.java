@@ -1,4 +1,4 @@
-package com.quickblox.sample.video_webrtc;
+package com.quickblox.sample.videowbrtc;
 
 import com.quickblox.module.users.model.QBUser;
 

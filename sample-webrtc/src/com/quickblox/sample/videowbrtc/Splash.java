@@ -1,4 +1,4 @@
-package com.quickblox.sample.video_webrtc;
+package com.quickblox.sample.videowbrtc;
 
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -16,7 +16,6 @@ import com.quickblox.module.auth.QBAuth;
 import com.quickblox.module.auth.model.QBSession;
 import com.quickblox.module.users.QBUsers;
 import com.quickblox.module.users.model.QBUser;
-import com.quickblox.sample.video_webrtc.R;
 
 import java.util.List;
 

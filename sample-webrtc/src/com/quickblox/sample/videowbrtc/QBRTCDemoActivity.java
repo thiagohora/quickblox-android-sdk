@@ -1,4 +1,4 @@
-package com.quickblox.sample.video_webrtc;
+package com.quickblox.sample.videowbrtc;
 
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -19,6 +19,10 @@ import android.widget.Toast;
 
 import com.quickblox.core.QBEntityCallback;
 import com.quickblox.module.chat.QBChatService;
+import com.quickblox.module.chat.QBSignaling;
+import com.quickblox.module.chat.QBSignalingManager;
+import com.quickblox.module.chat.exceptions.QBChatException;
+import com.quickblox.module.chat.listeners.QBSignalingManagerListener;
 import com.quickblox.module.users.model.QBUser;
 import com.quickblox.module.videochat_webrtc.*;
 import com.quickblox.module.videochat_webrtc.model.CallConfig;
@@ -36,18 +40,19 @@ public class QBRTCDemoActivity extends Activity implements QBEntityCallback<Void
     private VideoStreamsView vsv;
     private Toast logToast;
     private QBVideoChat qbVideoChat;
-    private ExtensionSignalingChannel qbVideoChatSignlaing;
+    private VideoSenderChannel qbVideoChatSignlaing;
     private QBUser opponent;
     private SessionDescription sdp;
     private ProgressDialog progressDialog;
     private String sessionId;
-
+    private VideoSignalingListener videoSignalingListener = new VideoSignalingListener();
     private int[] orientations = {ActivityInfo.SCREEN_ORIENTATION_PORTRAIT, ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE, ActivityInfo.SCREEN_ORIENTATION_REVERSE_PORTRAIT, ActivityInfo.SCREEN_ORIENTATION_REVERSE_LANDSCAPE};
     private int orientationIndex = 0;
     private int orientation = orientations[orientationIndex];
     private WebRTC.MEDIA_STREAM callType;
     private CallConfig callConfig;
     private boolean cameraEnabled = true;
+    private QBSignaling signaling;
 
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -55,15 +60,30 @@ public class QBRTCDemoActivity extends Activity implements QBEntityCallback<Void
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
         initViews();
+
         QBChatService.setDebugEnabled(true);
         QBChatService.init(this);
         QBChatService.getInstance().login(DataHolder.getQbUser(), this);
     }
 
     private void initSignaling() {
-        qbVideoChatSignlaing = new ExtensionSignalingChannel(
-                QBChatService.getInstance().getSignalingManager(), DataHolder.getQbUser());
-        qbVideoChatSignlaing.addSignalingListener(this);
+        QBChatService.getInstance().getSignalingManager().addSignalingManagerListener(new QBSignalingManagerListener() {
+            @Override
+            public void signalingCreated(QBSignaling signaling, boolean createdLocally) {
+                Log.i(TAG, "onsignalingCreated "+signaling.getParticipant() + " "+createdLocally);
+                if ( !createdLocally) {
+                    if (qbVideoChatSignlaing == null) {
+                        qbVideoChatSignlaing = new VideoSenderChannel(signaling);
+                    }
+                    /*else{
+                        qbVideoChatSignlaing.reInitSignaling(signaling);
+
+                    }*/
+                    qbVideoChatSignlaing.addSignalingListener(QBRTCDemoActivity.this);
+                }
+            }
+        });
+
     }
 
     @Override
@@ -106,6 +126,7 @@ public class QBRTCDemoActivity extends Activity implements QBEntityCallback<Void
             case R.id.stop: {
                 if (qbVideoChat != null){
                     qbVideoChat.stopCall();
+                    qbVideoChatSignlaing.close();
                 }
                 break;
             }
@@ -139,6 +160,7 @@ public class QBRTCDemoActivity extends Activity implements QBEntityCallback<Void
             ConnectionConfig connectionConfig = new ConnectionConfig(callConfig.getParticipant(),
                     callConfig.getConnectionSession());
             qbVideoChatSignlaing.sendReject(connectionConfig);
+            qbVideoChatSignlaing.close();
         }
         enableAcceptView(false);
     }
@@ -168,6 +190,7 @@ public class QBRTCDemoActivity extends Activity implements QBEntityCallback<Void
     }
 
     private void startCall() {
+        createSignaling();
         if (qbVideoChat == null){
             initVideoChat();
         }
@@ -175,6 +198,14 @@ public class QBRTCDemoActivity extends Activity implements QBEntityCallback<Void
             qbVideoChat.call(opponent, getCallType());
         } else {
             logAndToast("Stop current chat before call");
+        }
+    }
+
+    private void createSignaling() {
+        if (qbVideoChatSignlaing == null) {
+            QBSignaling signaling = QBChatService.getInstance().getSignalingManager().createSignaling(opponent.getId(), null);
+            qbVideoChatSignlaing = new VideoSenderChannel(signaling);
+            qbVideoChatSignlaing.addSignalingListener(QBRTCDemoActivity.this);
         }
     }
 
@@ -354,6 +385,7 @@ public class QBRTCDemoActivity extends Activity implements QBEntityCallback<Void
             public void run() {
                 logAndToast("Participant closed connection");
                 qbVideoChat.disposeConnection();
+                qbVideoChatSignlaing.close();
             }
         });
     }
@@ -365,6 +397,7 @@ public class QBRTCDemoActivity extends Activity implements QBEntityCallback<Void
             public void run() {
                 logAndToast("Reject call");
                 qbVideoChat.disposeConnection();
+                qbVideoChatSignlaing.close();
             }
         });
     }
@@ -394,6 +427,11 @@ public class QBRTCDemoActivity extends Activity implements QBEntityCallback<Void
 
     @Override
     public void onClosed(String msg) {
+
+    }
+
+    @Override
+    public void onError(QBChatException exception) {
 
     }
 
