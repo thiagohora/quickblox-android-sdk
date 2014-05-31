@@ -188,10 +188,10 @@ public class QBRTCDemoActivity extends Activity implements QBEntityCallback<Void
     private void startCall() {
         createSenderChannel();
         initVideoChat();
-        if (QBVideoChat.VIDEO_CHAT_STATE.INACTIVE.equals(qbVideoChat.getState())) {
+        if (qbVideoChat != null) {
             qbVideoChat.call(opponent, DataHolder.getQbUser(), getCallType());
         } else {
-            logAndToast("Stop current chat before call");
+            logAndToast("Video chat was not instantiated");
         }
     }
 
