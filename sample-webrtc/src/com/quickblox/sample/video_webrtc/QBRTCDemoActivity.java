@@ -16,23 +16,27 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.RadioGroup;
 import android.widget.Toast;
-
 import com.quickblox.core.QBEntityCallback;
 import com.quickblox.module.chat.QBChatService;
 import com.quickblox.module.chat.QBSignaling;
 import com.quickblox.module.chat.exceptions.QBChatException;
 import com.quickblox.module.chat.listeners.QBSignalingManagerListener;
 import com.quickblox.module.users.model.QBUser;
-import com.quickblox.module.videochat_webrtc.*;
+import com.quickblox.module.videochat_webrtc.QBSignalingChannel;
+import com.quickblox.module.videochat_webrtc.QBVideoChat;
+import com.quickblox.module.videochat_webrtc.VideoSenderChannel;
+import com.quickblox.module.videochat_webrtc.WebRTC;
 import com.quickblox.module.videochat_webrtc.model.CallConfig;
 import com.quickblox.module.videochat_webrtc.model.ConnectionConfig;
 import com.quickblox.module.videochat_webrtc.render.VideoStreamsView;
-
 import com.quickblox.module.videochat_webrtc.signaling.SIGNAL_STATE;
 import org.jivesoftware.smack.SmackException;
 import org.webrtc.SessionDescription;
 
 import java.util.List;
+
+import static com.quickblox.sample.video_webrtc.R.id;
+import static com.quickblox.sample.video_webrtc.R.string;
 
 public class QBRTCDemoActivity extends Activity implements QBEntityCallback<Void>, View.OnClickListener, QBSignalingChannel.SignalingListener {
 
@@ -42,14 +46,12 @@ public class QBRTCDemoActivity extends Activity implements QBEntityCallback<Void
     private QBVideoChat qbVideoChat;
     private VideoSenderChannel qbVideoChatSignlaing;
     private QBUser opponent;
-    private SessionDescription sdp;
     private ProgressDialog progressDialog;
     private String sessionId;
 
     private int[] orientations = {ActivityInfo.SCREEN_ORIENTATION_PORTRAIT, ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE, ActivityInfo.SCREEN_ORIENTATION_REVERSE_PORTRAIT, ActivityInfo.SCREEN_ORIENTATION_REVERSE_LANDSCAPE};
     private int orientationIndex = 0;
     private int orientation = orientations[orientationIndex];
-    private WebRTC.MEDIA_STREAM callType;
     private CallConfig callConfig;
     private boolean cameraEnabled = true;
 
@@ -68,9 +70,9 @@ public class QBRTCDemoActivity extends Activity implements QBEntityCallback<Void
         QBChatService.getInstance().getSignalingManager().addSignalingManagerListener(new QBSignalingManagerListener() {
             @Override
             public void signalingCreated(QBSignaling signaling, boolean createdLocally) {
-                if (!createdLocally){
+                if (!createdLocally) {
                     qbVideoChatSignlaing = new VideoSenderChannel(
-                           signaling);
+                            signaling);
                     qbVideoChatSignlaing.addSignalingListener(QBRTCDemoActivity.this);
                 }
             }
@@ -81,20 +83,20 @@ public class QBRTCDemoActivity extends Activity implements QBEntityCallback<Void
     public void onConfigurationChanged(Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
         Log.i(TAG, "onConfigurationChanged");
-        if (qbVideoChat != null){
+        if (qbVideoChat != null) {
             qbVideoChat.onConfigurationChanged(newConfig);
         }
     }
 
     private void initViews() {
-        vsv = (VideoStreamsView) findViewById(R.id.videoView);
+        vsv = (VideoStreamsView) findViewById(id.videoView);
         findViewById(R.id.call).setOnClickListener(this);
-        findViewById(R.id.accept).setOnClickListener(this);
-        findViewById(R.id.reject).setOnClickListener(this);
-        findViewById(R.id.stop).setOnClickListener(this);
-        findViewById(R.id.muteMicrophone).setOnClickListener(this);
-        findViewById(R.id.turnCamera).setOnClickListener(this);
-        findViewById(R.id.orientation).setOnClickListener(this);
+        findViewById(id.accept).setOnClickListener(this);
+        findViewById(id.reject).setOnClickListener(this);
+        findViewById(id.stop).setOnClickListener(this);
+        findViewById(id.muteMicrophone).setOnClickListener(this);
+        findViewById(id.turnCamera).setOnClickListener(this);
+        findViewById(id.orientation).setOnClickListener(this);
         progressDialog = new ProgressDialog(this);
         progressDialog.setMessage("Please wait. Connecting to chat...");
         progressDialog.show();
@@ -103,59 +105,58 @@ public class QBRTCDemoActivity extends Activity implements QBEntityCallback<Void
     @Override
     public void onClick(View v) {
         switch (v.getId()) {
-            case R.id.call: {
+            case id.call: {
                 showCallDialog();
                 break;
             }
-            case R.id.accept: {
+            case id.accept: {
                 accept();
                 break;
             }
-            case R.id.reject: {
+            case id.reject: {
                 reject();
             }
-            case R.id.stop: {
+            case id.stop: {
                 stopCall();
                 break;
             }
-            case R.id.muteMicrophone: {
+            case id.muteMicrophone: {
                 muteMicrophone();
                 break;
             }
-            case R.id.turnCamera: {
+            case id.turnCamera: {
                 enableCamera();
                 break;
             }
-            case R.id.orientation: {
+            case id.orientation: {
                 changeOrientation();
             }
         }
     }
 
     private void stopCall() {
-        if (qbVideoChat != null){
+        if (qbVideoChat != null) {
             qbVideoChat.stopCall();
             qbVideoChat = null;
         }
-        if (qbVideoChatSignlaing != null){
+        if (qbVideoChatSignlaing != null) {
             qbVideoChatSignlaing.close();
             qbVideoChatSignlaing = null;
         }
     }
 
     private void muteMicrophone() {
-        if (qbVideoChat != null){
+        if (qbVideoChat != null) {
             qbVideoChat.muteMicrophone(!qbVideoChat.isMicrophoneMute());
             String status = qbVideoChat.isMicrophoneMute() ? "off" : "on";
-            ((Button)findViewById(R.id.muteMicrophone)).setText("Mute " + status);
+            ((Button) findViewById(id.muteMicrophone)).setText("Mute " + status);
         }
     }
 
     private void reject() {
-        if (qbVideoChat != null){
+        if (qbVideoChat != null) {
             qbVideoChat.reject(opponent, sessionId);
-        }
-        else if (callConfig != null){
+        } else if (callConfig != null) {
             ConnectionConfig connectionConfig = new ConnectionConfig(callConfig.getFromUser(),
                     callConfig.getConnectionSession());
             qbVideoChatSignlaing.sendReject(connectionConfig);
@@ -163,24 +164,23 @@ public class QBRTCDemoActivity extends Activity implements QBEntityCallback<Void
         enableAcceptView(false);
     }
 
-    private void enableCamera(){
-        if (qbVideoChat != null){
+    private void enableCamera() {
+        if (qbVideoChat != null) {
             if (cameraEnabled) {
                 qbVideoChat.disableCamera();
                 cameraEnabled = false;
-            }
-            else{
+            } else {
                 qbVideoChat.enableCamera();
                 cameraEnabled = true;
             }
-            int resource = cameraEnabled ? R.string.camera_off : R.string.camera_on;
-            ((Button)findViewById(R.id.turnCamera)).setText( getString(resource) );
+            int resource = cameraEnabled ? string.camera_off : string.camera_on;
+            ((Button) findViewById(id.turnCamera)).setText(getString(resource));
         }
     }
 
     private void accept() {
         initVideoChat();
-        logAndToast("callType="+callConfig.getCallStreamType());
+        logAndToast("callType=" + callConfig.getCallStreamType());
         qbVideoChat.accept(callConfig);
         enableAcceptView(false);
     }
@@ -207,18 +207,18 @@ public class QBRTCDemoActivity extends Activity implements QBEntityCallback<Void
         userIdEditText.setSelection(userIdEditText.getText().length());
         DialogInterface.OnClickListener listener =
                 new DialogInterface.OnClickListener() {
-                    @Override public void onClick(DialogInterface dialog, int which) {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
                         abortUnless(which == DialogInterface.BUTTON_POSITIVE, "lolwat?");
                         dialog.dismiss();
                         opponent = new QBUser();
-                        int id =0;
+                        int id = 0;
                         try {
                             id = Integer.parseInt(userIdEditText.getText().toString());
-                        }
-                        catch (NumberFormatException exc){
+                        } catch (NumberFormatException exc) {
                             exc.printStackTrace();
                         }
-                        if (id !=0) {
+                        if (id != 0) {
                             opponent.setId(id);
                             startCall();
                         }
@@ -230,9 +230,9 @@ public class QBRTCDemoActivity extends Activity implements QBEntityCallback<Void
                 .setPositiveButton("Call!", listener).show();
     }
 
-    private void initVideoChat(){
+    private void initVideoChat() {
         qbVideoChat = new QBVideoChat(QBRTCDemoActivity.this, qbVideoChatSignlaing, vsv);
-        qbVideoChat.setMediaCaptureCallback( new QBVideoChat.MediaCaptureCallback() {
+        qbVideoChat.setMediaCaptureCallback(new QBVideoChat.MediaCaptureCallback() {
             @Override
             public void onCaptureFail(WebRTC.MEDIA_STREAM mediaStream, String problem) {
                 logAndToast(problem);
@@ -245,9 +245,9 @@ public class QBRTCDemoActivity extends Activity implements QBEntityCallback<Void
         });
     }
 
-    private WebRTC.MEDIA_STREAM getCallType(){
-        int selectedId = ((RadioGroup)findViewById(R.id.callMode)).getCheckedRadioButtonId();
-        return (R.id.audio_call ==selectedId) ? WebRTC.MEDIA_STREAM.AUDIO :WebRTC.MEDIA_STREAM.VIDEO;
+    private WebRTC.MEDIA_STREAM getCallType() {
+        int selectedId = ((RadioGroup) findViewById(id.callMode)).getCheckedRadioButtonId();
+        return (id.audio_call == selectedId) ? WebRTC.MEDIA_STREAM.AUDIO : WebRTC.MEDIA_STREAM.VIDEO;
 
     }
 
@@ -291,12 +291,10 @@ public class QBRTCDemoActivity extends Activity implements QBEntityCallback<Void
 
     // Disconnect from remote resources, disposeConnection of local resources, and exit.
     private void disconnectAndExit() {
-        if (qbVideoChat != null) {
-            if (!QBVideoChat.VIDEO_CHAT_STATE.CLOSED.equals(qbVideoChat.getState()) ){
-                qbVideoChat.disposeConnection();
-            }
+        if (qbVideoChat != null && !QBVideoChat.VIDEO_CHAT_STATE.CLOSED.equals(qbVideoChat.getState())) {
+            qbVideoChat.disposeConnection();
         }
-        if ( qbVideoChatSignlaing != null){
+        if (qbVideoChatSignlaing != null) {
             qbVideoChatSignlaing.close();
         }
         try {
@@ -307,9 +305,15 @@ public class QBRTCDemoActivity extends Activity implements QBEntityCallback<Void
         QBChatService.getInstance().destroy();
     }
 
-    private void closeConnection(){
-        qbVideoChat.disposeConnection();
-        qbVideoChatSignlaing.close();
+    private void closeConnection() {
+        if (qbVideoChat != null) {
+            qbVideoChat.disposeConnection();
+            qbVideoChat = null;
+        }
+        if (qbVideoChatSignlaing != null) {
+            qbVideoChatSignlaing.close();
+            qbVideoChatSignlaing = null;
+        }
     }
 
     private void enableView(int viewId, boolean enable) {
@@ -317,13 +321,13 @@ public class QBRTCDemoActivity extends Activity implements QBEntityCallback<Void
     }
 
     private void enableCallView(boolean enable) {
-        enableView(R.id.call, enable);
-        enableView(R.id.stop, enable);
+        enableView(id.call, enable);
+        enableView(id.stop, enable);
     }
 
     private void enableAcceptView(boolean enable) {
-        enableView(R.id.accept, enable);
-        enableView(R.id.reject, enable);
+        enableView(id.accept, enable);
+        enableView(id.reject, enable);
     }
 
 
@@ -349,9 +353,7 @@ public class QBRTCDemoActivity extends Activity implements QBEntityCallback<Void
                 vibrator.vibrate(4000);
                 enableAcceptView(true);
                 QBRTCDemoActivity.this.sessionId = connectionConfig.getConnectionSession();
-                sdp = ((CallConfig)connectionConfig).getSessionDescription();
-                callType = ((CallConfig)connectionConfig).getCallStreamType();
-                callConfig =  (CallConfig)connectionConfig;
+                callConfig = (CallConfig) connectionConfig;
             }
         });
     }
@@ -394,6 +396,7 @@ public class QBRTCDemoActivity extends Activity implements QBEntityCallback<Void
             @Override
             public void run() {
                 logAndToast("Reject call");
+                closeConnection();
             }
         });
     }
