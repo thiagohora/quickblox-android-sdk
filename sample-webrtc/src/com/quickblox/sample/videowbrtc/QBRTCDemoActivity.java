@@ -1,4 +1,4 @@
-package com.quickblox.sample.videowbrtc;
+package com.quickblox.sample.video_webrtc;
 
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -23,16 +23,25 @@ import com.quickblox.module.chat.QBSignaling;
 import com.quickblox.module.chat.QBSignalingManager;
 import com.quickblox.module.chat.exceptions.QBChatException;
 import com.quickblox.module.chat.listeners.QBSignalingManagerListener;
+import com.quickblox.module.chat.QBSignaling;
+import com.quickblox.module.chat.exceptions.QBChatException;
+import com.quickblox.module.chat.listeners.QBSignalingManagerListener;
 import com.quickblox.module.users.model.QBUser;
-import com.quickblox.module.videochat_webrtc.*;
+import com.quickblox.module.videochat_webrtc.QBSignalingChannel;
+import com.quickblox.module.videochat_webrtc.QBVideoChat;
+import com.quickblox.module.videochat_webrtc.VideoSenderChannel;
+import com.quickblox.module.videochat_webrtc.WebRTC;
 import com.quickblox.module.videochat_webrtc.model.CallConfig;
 import com.quickblox.module.videochat_webrtc.model.ConnectionConfig;
 import com.quickblox.module.videochat_webrtc.render.VideoStreamsView;
-
+import com.quickblox.module.videochat_webrtc.signaling.SIGNAL_STATE;
 import org.jivesoftware.smack.SmackException;
 import org.webrtc.SessionDescription;
 
 import java.util.List;
+
+import static com.quickblox.sample.video_webrtc.R.id;
+import static com.quickblox.sample.video_webrtc.R.string;
 
 public class QBRTCDemoActivity extends Activity implements QBEntityCallback<Void>, View.OnClickListener, QBSignalingChannel.SignalingListener {
 
@@ -60,7 +69,6 @@ public class QBRTCDemoActivity extends Activity implements QBEntityCallback<Void
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
         initViews();
-
         QBChatService.setDebugEnabled(true);
         QBChatService.init(this);
         QBChatService.getInstance().login(DataHolder.getQbUser(), this);
@@ -84,6 +92,16 @@ public class QBRTCDemoActivity extends Activity implements QBEntityCallback<Void
             }
         });
 
+        QBChatService.getInstance().getSignalingManager().addSignalingManagerListener(new QBSignalingManagerListener() {
+            @Override
+            public void signalingCreated(QBSignaling signaling, boolean createdLocally) {
+                if (!createdLocally) {
+                    qbVideoChatSignlaing = new VideoSenderChannel(
+                            signaling);
+                    qbVideoChatSignlaing.addSignalingListener(QBRTCDemoActivity.this);
+                }
+            }
+        });
     }
 
     @Override
@@ -128,6 +146,8 @@ public class QBRTCDemoActivity extends Activity implements QBEntityCallback<Void
                     qbVideoChat.stopCall();
                     qbVideoChatSignlaing.close();
                 }
+            case id.stop: {
+                stopCall();
                 break;
             }
             case R.id.muteMicrophone: {
@@ -144,69 +164,71 @@ public class QBRTCDemoActivity extends Activity implements QBEntityCallback<Void
         }
     }
 
+    private void stopCall() {
+        if (qbVideoChat != null) {
+            qbVideoChat.stopCall();
+            qbVideoChat = null;
+        }
+        if (qbVideoChatSignlaing != null) {
+            qbVideoChatSignlaing.close();
+            qbVideoChatSignlaing = null;
+        }
+    }
+
     private void muteMicrophone() {
-        if (qbVideoChat != null){
+        if (qbVideoChat != null) {
             qbVideoChat.muteMicrophone(!qbVideoChat.isMicrophoneMute());
             String status = qbVideoChat.isMicrophoneMute() ? "off" : "on";
-            ((Button)findViewById(R.id.muteMicrophone)).setText("Mute " + status);
+            ((Button) findViewById(id.muteMicrophone)).setText("Mute " + status);
         }
     }
 
     private void reject() {
-        if (qbVideoChat != null){
+        if (qbVideoChat != null) {
             qbVideoChat.reject(opponent, sessionId);
-        }
-        else if (callConfig != null){
-            ConnectionConfig connectionConfig = new ConnectionConfig(callConfig.getParticipant(),
+        } else if (callConfig != null) {
+            ConnectionConfig connectionConfig = new ConnectionConfig(callConfig.getFromUser(),
                     callConfig.getConnectionSession());
             qbVideoChatSignlaing.sendReject(connectionConfig);
-            qbVideoChatSignlaing.close();
         }
         enableAcceptView(false);
     }
 
-    private void enableCamera(){
-        if (qbVideoChat != null){
+    private void enableCamera() {
+        if (qbVideoChat != null) {
             if (cameraEnabled) {
                 qbVideoChat.disableCamera();
                 cameraEnabled = false;
-            }
-            else{
+            } else {
                 qbVideoChat.enableCamera();
                 cameraEnabled = true;
             }
-            int resource = cameraEnabled ? R.string.camera_off : R.string.camera_on;
-            ((Button)findViewById(R.id.turnCamera)).setText( getString(resource) );
+            int resource = cameraEnabled ? string.camera_off : string.camera_on;
+            ((Button) findViewById(id.turnCamera)).setText(getString(resource));
         }
     }
 
     private void accept() {
-        if (qbVideoChat == null){
-            initVideoChat();
-        }
-        logAndToast("callType="+callConfig.getCallStreamType());
+        initVideoChat();
+        logAndToast("callType=" + callConfig.getCallStreamType());
         qbVideoChat.accept(callConfig);
         enableAcceptView(false);
     }
 
     private void startCall() {
-        createSignaling();
-        if (qbVideoChat == null){
-            initVideoChat();
-        }
-        if (QBVideoChat.VIDEO_CHAT_STATE.INACTIVE.equals(qbVideoChat.getState())) {
-            qbVideoChat.call(opponent, getCallType());
+        createSenderChannel();
+        initVideoChat();
+        if (qbVideoChat != null) {
+            qbVideoChat.call(opponent, DataHolder.getQbUser(), getCallType());
         } else {
             logAndToast("Stop current chat before call");
         }
     }
 
-    private void createSignaling() {
-        if (qbVideoChatSignlaing == null) {
-            QBSignaling signaling = QBChatService.getInstance().getSignalingManager().createSignaling(opponent.getId(), null);
-            qbVideoChatSignlaing = new VideoSenderChannel(signaling);
-            qbVideoChatSignlaing.addSignalingListener(QBRTCDemoActivity.this);
-        }
+    private void createSenderChannel() {
+        QBSignaling signaling = QBChatService.getInstance().getSignalingManager().createSignaling(opponent.getId(), null);
+        qbVideoChatSignlaing = new VideoSenderChannel(signaling);
+        qbVideoChatSignlaing.addSignalingListener(QBRTCDemoActivity.this);
     }
 
     private void showCallDialog() {
@@ -299,11 +321,10 @@ public class QBRTCDemoActivity extends Activity implements QBEntityCallback<Void
 
     // Disconnect from remote resources, disposeConnection of local resources, and exit.
     private void disconnectAndExit() {
-        if (qbVideoChat != null) {
-            if (!QBVideoChat.VIDEO_CHAT_STATE.INACTIVE.equals(qbVideoChat.getState()) ){
-                qbVideoChat.disposeConnection();
-            }
-            qbVideoChat.clean();
+        if (qbVideoChat != null && !QBVideoChat.VIDEO_CHAT_STATE.CLOSED.equals(qbVideoChat.getState())) {
+            qbVideoChat.disposeConnection();
+        }
+        if (qbVideoChatSignlaing != null) {
             qbVideoChatSignlaing.close();
         }
         try {
@@ -312,6 +333,17 @@ public class QBRTCDemoActivity extends Activity implements QBEntityCallback<Void
             e.printStackTrace();
         }
         QBChatService.getInstance().destroy();
+    }
+
+    private void closeConnection() {
+        if (qbVideoChat != null) {
+            qbVideoChat.disposeConnection();
+            qbVideoChat = null;
+        }
+        if (qbVideoChatSignlaing != null) {
+            qbVideoChatSignlaing.close();
+            qbVideoChatSignlaing = null;
+        }
     }
 
     private void enableView(int viewId, boolean enable) {
@@ -383,9 +415,9 @@ public class QBRTCDemoActivity extends Activity implements QBEntityCallback<Void
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                logAndToast("Participant closed connection");
-                qbVideoChat.disposeConnection();
-                qbVideoChatSignlaing.close();
+                logAndToast("Participa" +
+                        "nt closed connection");
+                closeConnection();
             }
         });
     }
@@ -396,8 +428,7 @@ public class QBRTCDemoActivity extends Activity implements QBEntityCallback<Void
             @Override
             public void run() {
                 logAndToast("Reject call");
-                qbVideoChat.disposeConnection();
-                qbVideoChatSignlaing.close();
+                closeConnection();
             }
         });
     }
@@ -431,7 +462,7 @@ public class QBRTCDemoActivity extends Activity implements QBEntityCallback<Void
     }
 
     @Override
-    public void onError(QBChatException exception) {
+    public void onError(SIGNAL_STATE state, QBChatException exception) {
 
     }
 
