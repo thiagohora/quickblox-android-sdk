@@ -25,7 +25,7 @@ import java.util.List;
  * Created by vfite on 11.02.14.
  */
 public class SnippetsRatingNew extends Snippets {
-    private static final String TAG = SnippetsRatings.class.getSimpleName();
+    private static final String TAG = SnippetsRatingNew.class.getSimpleName();
 
     public SnippetsRatingNew(Context context) {
         super(context);

@@ -22,7 +22,7 @@ import java.util.List;
  * Created by vfite on 10.02.14.
  */
 public class SnippetsMessagesNew extends Snippets{
-    private static final String TAG = SnippetsMessages.class.getSimpleName();
+    private static final String TAG = SnippetsMessagesNew.class.getSimpleName();
 
     public SnippetsMessagesNew(Context context) {
         super(context);

@@ -4,7 +4,6 @@ import android.app.Activity;
 import android.os.Bundle;
 import com.quickblox.snippets.R;
 import com.quickblox.snippets.SnippetsList;
-import com.quickblox.snippets.modules.SnippetsMessages;
 import com.quickblox.snippets.modules.SnippetsMessagesNew;
 
 /**

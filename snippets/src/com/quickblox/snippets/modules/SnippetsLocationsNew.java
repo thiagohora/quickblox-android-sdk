@@ -26,7 +26,7 @@ import java.util.List;
  * Created by vfite on 10.02.14.
  */
 public class SnippetsLocationsNew extends Snippets {
-    private static final String TAG = SnippetsLocations.class.getSimpleName();
+    private static final String TAG = SnippetsLocationsNew.class.getSimpleName();
 
     // Coordinates for follow points
     // First point is SW, second is NE

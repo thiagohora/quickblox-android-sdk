@@ -5,7 +5,6 @@ import android.os.Bundle;
 import com.quickblox.snippets.R;
 import com.quickblox.snippets.SnippetsList;
 import com.quickblox.snippets.modules.SnippetsCONew;
-import com.quickblox.snippets.modules.SnippetsCustomObjects;
 
 /**
  * User: Oleg Soroka

@@ -24,7 +24,7 @@ import java.util.List;
  */
 
 public class SnippetsUsersNew extends Snippets{
-    private static final String TAG = SnippetsUsers.class.getSimpleName();
+    private static final String TAG = SnippetsUsersNew.class.getSimpleName();
 
     public SnippetsUsersNew(Context context) {
         super(context);
