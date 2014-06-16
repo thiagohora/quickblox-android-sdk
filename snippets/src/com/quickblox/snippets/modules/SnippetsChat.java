@@ -7,11 +7,11 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
-import android.net.wifi.WifiManager;
 import android.os.Handler;
 import android.os.Looper;
 import android.util.Log;
 import android.widget.Toast;
+
 import com.quickblox.core.QBEntityCallbackImpl;
 import com.quickblox.core.QBSettings;
 import com.quickblox.internal.core.exception.BaseServiceException;
@@ -23,9 +23,7 @@ import com.quickblox.module.chat.QBChatService;
 import com.quickblox.module.chat.listeners.ChatMessageListener;
 import com.quickblox.module.chat.listeners.RoomListener;
 import com.quickblox.module.chat.listeners.RoomReceivingListener;
-import com.quickblox.module.chat.listeners.SessionListener;
 import com.quickblox.module.chat.model.QBChatRoster;
-import com.quickblox.module.chat.smack.SmackAndroid;
 import com.quickblox.module.chat.utils.QBChatUtils;
 import com.quickblox.module.chat.xmpp.QBPrivateChat;
 import com.quickblox.module.users.model.QBUser;
@@ -34,6 +32,7 @@ import com.quickblox.snippets.AsyncSnippet;
 import com.quickblox.snippets.Consts;
 import com.quickblox.snippets.Snippet;
 import com.quickblox.snippets.Snippets;
+
 import org.jivesoftware.smack.ConnectionListener;
 import org.jivesoftware.smack.PacketListener;
 import org.jivesoftware.smack.XMPPException;
@@ -41,7 +40,11 @@ import org.jivesoftware.smack.packet.Message;
 import org.jivesoftware.smack.packet.Packet;
 import org.jivesoftware.smack.packet.Presence;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * User: Oleg Soroka
@@ -275,7 +278,7 @@ public class SnippetsChat extends Snippets {
         qbPrivateChat = QBChatService.getInstance().getPrivateChatInstance();
         initChatMessageListener(qbPrivateChat);
         QBChatService.getInstance().addSystemMessageListener(packetListener);
-        QBChatService.getInstance().addSessionListener(connectionListener);
+        QBChatService.getInstance().addConnectionListener(connectionListener);
     }
 
     Snippet createChat = new Snippet("create 1 to 1 chat") {
@@ -348,7 +351,7 @@ public class SnippetsChat extends Snippets {
         @Override
         public void execute() {
             try {
-                qbChatRoster.createEntry(SUBSCRIBE_USER_ID, "friend", null);
+                qbChatRoster.createEntry(SUBSCRIBE_USER_ID, "friend");
             } catch (XMPPException e) {
                 e.printStackTrace();
             }
