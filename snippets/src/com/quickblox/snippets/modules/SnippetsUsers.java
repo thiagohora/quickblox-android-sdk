@@ -69,24 +69,46 @@ public class SnippetsUsers extends Snippets{
         snippets.add(getUsersByIds);
         snippets.add(getUsersByIdsSynchronous);
         //
-        snippets.add(getUsersByLoginsNewCallback);
+        snippets.add(getUsersByLogins);
         snippets.add(getUsersByLoginsSynchronous);
         //
-        snippets.add(getUsersByEmailsNewCallback);
-
+        snippets.add(getUsersByEmails);
+        snippets.add(getUsersByEmailsSynchronous);
         //
-        snippets.add(getUsersWithTagsNewCallback);
-
+        snippets.add(getUsersByPhoneNumbers);
+        snippets.add(getUsersByPhoneNumbersSynchronous);
         //
-        snippets.add(getUsersWithFullNameNewCallback);
+        snippets.add(getUsersWithFacebookIDs);
+        snippets.add(getUsersWithFacebookIDsSynchronous);
         //
-        snippets.add(getUserByIdNewCallback);
-        snippets.add(getUserWithLoginNewCallback);
-        snippets.add(getUserWithTwitterIdNewCallback);
-        snippets.add(getUserWithFacebookIdNewCallback);
-        snippets.add(getUserWithEmailNewCallback);
+        snippets.add(getUsersWithTwitterIDs);
+        snippets.add(getUsersWithTwitterIDsSynchronous);
+        //
+        snippets.add(getUsersWithTags);
+        snippets.add(getUsersWithTagsSynchronous);
+        //
+        snippets.add(getUsersWithFullName);
+        snippets.add(getUsersWithFullNameSynchronous);
+        //
+        //
+        snippets.add(getUserById);
+        snippets.add(getUserByIdSynchronous);
+        //
+        snippets.add(getUserWithLogin);
+        snippets.add(getUserWithLoginSynchronous);
+        //
+        snippets.add(getUserWithTwitterId);
+        snippets.add(getUserWithTwitterIdSynchronous);
+        //
+        snippets.add(getUserWithFacebookId);
+        snippets.add(getUserWithFacebookIdSynchronous);
+        //
+        snippets.add(getUserWithEmail);
         snippets.add(getUserWithEmailSynchronous);
-        snippets.add(getUserWithExternalIdNewCallback);
+        //
+        snippets.add(getUserWithExternalId);
+        snippets.add(getUserWithExternalIdSynchronous);
+
     }
 
 
@@ -205,6 +227,7 @@ public class SnippetsUsers extends Snippets{
             });
         }
     };
+
 
     Snippet signInUsingSocialProviderSynchronous = new AsyncSnippet("sign in user (synchronous)", "with social provider", context) {
         @Override
@@ -551,7 +574,7 @@ public class SnippetsUsers extends Snippets{
         }
     };
 
-    Snippet resetPasswordSynchronous = new AsyncSnippet("reset password(synchronous)", context) {
+    Snippet resetPasswordSynchronous = new AsyncSnippet("reset password (synchronous)", context) {
         @Override
         public void executeAsync() {
 
@@ -569,7 +592,7 @@ public class SnippetsUsers extends Snippets{
     //
 
 
-    Snippet getAllUsers = new Snippet("get all users") {
+    Snippet getAllUsers = new Snippet("get users") {
         @Override
         public void execute() {
 
@@ -596,7 +619,7 @@ public class SnippetsUsers extends Snippets{
         }
     };
 
-    Snippet getAllUsersSynchronous = new AsyncSnippet("get all users (synchronous)", context) {
+    Snippet getAllUsersSynchronous = new AsyncSnippet("get users (synchronous)", context) {
         @Override
         public void executeAsync() {
             // TODO
@@ -609,7 +632,7 @@ public class SnippetsUsers extends Snippets{
     //
 
 
-    Snippet getUsersByIds = new Snippet("get users by ids") {
+    Snippet getUsersByIds = new Snippet("get users", "by ids") {
         @Override
         public void execute() {
             QBPagedRequestBuilder pagedRequestBuilder = new QBPagedRequestBuilder();
@@ -640,7 +663,7 @@ public class SnippetsUsers extends Snippets{
     };
 
 
-    Snippet getUsersByIdsSynchronous = new AsyncSnippet("get users by ids (synchronous)", context) {
+    Snippet getUsersByIdsSynchronous = new AsyncSnippet("get users (synchronous)", "by ids", context) {
         @Override
         public void executeAsync() {
             QBPagedRequestBuilder pagedRequestBuilder = new QBPagedRequestBuilder();
@@ -652,18 +675,30 @@ public class SnippetsUsers extends Snippets{
             usersIds.add(379);
             usersIds.add(380);
 
+            Bundle params = new Bundle();
+            ArrayList<QBUser> users = null;
             try {
-                QBUsers.getUsersByIDs(usersIds, pagedRequestBuilder, (Bundle)null);
+                users = QBUsers.getUsersByIDs(usersIds, pagedRequestBuilder, params);
             } catch (QBResponseException e) {
                 setException(e);
+            }
+
+            if(users != null){
+                Log.i(TAG, ">>> Users: " + users.toString());
+                Log.i(TAG, "currentPage: " + params.getInt(Consts.CURR_PAGE));
+                Log.i(TAG, "perPage: " + params.getInt(Consts.PER_PAGE));
+                Log.i(TAG, "totalPages: " + params.getInt(Consts.TOTAL_ENTRIES));
             }
         }
     };
 
 
+    //
+    //////////////////////////////////////// Get users by logins ///////////////////////////////////
+    //
 
 
-    Snippet getUsersByLoginsNewCallback = new Snippet("get users by logins") {
+    Snippet getUsersByLogins = new Snippet("get users", "by logins") {
         @Override
         public void execute() {
             QBPagedRequestBuilder pagedRequestBuilder = new QBPagedRequestBuilder();
@@ -692,7 +727,7 @@ public class SnippetsUsers extends Snippets{
         }
     };
 
-    Snippet getUsersByLoginsSynchronous = new AsyncSnippet("get users by logins synchornous", context) {
+    Snippet getUsersByLoginsSynchronous = new AsyncSnippet("get users (synchronous)", "by logins", context) {
         @Override
         public void executeAsync() {
             QBPagedRequestBuilder pagedRequestBuilder = new QBPagedRequestBuilder();
@@ -702,16 +737,18 @@ public class SnippetsUsers extends Snippets{
             ArrayList<String> usersLogins = new ArrayList<String>();
             usersLogins.add("bob");
             usersLogins.add("john");
+
             Bundle params = new Bundle();
-            ArrayList<QBUser> usersByLogins = null;
+
+            ArrayList<QBUser> users = null;
             try {
-                usersByLogins = QBUsers.getUsersByLogins(usersLogins, pagedRequestBuilder, params);
+                users = QBUsers.getUsersByLogins(usersLogins, pagedRequestBuilder, params);
             } catch (QBResponseException e) {
                setException(e);
             }
 
-            if(usersByLogins != null){
-                Log.i(TAG, ">>> Users: " + usersByLogins.toString());
+            if(users != null){
+                Log.i(TAG, ">>> Users: " + users.toString());
                 Log.i(TAG, "currentPage: " + params.getInt(Consts.CURR_PAGE));
                 Log.i(TAG, "perPage: " + params.getInt(Consts.PER_PAGE));
                 Log.i(TAG, "totalPages: " + params.getInt(Consts.TOTAL_ENTRIES));
@@ -720,7 +757,12 @@ public class SnippetsUsers extends Snippets{
     };
 
 
-    Snippet getUsersByEmailsNewCallback = new Snippet("get users by emails") {
+    //
+    //////////////////////////////////////// Get users by emails ///////////////////////////////////
+    //
+
+
+    Snippet getUsersByEmails = new Snippet("get users", "by emails") {
         @Override
         public void execute() {
             QBPagedRequestBuilder pagedRequestBuilder = new QBPagedRequestBuilder();
@@ -749,10 +791,298 @@ public class SnippetsUsers extends Snippets{
         }
     };
 
-    Snippet getUsersWithFullNameNewCallback = new Snippet("get user with full name") {
+    Snippet getUsersByEmailsSynchronous = new AsyncSnippet("get users (synchronous)", "by emails", context) {
+        @Override
+        public void executeAsync() {
+            QBPagedRequestBuilder pagedRequestBuilder = new QBPagedRequestBuilder();
+            pagedRequestBuilder.setPage(1);
+            pagedRequestBuilder.setPerPage(10);
+
+            ArrayList<String> usersEmails = new ArrayList<String>();
+            usersEmails.add("asd@ffg.fgg");
+            usersEmails.add("ghh@ggh.vbb");
+
+            Bundle params = new Bundle();
+
+            ArrayList<QBUser> users = null;
+            try {
+                users = QBUsers.getUsersByEmails(usersEmails, pagedRequestBuilder, params);
+            } catch (QBResponseException e) {
+                setException(e);
+            }
+
+            if(users != null){
+                Log.i(TAG, ">>> Users: " + users.toString());
+                Log.i(TAG, "currentPage: " + params.getInt(Consts.CURR_PAGE));
+                Log.i(TAG, "perPage: " + params.getInt(Consts.PER_PAGE));
+                Log.i(TAG, "totalPages: " + params.getInt(Consts.TOTAL_ENTRIES));
+            }
+        }
+    };
+
+
+    //
+    //////////////////////////////////////// Get users by phone numbers ////////////////////////////
+    //
+
+
+    Snippet getUsersByPhoneNumbers = new Snippet("get users", "by phone numbers") {
         @Override
         public void execute() {
-            String fullName = "fullName";
+            QBPagedRequestBuilder pagedRequestBuilder = new QBPagedRequestBuilder();
+            pagedRequestBuilder.setPage(1);
+            pagedRequestBuilder.setPerPage(10);
+
+            ArrayList<String> usersPhones = new ArrayList<String>();
+            usersPhones.add("980028312");
+            usersPhones.add("765172323");
+
+            QBUsers.getUsersByPhoneNumbers(usersPhones, pagedRequestBuilder, new QBEntityCallbackImpl<ArrayList<QBUser>>() {
+                @Override
+                public void onSuccess(ArrayList<QBUser> users, Bundle params) {
+                    Log.i(TAG, ">>> Users: " + users.toString());
+                    Log.i(TAG, "currentPage: " + params.getInt(Consts.CURR_PAGE));
+                    Log.i(TAG, "perPage: " + params.getInt(Consts.PER_PAGE));
+                    Log.i(TAG, "totalPages: " + params.getInt(Consts.TOTAL_ENTRIES));
+                }
+
+                @Override
+                public void onError(List<String> errors) {
+                    handleErrors(errors);
+                }
+
+            });
+        }
+    };
+
+    Snippet getUsersByPhoneNumbersSynchronous = new AsyncSnippet("get users (synchronous)", "by phone numbers", context) {
+        @Override
+        public void executeAsync() {
+            QBPagedRequestBuilder pagedRequestBuilder = new QBPagedRequestBuilder();
+            pagedRequestBuilder.setPage(1);
+            pagedRequestBuilder.setPerPage(10);
+
+            ArrayList<String> usersPhones = new ArrayList<String>();
+            usersPhones.add("980028312");
+            usersPhones.add("765172323");;
+
+            Bundle params = new Bundle();
+
+            ArrayList<QBUser> users = null;
+            try {
+                users = QBUsers.getUsersByPhoneNumbers(usersPhones, pagedRequestBuilder, params);
+            } catch (QBResponseException e) {
+                setException(e);
+            }
+
+            if(users != null){
+                Log.i(TAG, ">>> Users: " + users.toString());
+                Log.i(TAG, "currentPage: " + params.getInt(Consts.CURR_PAGE));
+                Log.i(TAG, "perPage: " + params.getInt(Consts.PER_PAGE));
+                Log.i(TAG, "totalPages: " + params.getInt(Consts.TOTAL_ENTRIES));
+            }
+        }
+    };
+
+
+    //
+    //////////////////////////////////////// Get users with Facebook IDs ///////////////////////////////////
+    //
+
+
+    Snippet getUsersWithFacebookIDs = new Snippet("get users", "with facebook IDs") {
+        @Override
+        public void execute() {
+            ArrayList<String> facebookIDs = new ArrayList<String>();
+            facebookIDs.add("11020002022222");
+            facebookIDs.add("10000045345444");
+
+            QBPagedRequestBuilder pagedRequestBuilder = new QBPagedRequestBuilder();
+            pagedRequestBuilder.setPage(1);
+            pagedRequestBuilder.setPerPage(10);
+
+            QBUsers.getUsersByFacebookId(facebookIDs, pagedRequestBuilder, new QBEntityCallbackImpl<ArrayList<QBUser>>() {
+                @Override
+                public void onSuccess(ArrayList<QBUser> users, Bundle params) {
+                    Log.i(TAG, ">>> Users: " + users.toString());
+                    Log.i(TAG, "currentPage: " + params.getInt(Consts.CURR_PAGE));
+                    Log.i(TAG, "perPage: " + params.getInt(Consts.PER_PAGE));
+                    Log.i(TAG, "totalPages: " + params.getInt(Consts.TOTAL_ENTRIES));
+                }
+
+                @Override
+                public void onError(List<String> errors) {
+                    handleErrors(errors);
+                }
+            });
+        }
+    };
+
+    Snippet getUsersWithFacebookIDsSynchronous = new AsyncSnippet("get users (synchronous)", "with facebook IDs", context) {
+        @Override
+        public void executeAsync() {
+            ArrayList<String> facebookIDs = new ArrayList<String>();
+            facebookIDs.add("11020002022222");
+            facebookIDs.add("10000045345444");
+
+            QBPagedRequestBuilder pagedRequestBuilder = new QBPagedRequestBuilder();
+            pagedRequestBuilder.setPage(1);
+            pagedRequestBuilder.setPerPage(10);
+
+            Bundle params = new Bundle();
+
+            ArrayList<QBUser> users = null;
+            try {
+                users = QBUsers.getUsersByFacebookId(facebookIDs, pagedRequestBuilder, params);
+            } catch (QBResponseException e) {
+                setException(e);
+            }
+
+            if(users != null){
+                Log.i(TAG, ">>> Users: " + users.toString());
+                Log.i(TAG, "currentPage: " + params.getInt(Consts.CURR_PAGE));
+                Log.i(TAG, "perPage: " + params.getInt(Consts.PER_PAGE));
+                Log.i(TAG, "totalPages: " + params.getInt(Consts.TOTAL_ENTRIES));
+            }
+        }
+    };
+
+
+    //
+    //////////////////////////////////////// Get users with Twitter IDs ///////////////////////////////////
+    //
+
+
+    Snippet getUsersWithTwitterIDs = new Snippet("get users", "with twitter IDs") {
+        @Override
+        public void execute() {
+            ArrayList<String> twitterIDs = new ArrayList<String>();
+            twitterIDs.add("11020002022222");
+            twitterIDs.add("10000045345444");
+
+            QBPagedRequestBuilder pagedRequestBuilder = new QBPagedRequestBuilder();
+            pagedRequestBuilder.setPage(1);
+            pagedRequestBuilder.setPerPage(10);
+
+            QBUsers.getUsersByTwitterId(twitterIDs, pagedRequestBuilder, new QBEntityCallbackImpl<ArrayList<QBUser>>() {
+                @Override
+                public void onSuccess(ArrayList<QBUser> users, Bundle params) {
+                    Log.i(TAG, ">>> Users: " + users.toString());
+                    Log.i(TAG, "currentPage: " + params.getInt(Consts.CURR_PAGE));
+                    Log.i(TAG, "perPage: " + params.getInt(Consts.PER_PAGE));
+                    Log.i(TAG, "totalPages: " + params.getInt(Consts.TOTAL_ENTRIES));
+                }
+
+                @Override
+                public void onError(List<String> errors) {
+                    handleErrors(errors);
+                }
+            });
+        }
+    };
+
+    Snippet getUsersWithTwitterIDsSynchronous = new AsyncSnippet("get users (synchronous)", "with twitter IDs", context) {
+        @Override
+        public void executeAsync() {
+            ArrayList<String> twitterIDs = new ArrayList<String>();
+            twitterIDs.add("11020002022222");
+            twitterIDs.add("10000045345444");
+
+            QBPagedRequestBuilder pagedRequestBuilder = new QBPagedRequestBuilder();
+            pagedRequestBuilder.setPage(1);
+            pagedRequestBuilder.setPerPage(10);
+
+            Bundle params = new Bundle();
+
+            ArrayList<QBUser> users = null;
+            try {
+                users = QBUsers.getUsersByTwitterId(twitterIDs, pagedRequestBuilder, params);
+            } catch (QBResponseException e) {
+                setException(e);
+            }
+
+            if(users != null){
+                Log.i(TAG, ">>> Users: " + users.toString());
+                Log.i(TAG, "currentPage: " + params.getInt(Consts.CURR_PAGE));
+                Log.i(TAG, "perPage: " + params.getInt(Consts.PER_PAGE));
+                Log.i(TAG, "totalPages: " + params.getInt(Consts.TOTAL_ENTRIES));
+            }
+        }
+    };
+
+
+    //
+    //////////////////////////////////////// Get users with tags ///////////////////////////////////
+    //
+
+
+    Snippet getUsersWithTags = new Snippet("get users", "with tags") {
+        @Override
+        public void execute() {
+            ArrayList<String> userTags = new ArrayList<String>();
+            userTags.add("man");
+            userTags.add("car");
+
+            QBPagedRequestBuilder pagedRequestBuilder = new QBPagedRequestBuilder();
+            pagedRequestBuilder.setPage(1);
+            pagedRequestBuilder.setPerPage(10);
+
+            QBUsers.getUsersByTags(userTags, pagedRequestBuilder, new QBEntityCallbackImpl<ArrayList<QBUser>>() {
+                @Override
+                public void onSuccess(ArrayList<QBUser> users, Bundle params) {
+                    Log.i(TAG, ">>> Users: " + users.toString());
+                    Log.i(TAG, "currentPage: " + params.getInt(Consts.CURR_PAGE));
+                    Log.i(TAG, "perPage: " + params.getInt(Consts.PER_PAGE));
+                    Log.i(TAG, "totalPages: " + params.getInt(Consts.TOTAL_ENTRIES));
+                }
+
+                @Override
+                public void onError(List<String> errors) {
+                    handleErrors(errors);
+                }
+            });
+        }
+    };
+
+    Snippet getUsersWithTagsSynchronous = new AsyncSnippet("get users (synchronous)", "with tags", context) {
+        @Override
+        public void executeAsync() {
+            ArrayList<String> userTags = new ArrayList<String>();
+            userTags.add("man");
+            userTags.add("car");
+
+            QBPagedRequestBuilder pagedRequestBuilder = new QBPagedRequestBuilder();
+            pagedRequestBuilder.setPage(1);
+            pagedRequestBuilder.setPerPage(10);
+
+            Bundle params = new Bundle();
+
+            ArrayList<QBUser> users = null;
+            try {
+                users = QBUsers.getUsersByTags(userTags, pagedRequestBuilder, params);
+            } catch (QBResponseException e) {
+                setException(e);
+            }
+
+            if(users != null){
+                Log.i(TAG, ">>> Users: " + users.toString());
+                Log.i(TAG, "currentPage: " + params.getInt(Consts.CURR_PAGE));
+                Log.i(TAG, "perPage: " + params.getInt(Consts.PER_PAGE));
+                Log.i(TAG, "totalPages: " + params.getInt(Consts.TOTAL_ENTRIES));
+            }
+        }
+    };
+
+
+    //
+    //////////////////////////////////////// Get users with fullname ///////////////////////////////////
+    //
+
+
+    Snippet getUsersWithFullName = new Snippet("get users", "with full name") {
+        @Override
+        public void execute() {
+            String fullName = "bob";
             QBUsers.getUsersByFullName(fullName, null,  new QBEntityCallbackImpl<ArrayList<QBUser>>() {
                 @Override
                 public void onSuccess(ArrayList<QBUser> users, Bundle params) {
@@ -770,32 +1100,39 @@ public class SnippetsUsers extends Snippets{
         }
     };
 
-    Snippet getUsersWithTagsNewCallback = new Snippet("get users with tags") {
+    Snippet getUsersWithFullNameSynchronous = new AsyncSnippet("get users (synchronous)", "with fullname", context) {
         @Override
-        public void execute() {
-            ArrayList<String> userTags = new ArrayList<String>();
-            userTags.add("man");
-            userTags.add("car");
+        public void executeAsync() {
 
-            QBUsers.getUsersByTags(userTags, null, new QBEntityCallbackImpl<ArrayList<QBUser>>() {
-                @Override
-                public void onSuccess(ArrayList<QBUser> users, Bundle params) {
-                    Log.i(TAG, ">>> Users: " + users.toString());
-                    Log.i(TAG, "currentPage: " + params.getInt(Consts.CURR_PAGE));
-                    Log.i(TAG, "perPage: " + params.getInt(Consts.PER_PAGE));
-                    Log.i(TAG, "totalPages: " + params.getInt(Consts.TOTAL_ENTRIES));
-                }
+            QBPagedRequestBuilder pagedRequestBuilder = new QBPagedRequestBuilder();
+            pagedRequestBuilder.setPage(1);
+            pagedRequestBuilder.setPerPage(10);
 
-                @Override
-                public void onError(List<String> errors) {
-                    handleErrors(errors);
-                }
-            });
+            Bundle params = new Bundle();
+
+            ArrayList<QBUser> users = null;
+            try {
+                users = QBUsers.getUsersByFullName("bob", pagedRequestBuilder, params);
+            } catch (QBResponseException e) {
+                setException(e);
+            }
+
+            if(users != null){
+                Log.i(TAG, ">>> Users: " + users.toString());
+                Log.i(TAG, "currentPage: " + params.getInt(Consts.CURR_PAGE));
+                Log.i(TAG, "perPage: " + params.getInt(Consts.PER_PAGE));
+                Log.i(TAG, "totalPages: " + params.getInt(Consts.TOTAL_ENTRIES));
+            }
         }
     };
 
 
-    Snippet getUserByIdNewCallback = new Snippet("get user by id") {
+    //
+    //////////////////////////////////////// Get user by ID ////////////////////////////////////////
+    //
+
+
+    Snippet getUserById = new Snippet("get user", "by id") {
         @Override
         public void execute() {
             QBUsers.getUser(53779, new QBEntityCallbackImpl<QBUser>() {
@@ -813,7 +1150,29 @@ public class SnippetsUsers extends Snippets{
         }
     };
 
-    Snippet getUserWithLoginNewCallback = new Snippet("get user with login") {
+    Snippet getUserByIdSynchronous = new AsyncSnippet("get user (synchronous)", "by id", context) {
+        @Override
+        public void executeAsync() {
+            QBUser user = null;
+            try {
+                user = QBUsers.getUser(new QBUser(53779));
+            } catch (QBResponseException e) {
+                setException(e);
+            }
+
+            if(user != null){
+                Log.i(TAG, ">>> User: " + user.toString());
+            }
+        }
+    };
+
+
+    //
+    //////////////////////////////////////// Get user with login ///////////////////////////////////
+    //
+
+
+    Snippet getUserWithLogin = new Snippet("get user", "with login") {
         @Override
         public void execute() {
             String login = "testuser";
@@ -834,7 +1193,33 @@ public class SnippetsUsers extends Snippets{
         }
     };
 
-    Snippet getUserWithTwitterIdNewCallback = new Snippet("get user with twitter id") {
+    Snippet getUserWithLoginSynchronous = new AsyncSnippet("get user (synchronous)", "with login", context) {
+        @Override
+        public void executeAsync() {
+            String login = "testuser";
+            QBUser qbUser = new QBUser();
+            qbUser.setLogin(login);
+
+            QBUser user = null;
+            try {
+                user = QBUsers.getUserByLogin(qbUser);
+            } catch (QBResponseException e) {
+                setException(e);
+            }
+
+            if(user != null){
+                Log.i(TAG, ">>> User: " + user.toString());
+            }
+        }
+    };
+
+
+    //
+    //////////////////////////////////////// Get user with twitter ID //////////////////////////////
+    //
+
+
+    Snippet getUserWithTwitterId = new Snippet("get user", "with twitter id") {
         @Override
         public void execute() {
             String twitterId = "56802037340";
@@ -853,7 +1238,31 @@ public class SnippetsUsers extends Snippets{
         }
     };
 
-    Snippet getUserWithFacebookIdNewCallback = new Snippet("get user with facebook id") {
+    Snippet getUserWithTwitterIdSynchronous = new AsyncSnippet("get user (synchronous)", "with twitter id", context) {
+        @Override
+        public void executeAsync() {
+            String twitterId = "56802037340";
+
+            QBUser user = null;
+            try {
+                user = QBUsers.getUserByTwitterId(twitterId);
+            } catch (QBResponseException e) {
+                setException(e);
+            }
+
+            if(user != null){
+                Log.i(TAG, ">>> User: " + user.toString());
+            }
+        }
+    };
+
+
+    //
+    //////////////////////////////////////// Get user with facebook ID /////////////////////////////
+    //
+
+
+    Snippet getUserWithFacebookId = new Snippet("get user", "with facebook id") {
         @Override
         public void execute() {
             String facebookId = "100003123141430";
@@ -871,7 +1280,33 @@ public class SnippetsUsers extends Snippets{
         }
     };
 
-    Snippet getUserWithEmailNewCallback = new Snippet("get user with email") {
+    Snippet getUserWithFacebookIdSynchronous = new AsyncSnippet("get user (synchronous)", "with facebook id", context) {
+        @Override
+        public void executeAsync() {
+            String facebookId = "100003123141430";
+            QBUser qbUser = new QBUser();
+            qbUser.setFacebookId(facebookId);
+
+            QBUser user = null;
+            try {
+                user = QBUsers.getUserByFacebookId(qbUser);
+            } catch (QBResponseException e) {
+                setException(e);
+            }
+
+            if(user != null){
+                Log.i(TAG, ">>> User: " + user.toString());
+            }
+        }
+    };
+
+
+    //
+    //////////////////////////////////////// Get user with email /////////////////////////////
+    //
+
+
+    Snippet getUserWithEmail = new Snippet("get user", "with email") {
         @Override
         public void execute() {
             String email = "test123@test.com";
@@ -889,7 +1324,7 @@ public class SnippetsUsers extends Snippets{
         }
     };
 
-    Snippet getUserWithEmailSynchronous = new AsyncSnippet("get user with email synchornous", context) {
+    Snippet getUserWithEmailSynchronous = new AsyncSnippet("get user (synchronous)", "with email", context) {
 
         QBUser userByEmail;
         @Override
@@ -911,7 +1346,13 @@ public class SnippetsUsers extends Snippets{
         }
     };
 
-    Snippet getUserWithExternalIdNewCallback = new Snippet("get user with external id") {
+
+    //
+    //////////////////////////////////////// Get user with external ID /////////////////////////////
+    //
+
+
+    Snippet getUserWithExternalId = new Snippet("get user", "with external id") {
         @Override
         public void execute() {
             String externalId = "123145235";
@@ -926,6 +1367,24 @@ public class SnippetsUsers extends Snippets{
                     super.onError(errors);
                 }
             });
+        }
+    };
+
+    Snippet getUserWithExternalIdSynchronous = new AsyncSnippet("get user (synchronous)", "with external id", context) {
+        @Override
+        public void executeAsync() {
+            String externalId = "123145235";
+
+            QBUser user = null;
+            try {
+                user = QBUsers.getUserByExternalId(externalId);
+            } catch (QBResponseException e) {
+                setException(e);
+            }
+
+            if(user != null){
+                Log.i(TAG, ">>> User: " + user.toString());
+            }
         }
     };
 }

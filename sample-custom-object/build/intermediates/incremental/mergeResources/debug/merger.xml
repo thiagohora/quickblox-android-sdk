@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="utf-8"?>
+<merger version="2" >
+
+    <dataSet config="main" >
+        <source path="/Users/igorkhomenko/workspace/quickblox-android-sdk/sample-custom-object/res" >
+            <file
+                name="background"
+                path="/Users/igorkhomenko/workspace/quickblox-android-sdk/sample-custom-object/res/drawable/background.jpeg"
+                qualifiers=""
+                type="drawable" />
+            <file
+                name="icon"
+                path="/Users/igorkhomenko/workspace/quickblox-android-sdk/sample-custom-object/res/drawable/icon.png"
+                qualifiers=""
+                type="drawable" />
+            <file
+                name="qb_splash_bg"
+                path="/Users/igorkhomenko/workspace/quickblox-android-sdk/sample-custom-object/res/drawable/qb_splash_bg.png"
+                qualifiers=""
+                type="drawable" />
+            <file
+                name="qb_splash_hero"
+                path="/Users/igorkhomenko/workspace/quickblox-android-sdk/sample-custom-object/res/drawable/qb_splash_hero.png"
+                qualifiers=""
+                type="drawable" />
+            <file
+                name="qb_splash_link"
+                path="/Users/igorkhomenko/workspace/quickblox-android-sdk/sample-custom-object/res/drawable/qb_splash_link.png"
+                qualifiers=""
+                type="drawable" />
+            <file
+                name="show_note_background"
+                path="/Users/igorkhomenko/workspace/quickblox-android-sdk/sample-custom-object/res/drawable/show_note_background.jpeg"
+                qualifiers=""
+                type="drawable" />
+            <file
+                name="add_note"
+                path="/Users/igorkhomenko/workspace/quickblox-android-sdk/sample-custom-object/res/layout/add_note.xml"
+                qualifiers=""
+                type="layout" />
+            <file
+                name="main"
+                path="/Users/igorkhomenko/workspace/quickblox-android-sdk/sample-custom-object/res/layout/main.xml"
+                qualifiers=""
+                type="layout" />
+            <file
+                name="note"
+                path="/Users/igorkhomenko/workspace/quickblox-android-sdk/sample-custom-object/res/layout/note.xml"
+                qualifiers=""
+                type="layout" />
+            <file
+                name="note_list"
+                path="/Users/igorkhomenko/workspace/quickblox-android-sdk/sample-custom-object/res/layout/note_list.xml"
+                qualifiers=""
+                type="layout" />
+            <file
+                name="note_list_item"
+                path="/Users/igorkhomenko/workspace/quickblox-android-sdk/sample-custom-object/res/layout/note_list_item.xml"
+                qualifiers=""
+                type="layout" />
+            <file
+                name="splash"
+                path="/Users/igorkhomenko/workspace/quickblox-android-sdk/sample-custom-object/res/layout/splash.xml"
+                qualifiers=""
+                type="layout" />
+            <file
+                path="/Users/igorkhomenko/workspace/quickblox-android-sdk/sample-custom-object/res/values/strings.xml"
+                qualifiers="" >
+                <string name="comments" >Comments:
+                </string>
+                <string name="write_new_comment" >Write new comment
+                </string>
+                <string name="date" >Date:
+                </string>
+                <string name="please_wait" >Please wait...
+                </string>
+                <string name="add_new_note" >Add new note
+                </string>
+                <string name="note" >Note:
+                </string>
+                <string name="note_successfully_deleted" >Note was successfully deleted!
+                </string>
+                <string name="cancel" >cancel
+                </string>
+                <string name="status" >Status:
+                </string>
+                <string name="new_comment" >New comment
+                </string>
+                <string name="ok" >ok
+                </string>
+                <string name="save" >Save
+                </string>
+                <string name="choose_new_status" >Choose new status
+                </string>
+                <string name="app_name" >sample-custom-object
+                </string>
+                <string name="delete" >Delete
+                </string>
+                <string name="change_status" >Change status
+                </string>
+                <string name="add_comment" >Add comment
+                </string>
+            </file>
+        </source>
+        <source path="/Users/igorkhomenko/workspace/quickblox-android-sdk/sample-custom-object/build/generated/res/rs/debug" />
+        <source path="/Users/igorkhomenko/workspace/quickblox-android-sdk/sample-custom-object/build/generated/res/generated/debug" />
+    </dataSet>
+    <dataSet config="debug" >
+        <source path="/Users/igorkhomenko/workspace/quickblox-android-sdk/sample-custom-object/src/debug/res" />
+    </dataSet>
+
+</merger>
