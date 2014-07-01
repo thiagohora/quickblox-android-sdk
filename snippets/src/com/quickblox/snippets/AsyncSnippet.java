@@ -18,6 +18,11 @@ public abstract class AsyncSnippet extends Snippet {
         this.context = context;
     }
 
+    public AsyncSnippet(String title, String subtitle, Context context) {
+        super(title, subtitle);
+        this.context = context;
+    }
+
     public void setException(Exception exception){
          this.exception = exception;
     }
