@@ -4,7 +4,7 @@ import android.app.Activity;
 import android.os.Bundle;
 import com.quickblox.snippets.R;
 import com.quickblox.snippets.SnippetsList;
-import com.quickblox.snippets.modules.SnippetsUsersNew;
+import com.quickblox.snippets.modules.SnippetsUsers;
 
 /**
  * User: Oleg Soroka
@@ -17,7 +17,7 @@ public class UsersActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.snippets_list);
-        SnippetsUsersNew snippets = new SnippetsUsersNew(this);
+        SnippetsUsers snippets = new SnippetsUsers(this);
         SnippetsList list = (SnippetsList) findViewById(R.id.list);
 
         list.initialize(snippets);

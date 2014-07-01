@@ -23,10 +23,10 @@ import java.util.List;
  * Created by vfite on 04.02.14.
  */
 
-public class SnippetsUsersNew extends Snippets{
-    private static final String TAG = SnippetsUsersNew.class.getSimpleName();
+public class SnippetsUsers extends Snippets{
+    private static final String TAG = SnippetsUsers.class.getSimpleName();
 
-    public SnippetsUsersNew(Context context) {
+    public SnippetsUsers(Context context) {
         super(context);
 
         snippets.add(signInUserWithLoginNewCallback);
