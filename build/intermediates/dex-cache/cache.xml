@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<pre-dex-items>
+
+    <item
+        dex="/Users/igorkhomenko/workspace/quickblox-android-sdk/snippets/build/intermediates/pre-dexed/debug/SDK-android-bb83d8547aeddc7ab6c8029e2c65abc0784d3554.jar"
+        jar="/Users/igorkhomenko/workspace/quickblox-android-sdk/jar/SDK-android.jar"
+        jumboMode="false"
+        revision="19.1.0"
+        sha1="4968b224458186622a725dd83f8646e2e39123f0"/>
+
+</pre-dex-items>

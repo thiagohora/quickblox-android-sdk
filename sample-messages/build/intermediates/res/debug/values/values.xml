@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <!-- From: file:/Users/igorkhomenko/workspace/quickblox-android-sdk/sample-messages/res/values/strings.xml -->
+    <eat-comment />
+
+    <string name="app_name">QuickBlox Messages Sample</string>
+    <string name="enter_your_message">Enter Your message here:</string>
+    <string name="received_messages">Received messages:</string>
+    <string name="select_user">Select user</string>
+    <string name="send">Send</string>
+    <string name="to_user">to user:</string>
+
+</resources>
